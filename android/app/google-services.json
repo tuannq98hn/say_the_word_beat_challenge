@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "907975597160",
+    "project_id": "say-the-word-on-beat-cha-e9f44",
+    "storage_bucket": "say-the-word-on-beat-cha-e9f44.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:907975597160:android:d0a63299d27064ee3e2fdd",
+        "android_client_info": {
+          "package_name": "com.say.word.challenge"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8t7CdXTt3ggQBuyIzOgxCZT74Cf8I1Oo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

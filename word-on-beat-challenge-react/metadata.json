@@ -1,0 +1,7 @@
+{
+  "name": "Word On Beat Challenge",
+  "description": "A viral rhythm game where users must pronounce similar-sounding words to the beat. Powered by Gemini for infinite rhyming challenges.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

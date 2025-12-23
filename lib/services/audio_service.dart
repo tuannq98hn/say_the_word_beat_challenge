@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/services.dart';
+import 'package:audioplayers/audioplayers.dart';
 import '../common/enums/music_style.dart';
 
 class AudioService {
@@ -14,6 +14,8 @@ class AudioService {
   MusicStyle _musicStyle = MusicStyle.funk;
   double _nextNoteTime = 0;
   DateTime? _startTime;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isMusicPlaying = false;
 
   void setBpm(int bpm) {
     _bpm = bpm;
@@ -32,7 +34,7 @@ class AudioService {
     // In Flutter, we don't need to initialize like in web AudioContext
   }
 
-  void start() {
+  Future<void> start([Duration delay = Duration.zero]) async {
     if (_isPlaying) return;
 
     _isPlaying = true;
@@ -41,13 +43,31 @@ class AudioService {
     _startTime = DateTime.now();
     _nextNoteTime = 0.1;
 
+    if (!_isMusicPlaying) {
+      if (delay.inMilliseconds > 0) {
+        await Future.delayed(delay);
+      }
+      try {
+        await _audioPlayer.play(AssetSource('mp3/music2.mp3'));
+        await _audioPlayer.setReleaseMode(ReleaseMode.release);
+        _isMusicPlaying = true;
+      } catch (e) {
+        // Error playing music - silently fail
+      }
+    }
+
     _scheduler();
   }
 
-  void stop() {
+  Future<void> stop() async {
     _isPlaying = false;
     _timer?.cancel();
     _timer = null;
+    
+    if (_isMusicPlaying) {
+      await _audioPlayer.stop();
+      _isMusicPlaying = false;
+    }
   }
 
   void _scheduler() {
@@ -98,35 +118,13 @@ class AudioService {
   }
 
   void _playSound(bool isDownBeat, int quarterBeat) {
-    double kickFreq = 150;
-    double hiHatFreq = 3000;
-    double snareFreq = 400;
-
-    switch (_musicStyle) {
-      case MusicStyle.synth:
-        kickFreq = 120;
-        snareFreq = 400;
-        break;
-      case MusicStyle.chill:
-        kickFreq = 100;
-        snareFreq = 200;
-        break;
-      case MusicStyle.funk:
-      default:
-        kickFreq = 150;
-        snareFreq = 400;
-        break;
-    }
-
-    if (isDownBeat) {
-      if (quarterBeat == 1 || quarterBeat == 3) {
-        SystemSound.play(SystemSoundType.alert);
-      } else {
-        SystemSound.play(SystemSoundType.click);
-      }
-    } else {
-      SystemSound.play(SystemSoundType.alert);
-    }
+    // Music is now played from mp3 file, no need for SystemSound
+    // This method is kept for compatibility but does nothing
+  }
+  
+  Future<void> dispose() async {
+    await stop();
+    await _audioPlayer.dispose();
   }
 }
 

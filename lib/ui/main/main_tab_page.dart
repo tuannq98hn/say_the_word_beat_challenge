@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'components/bottom_nav.dart';
 import '../topic_list/view/topic_list_page.dart';
+import '../trending/view/trending_page.dart';
 import '../settings/view/settings_page.dart';
 import '../custom/view/custom_tab_page.dart';
 import '../video/view/video_tab_page.dart';
@@ -49,10 +50,8 @@ class _MainTabPageState extends State<MainTabPage> {
   Widget _buildTabContent() {
     switch (_activeTab) {
       case AppTab.trending:
-        return TopicListPage(
+        return TrendingPage(
           key: ValueKey('trending'),
-          topics: GeminiService.trendingTopicsList,
-          tabName: 'Trending Challenge',
           onChallengeSelected: widget.onChallengeSelected,
         );
       case AppTab.featured:
@@ -73,8 +72,6 @@ class _MainTabPageState extends State<MainTabPage> {
         );
       case AppTab.settings:
         return const SettingsPage();
-      default:
-        return const SizedBox();
     }
   }
 }

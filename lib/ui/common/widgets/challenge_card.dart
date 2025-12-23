@@ -135,15 +135,28 @@ class ChallengeCard extends StatelessWidget {
               itemCount: 8,
               itemBuilder: (context, idx) {
                 final img = backgroundImages![idx % backgroundImages!.length];
-                return img.isNotEmpty && img.startsWith('data:image')
-                    ? Image.memory(
-                        _base64ToBytes(img),
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(color: Colors.black);
-                        },
-                      )
-                    : Container(color: Colors.black);
+                if (img.isEmpty) {
+                  return Container(color: Colors.black);
+                }
+                if (img.startsWith('assets/')) {
+                  return Image.asset(
+                    img,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(color: Colors.black);
+                    },
+                  );
+                } else if (img.startsWith('data:image')) {
+                  return Image.memory(
+                    _base64ToBytes(img),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(color: Colors.black);
+                    },
+                  );
+                } else {
+                  return Container(color: Colors.black);
+                }
               },
             ),
           ),

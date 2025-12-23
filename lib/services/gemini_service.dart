@@ -5,7 +5,10 @@ import 'data/featured_data.dart';
 
 class GeminiService {
   static final List<TopicMetadata> trendingTopicsList = trendingMetadata;
-  static final List<TopicMetadata> featuredTopicsList = featuredMetadata;
+  static final List<TopicMetadata> featuredTopicsList = [
+    ...trendingMetadata,
+    ...featuredMetadata,
+  ];
   static final Map<String, Challenge> predefinedChallenges = {
     ...trendingData,
     ...featuredData,

@@ -8,9 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'game_event.dart';
 import 'game_state.dart';
+import '../config/game_timing_config.dart';
 
 class GameBloc extends BaseBloc<GameEvent, GameState> {
   Timer? _countdownTimer;
+  Timer? _gameTickTimer;
   GameSettings? _settings;
   final Set<String> _usedFeedbackWords = {};
 
@@ -32,6 +34,8 @@ class GameBloc extends BaseBloc<GameEvent, GameState> {
     on<GameCountdownTick>(_onCountdownTick);
     on<GameBeatReceived>(_onBeatReceived);
     on<GameStopped>(_onGameStopped);
+    on<GameToggleShowText>(_onToggleShowText);
+    on<GameTickEvent>(_onGameTick);
   }
 
   Future<void> _onGameInitialized(
@@ -40,7 +44,9 @@ class GameBloc extends BaseBloc<GameEvent, GameState> {
   ) async {
     await _loadSettings();
     emit(state.copyWith(challenge: event.challenge));
-    await Future.delayed(const Duration(milliseconds: 200));
+    if (GameTimingConfig.preCountdownDelay.inMilliseconds > 0) {
+      await Future.delayed(GameTimingConfig.preCountdownDelay);
+    }
     _startCountdown();
   }
 
@@ -58,44 +64,176 @@ class GameBloc extends BaseBloc<GameEvent, GameState> {
 
   void _startCountdown() {
     _countdownTimer = Timer.periodic(
-      const Duration(milliseconds: 600),
+      GameTimingConfig.countdownInterval,
       (timer) {
         add(const GameCountdownTick());
       },
     );
   }
 
-  void _onCountdownTick(
+  Future<void> _onCountdownTick(
     GameCountdownTick event,
     Emitter<GameState> emit,
-  ) {
+  ) async {
     if (state.countdownValue > 1) {
       emit(state.copyWith(countdownValue: state.countdownValue - 1));
     } else {
       _countdownTimer?.cancel();
+      _countdownTimer = null;
       emit(state.copyWith(
         isCountingDown: false,
         countdownValue: 0,
       ));
-      _startGame(emit);
+      await _startGame(emit);
     }
   }
 
-  void _startGame(Emitter<GameState> emit) {
+  Future<void> _startGame(Emitter<GameState> emit) async {
     final settings = _settings ?? GameSettings();
+    
+    if (state.challenge != null && state.challenge!.rounds.isNotEmpty) {
+      final allUniqueWords = <String>{};
+      for (final round in state.challenge!.rounds) {
+        for (final item in round.items) {
+          allUniqueWords.add(item.word);
+        }
+      }
+      final uniqueWordsList = allUniqueWords.toList();
+      
+      emit(state.copyWith(
+        visibleCardsCount: GameTimingConfig.initialVisibleCardsCount,
+        activeCardIndex: GameTimingConfig.noActiveCardIndex,
+        flashFeedback: null,
+        previewWords: uniqueWordsList,
+        tick: GameTimingConfig.levelStartTick,
+        currentRoundIndex: 0,
+      ));
+
+      await Future.delayed(GameTimingConfig.previewWordsDisplayDuration);
+
+      emit(state.copyWith(
+        previewWords: null,
+        removePreviewWords: true,
+      ));
+    }
+
+    emit(state.copyWith(
+      visibleCardsCount: GameTimingConfig.initialVisibleCardsCount,
+      activeCardIndex: GameTimingConfig.noActiveCardIndex,
+      flashFeedback: null,
+      tick: GameTimingConfig.levelStartTick,
+      currentRoundIndex: 0,
+    ));
+    
     audioService.setBpm(settings.difficulty.bpm);
     audioService.setMusicStyle(settings.musicStyle);
     audioService.setOnBeatCallback((beat) {
       add(GameBeatReceived(beat));
     });
-    audioService.start();
+    audioService.start(GameTimingConfig.musicStartDelay);
+    
+    _startGameTickTimer();
+  }
+  
+  void _startGameTickTimer() {
+    _gameTickTimer?.cancel();
+    
+    _gameTickTimer = Timer.periodic(
+      GameTimingConfig.gameTickInterval,
+      (timer) {
+        // Kiểm tra bloc chưa bị close trước khi add event
+        if (!isClosed) {
+          add(const GameTickEvent());
+        } else {
+          timer.cancel();
+        }
+      },
+    );
+  }
+  
+  Future<void> _onGameTick(
+    GameTickEvent event,
+    Emitter<GameState> emit,
+  ) async {
+    final currentTick = state.tick;
+
+    int? newActiveCardIndex = state.activeCardIndex;
+    int? newVisibleCardsCount = state.visibleCardsCount;
+    String? newFlashFeedback;
+    int? newRoundIndex = state.currentRoundIndex;
+    int newTick = currentTick + 1;
+    int beatInBar = (currentTick % 4);
+
+    if (currentTick < GameTimingConfig.cardsRevealEndTick) {
+      newActiveCardIndex = GameTimingConfig.noActiveCardIndex;
+      newVisibleCardsCount = (currentTick + 1) * 2;
+      
+      if (currentTick == GameTimingConfig.cardsRevealEndTick - 1) {
+        emit(state.copyWith(
+          beatInBar: beatInBar,
+          activeCardIndex: newActiveCardIndex,
+          visibleCardsCount: newVisibleCardsCount,
+          flashFeedback: newFlashFeedback,
+          tick: newTick,
+        ));
+        
+        _gameTickTimer?.cancel();
+        await Future.delayed(GameTimingConfig.revealToFocusDelay);
+        // Kiểm tra bloc chưa bị close trước khi add event
+        if (!isClosed) {
+          add(const GameTickEvent());
+          _startGameTickTimer();
+        }
+        return;
+      }
+    } else if (currentTick >= GameTimingConfig.cardHighlightStartTick && currentTick < GameTimingConfig.cardHighlightEndTick) {
+      newVisibleCardsCount = 8;
+      newActiveCardIndex = currentTick - GameTimingConfig.cardsRevealEndTick;
+    } else if (currentTick == GameTimingConfig.feedbackWordStartTick) {
+      newActiveCardIndex = -1;
+      newFlashFeedback = null;
+      
+      final totalRounds = state.challenge?.rounds.length ?? 0;
+      final isLastRound = state.currentRoundIndex >= totalRounds - 1;
+      
+      if (isLastRound) {
+        _gameTickTimer?.cancel();
+        _gameTickTimer = null;
+        audioService.stop();
+        emit(state.copyWith(
+          isLoading: false,
+          flashFeedback: null,
+          activeCardIndex: GameTimingConfig.noActiveCardIndex,
+          visibleCardsCount: 8,
+          tick: GameTimingConfig.feedbackWordStartTick,
+          isGameComplete: true,
+        ));
+        return;
+      }
+      
+      newRoundIndex = state.currentRoundIndex + 1;
+      newVisibleCardsCount = GameTimingConfig.initialVisibleCardsCount;
+      newActiveCardIndex = GameTimingConfig.noActiveCardIndex;
+      newFlashFeedback = null;
+      newTick = GameTimingConfig.levelStartTick;
+      emit(state.copyWith(
+        currentRoundIndex: newRoundIndex,
+        tick: newTick,
+        visibleCardsCount: newVisibleCardsCount,
+        activeCardIndex: newActiveCardIndex,
+        flashFeedback: null,
+        removeFlashFeedback: true,
+        beatInBar: beatInBar,
+      ));
+      return;
+    }
 
     emit(state.copyWith(
-      visibleCardsCount: 0,
-      activeCardIndex: -1,
-      flashFeedback: null,
-      tick: 0,
-      currentRoundIndex: 0,
+      beatInBar: beatInBar,
+      activeCardIndex: newActiveCardIndex,
+      visibleCardsCount: newVisibleCardsCount,
+      flashFeedback: newFlashFeedback,
+      tick: newTick,
     ));
   }
 
@@ -103,103 +241,19 @@ class GameBloc extends BaseBloc<GameEvent, GameState> {
     GameBeatReceived event,
     Emitter<GameState> emit,
   ) {
-    final currentTick = state.tick;
-
-    int? newActiveCardIndex = state.activeCardIndex;
-    int? newVisibleCardsCount = state.visibleCardsCount;
-    String? newFlashFeedback;
-    int? newRoundIndex = state.currentRoundIndex;
-    int newTick = currentTick;
-
-    if (currentTick < 4) {
-      newActiveCardIndex = -1;
-      newVisibleCardsCount = (currentTick + 1) * 2;
-      newTick = currentTick + 1;
-    } else if (currentTick >= 4 && currentTick < 12) {
-      newVisibleCardsCount = 8;
-      newActiveCardIndex = currentTick - 4;
-      newTick = currentTick + 1;
-    } else if (currentTick == 12) {
-      newActiveCardIndex = -1;
-
-      final availableWords = _feedbackWords
-          .where((w) => !_usedFeedbackWords.contains(w))
-          .toList();
-
-      String word;
-      if (availableWords.isNotEmpty) {
-        word = availableWords[DateTime.now().millisecond % availableWords.length];
-        _usedFeedbackWords.add(word);
-      } else {
-        _usedFeedbackWords.clear();
-        word = _feedbackWords[DateTime.now().millisecond % _feedbackWords.length];
-        _usedFeedbackWords.add(word);
-      }
-
-      newFlashFeedback = word;
-      newTick = currentTick + 1;
-    } else if (currentTick == 13) {
-      newFlashFeedback = null;
-      newTick = currentTick + 1;
-    } else if (currentTick == 14) {
-      newFlashFeedback = null;
-      newTick = currentTick + 1;
-    } else if (currentTick == 15) {
-      final nextRound = state.currentRoundIndex + 1;
-      if (nextRound >= (state.challenge?.rounds.length ?? 0)) {
-        audioService.stop();
-        emit(state.copyWith(
-          isLoading: false,
-          flashFeedback: null,
-        ));
-        return;
-      } else {
-        newRoundIndex = nextRound;
-        newVisibleCardsCount = 0;
-        newActiveCardIndex = -1;
-        newFlashFeedback = null;
-        newTick = 0;
-        emit(state.copyWith(
-          currentRoundIndex: newRoundIndex,
-          tick: newTick,
-          visibleCardsCount: newVisibleCardsCount,
-          activeCardIndex: newActiveCardIndex,
-          flashFeedback: null,
-          removeFlashFeedback: true,
-          beatInBar: event.beat,
-        ));
-        return;
-      }
-    }
-
-    if (newFlashFeedback == null && state.flashFeedback != null) {
-      emit(state.copyWith(
-        beatInBar: event.beat,
-        activeCardIndex: newActiveCardIndex,
-        visibleCardsCount: newVisibleCardsCount,
-        flashFeedback: null,
-        removeFlashFeedback: true,
-        tick: newTick,
-      ));
-    } else {
-      emit(state.copyWith(
-        beatInBar: event.beat,
-        activeCardIndex: newActiveCardIndex,
-        visibleCardsCount: newVisibleCardsCount,
-        flashFeedback: newFlashFeedback,
-        tick: newTick,
-      ));
-    }
+    emit(state.copyWith(beatInBar: event.beat));
   }
 
-  void _onGameStopped(
+  Future<void> _onGameStopped(
     GameStopped event,
     Emitter<GameState> emit,
-  ) {
+  ) async {
     _countdownTimer?.cancel();
     _countdownTimer = null;
+    _gameTickTimer?.cancel();
+    _gameTickTimer = null;
     audioService.setOnBeatCallback((_) {});
-    audioService.stop();
+    await audioService.stop();
     emit(state.copyWith(
       isLoading: false,
       isCountingDown: false,
@@ -208,10 +262,28 @@ class GameBloc extends BaseBloc<GameEvent, GameState> {
     ));
   }
 
+  Future<void> _onToggleShowText(
+    GameToggleShowText event,
+    Emitter<GameState> emit,
+  ) async {
+    if (_settings != null) {
+      _settings = _settings!.copyWith(showWordText: !_settings!.showWordText);
+      await _saveSettings();
+    }
+  }
+
+  Future<void> _saveSettings() async {
+    if (_settings != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('game_settings', jsonEncode(_settings!.toJson()));
+    }
+  }
+
   @override
-  Future<void> close() {
+  Future<void> close() async {
     _countdownTimer?.cancel();
-    audioService.stop();
+    _gameTickTimer?.cancel();
+    await audioService.stop();
     return super.close();
   }
 }

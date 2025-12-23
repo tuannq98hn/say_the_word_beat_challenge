@@ -11,7 +11,9 @@ class GameState extends BaseBlocState {
   final int activeCardIndex;
   final int visibleCardsCount;
   final String? flashFeedback;
+  final List<String>? previewWords;
   final int tick;
+  final bool isGameComplete;
 
   const GameState({
     super.isLoading = false,
@@ -20,11 +22,13 @@ class GameState extends BaseBlocState {
     this.currentRoundIndex = 0,
     this.beatInBar = 0,
     this.isCountingDown = true,
-    this.countdownValue = 3,
+    this.countdownValue = 4,
     this.activeCardIndex = -1,
     this.visibleCardsCount = 0,
     this.flashFeedback,
+    this.previewWords,
     this.tick = 0,
+    this.isGameComplete = false,
   });
 
   Round? get currentRound {
@@ -48,7 +52,10 @@ class GameState extends BaseBlocState {
     int? visibleCardsCount,
     String? flashFeedback,
     bool removeFlashFeedback = false,
+    List<String>? previewWords,
+    bool removePreviewWords = false,
     int? tick,
+    bool? isGameComplete,
   }) {
     return GameState(
       isLoading: isLoading ?? this.isLoading,
@@ -61,7 +68,9 @@ class GameState extends BaseBlocState {
       activeCardIndex: activeCardIndex ?? this.activeCardIndex,
       visibleCardsCount: visibleCardsCount ?? this.visibleCardsCount,
       flashFeedback: removeFlashFeedback ? null : (flashFeedback ?? this.flashFeedback),
+      previewWords: removePreviewWords ? null : (previewWords ?? this.previewWords),
       tick: tick ?? this.tick,
+      isGameComplete: isGameComplete ?? this.isGameComplete,
     );
   }
 
@@ -77,7 +86,9 @@ class GameState extends BaseBlocState {
         activeCardIndex,
         visibleCardsCount,
         flashFeedback,
+        previewWords,
         tick,
+        isGameComplete,
       ];
 }
 

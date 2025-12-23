@@ -9,6 +9,8 @@ import '../bloc/game_bloc.dart';
 import '../bloc/game_event.dart';
 import '../bloc/game_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../config/game_timing_config.dart';
+import '../../../services/audio_service.dart';
 
 class GamePage extends StatefulWidget {
   final Challenge challenge;
@@ -27,10 +29,12 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   GameSettings? _settings;
+  GameBloc? _gameBloc;
   late AnimationController _countdownAnimationController;
   late AnimationController _feedbackAnimationController;
+  final Map<String, Uint8List> _imageCache = {};
 
   static const List<Map<String, dynamic>> _decorations = [
     {'icon': '⭐', 'top': 0.15, 'left': 0.05},
@@ -44,34 +48,55 @@ class _GamePageState extends State<GamePage>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _countdownAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
+      duration: GameTimingConfig.countdownAnimationDuration,
     );
     _feedbackAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: GameTimingConfig.feedbackWordAnimationDuration,
     );
     _loadSettings();
   }
+
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     final json = prefs.getString('game_settings');
     if (!mounted) return;
-    setState(() {
-      _settings = json != null
-          ? GameSettings.fromJson(
-              Map<String, dynamic>.from(
-                jsonDecode(json),
-              ),
-            )
-          : GameSettings();
-    });
+    final newSettings = json != null
+        ? GameSettings.fromJson(
+            Map<String, dynamic>.from(
+              jsonDecode(json),
+            ),
+          )
+        : GameSettings();
+    if (_settings?.showWordText != newSettings.showWordText) {
+      setState(() {
+        _settings = newSettings;
+      });
+    } else {
+      _settings = newSettings;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      audioService.stop();
+      _gameBloc?.add(const GameStopped());
+    }
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    audioService.stop();
+    _gameBloc?.add(const GameStopped());
     _countdownAnimationController.dispose();
     _feedbackAnimationController.dispose();
     super.dispose();
@@ -80,40 +105,55 @@ class _GamePageState extends State<GamePage>
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => GameBloc()..add(GameInitialized(widget.challenge)),
+      create: (context) {
+        final bloc = GameBloc()..add(GameInitialized(widget.challenge));
+        _gameBloc = bloc;
+        return bloc;
+      },
       child: BlocListener<GameBloc, GameState>(
         listenWhen: (previous, current) {
-          return previous.flashFeedback != current.flashFeedback ||
+          final shouldListen = previous.flashFeedback != current.flashFeedback ||
               previous.currentRoundIndex != current.currentRoundIndex ||
-              previous.countdownValue != current.countdownValue;
+              previous.countdownValue != current.countdownValue ||
+              previous.isCountingDown != current.isCountingDown ||
+              previous.isLoading != current.isLoading ||
+              previous.tick != current.tick ||
+              previous.isGameComplete != current.isGameComplete;
+          return shouldListen;
         },
         listener: (context, state) {
-          if (state.flashFeedback != null && state.tick >= 12 && state.tick < 15) {
-            _feedbackAnimationController.reset();
-            _feedbackAnimationController.forward();
-          } else {
-            _feedbackAnimationController.stop();
-            _feedbackAnimationController.reset();
-          }
           if (state.countdownValue > 0 && state.isCountingDown) {
             _countdownAnimationController.reset();
             _countdownAnimationController.forward();
           }
-          if (!state.isCountingDown && state.challenge != null && !state.isLoading) {
-            final nextRound = state.currentRoundIndex + 1;
-            if (nextRound >= state.challenge!.rounds.length) {
-              widget.onGameOver();
+          if (state.isGameComplete) {
+            Future.delayed(GameTimingConfig.gameCompleteDelay, () {
+              if (mounted) {
+                widget.onGameOver();
+              }
+            });
+          }
+        },
+        child: BlocBuilder<GameBloc, GameState>(
+          buildWhen: (previous, current) {
+            return previous.isCountingDown != current.isCountingDown ||
+                previous.countdownValue != current.countdownValue ||
+                previous.currentRoundIndex != current.currentRoundIndex ||
+                previous.activeCardIndex != current.activeCardIndex ||
+                previous.visibleCardsCount != current.visibleCardsCount ||
+                previous.flashFeedback != current.flashFeedback ||
+                previous.previewWords != current.previewWords;
+          },
+          builder: (context, state) {
+            if (state.isCountingDown) {
+              return _buildCountdown(state);
             }
-          }
-        },
-      child: BlocBuilder<GameBloc, GameState>(
-        builder: (context, state) {
-          if (state.isCountingDown) {
-            return _buildCountdown(state);
-          }
-          return _buildMainGame(state);
-        },
-      ),
+            if (state.previewWords != null && state.previewWords!.isNotEmpty) {
+              return _buildPreviewWordsScreen(state);
+            }
+            return _buildMainGame(state);
+          },
+        ),
       ),
     );
   }
@@ -159,7 +199,7 @@ class _GamePageState extends State<GamePage>
                         opacity: _countdownAnimationController.value,
                         child: Text(
                           '${state.countdownValue}',
-                          key: ValueKey(state.countdownValue),
+                          key: ValueKey('countdown_${state.countdownValue}'),
                           style: TextStyle(
                             fontSize: 150,
                             fontWeight: FontWeight.w900,
@@ -181,7 +221,7 @@ class _GamePageState extends State<GamePage>
                 const SizedBox(height: 40),
                 TweenAnimationBuilder<double>(
                   tween: Tween(begin: 0.0, end: 1.0),
-                  duration: const Duration(milliseconds: 500),
+                  duration: GameTimingConfig.previewWordsDisplayDuration,
                   builder: (context, value, child) {
                     return Transform.translate(
                       offset: Offset(0, 20 * (1 - value)),
@@ -220,7 +260,7 @@ class _GamePageState extends State<GamePage>
     return Scaffold(
       backgroundColor: bgColor,
       body: AnimatedContainer(
-        duration: const Duration(milliseconds: 75),
+        duration: GameTimingConfig.beatIndicatorAnimationDuration,
         color: bgColor,
         child: Stack(
           children: [
@@ -228,7 +268,9 @@ class _GamePageState extends State<GamePage>
             SafeArea(
               child: Column(
                 children: [
-                  _buildTopBar(state),
+                  Builder(
+                    builder: (context) => _buildTopBar(context, state),
+                  ),
                   Expanded(
                     child: _buildGameGrid(state, currentRound),
                   ),
@@ -238,11 +280,8 @@ class _GamePageState extends State<GamePage>
                 ],
               ),
             ),
-            if (state.flashFeedback != null && 
-                state.flashFeedback!.isNotEmpty && 
-                state.tick >= 12 && 
-                state.tick < 15)
-              _buildFeedbackOverlay(state),
+            if (state.previewWords != null && state.previewWords!.isNotEmpty)
+              _buildPreviewWordsOverlay(state),
           ],
         ),
       ),
@@ -270,7 +309,7 @@ class _GamePageState extends State<GamePage>
                   : null,
               child: TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(seconds: 2),
+                duration: GameTimingConfig.decorationAnimationDuration,
                 builder: (context, value, child) {
                   return Opacity(
                     opacity: 0.5 + (value * 0.5),
@@ -288,7 +327,7 @@ class _GamePageState extends State<GamePage>
     );
   }
 
-  Widget _buildTopBar(GameState state) {
+  Widget _buildTopBar(BuildContext context, GameState state) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -330,6 +369,45 @@ class _GamePageState extends State<GamePage>
               ],
             ),
           ),
+          GestureDetector(
+            onTap: () async {
+              context.read<GameBloc>().add(const GameToggleShowText());
+              await Future.delayed(GameTimingConfig.smallUIDelay);
+              await _loadSettings();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    (_settings?.showWordText ?? true) ? Icons.text_fields : Icons.text_fields_outlined,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 6),
+                  Switch(
+                    value: _settings?.showWordText ?? true,
+                    onChanged: (value) async {
+                      context.read<GameBloc>().add(const GameToggleShowText());
+                      await Future.delayed(GameTimingConfig.smallUIDelay);
+                      await _loadSettings();
+                    },
+                    activeColor: Colors.yellow.shade400,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ],
+              ),
+            ),
+          ),
           Column(
             children: [
               Text(
@@ -355,7 +433,7 @@ class _GamePageState extends State<GamePage>
           Row(
             children: List.generate(4, (i) {
               return AnimatedContainer(
-                duration: const Duration(milliseconds: 75),
+                duration: GameTimingConfig.beatIndicatorAnimationDuration,
                 width: 12,
                 height: 12,
                 margin: const EdgeInsets.symmetric(horizontal: 3),
@@ -395,7 +473,7 @@ class _GamePageState extends State<GamePage>
             crossAxisCount: 4,
             crossAxisSpacing: 8,
             mainAxisSpacing: 8,
-            childAspectRatio: 1.0,
+            childAspectRatio: 0.9,
           ),
           itemCount: 8,
           itemBuilder: (context, index) {
@@ -409,15 +487,15 @@ class _GamePageState extends State<GamePage>
 
             return TweenAnimationBuilder<double>(
               tween: Tween(begin: 0.0, end: 1.0),
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeOutCubic,
+              duration: GameTimingConfig.cardAppearanceDuration,
+              curve: GameTimingConfig.cardAppearanceCurve,
               builder: (context, value, child) {
                 return Transform.translate(
                   offset: Offset(0, 100 * (1 - value)),
                   child: Opacity(
                     opacity: value,
                     child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 75),
+                      duration: GameTimingConfig.cardBorderAnimationDuration,
                       decoration: BoxDecoration(
                         color: (item.image != null && item.image!.isNotEmpty)
                             ? Colors.transparent
@@ -442,77 +520,126 @@ class _GamePageState extends State<GamePage>
                       transform: Matrix4.identity()
                         ..scale(isActive ? 1.05 : 1.0),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.max,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Expanded(
-                            child: item.image != null && item.image!.isNotEmpty
-                                ? ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: item.image!.startsWith('data:image')
-                                        ? Image.memory(
-                                            _base64ToBytes(item.image!),
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return Container(
-                                                color: Colors.white,
-                                                child: Center(
-                                                  child: AnimatedScale(
-                                                    scale: isActive ? 1.1 : 1.0,
-                                                    duration: const Duration(milliseconds: 75),
-                                                    child: Text(
-                                                      item.emoji,
-                                                      style: const TextStyle(fontSize: 40),
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          )
-                                        : Image.network(
-                                            item.image!,
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return Container(
-                                                color: Colors.white,
-                                                child: Center(
-                                                  child: AnimatedScale(
-                                                    scale: isActive ? 1.1 : 1.0,
-                                                    duration: const Duration(milliseconds: 75),
-                                                    child: Text(
-                                                      item.emoji,
-                                                      style: const TextStyle(fontSize: 40),
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            },
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final size = constraints.maxWidth;
+                                return SizedBox(
+                                  width: size,
+                                  height: size,
+                                  child: item.image != null && item.image!.isNotEmpty
+                                      ? RepaintBoundary(
+                                          child: ClipRRect(
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(12),
+                                              topRight: Radius.circular(12),
+                                            ),
+                                            child: item.image!.startsWith('assets/')
+                                                ? Image.asset(
+                                                    item.image!,
+                                                    key: ValueKey('asset_${item.image!}_$index'),
+                                                    fit: BoxFit.cover,
+                                                    width: double.infinity,
+                                                    height: double.infinity,
+                                                    errorBuilder: (context, error, stackTrace) {
+                                                      return Container(
+                                                        color: Colors.white,
+                                                        child: Center(
+                                                          child: AnimatedScale(
+                                                            scale: isActive ? 1.1 : 1.0,
+                                                            duration: GameTimingConfig.cardScaleAnimationDuration,
+                                                            child: Text(
+                                                              item.emoji,
+                                                              style: const TextStyle(fontSize: 40),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                  )
+                                                : item.image!.startsWith('data:image')
+                                                    ? Image.memory(
+                                                        _getCachedImageBytes(item.image!),
+                                                        key: ValueKey('img_${item.image!.hashCode}_$index'),
+                                                        fit: BoxFit.cover,
+                                                        width: double.infinity,
+                                                        height: double.infinity,
+                                                        errorBuilder: (context, error, stackTrace) {
+                                                          return Container(
+                                                            color: Colors.white,
+                                                            child: Center(
+                                                              child: AnimatedScale(
+                                                                scale: isActive ? 1.1 : 1.0,
+                                                                duration: const Duration(milliseconds: 75),
+                                                                child: Text(
+                                                                  item.emoji,
+                                                                  style: const TextStyle(fontSize: 40),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                      )
+                                                    : Image.network(
+                                                        item.image!,
+                                                        key: ValueKey('net_${item.image!}_$index'),
+                                                        fit: BoxFit.cover,
+                                                        width: double.infinity,
+                                                        height: double.infinity,
+                                                        errorBuilder: (context, error, stackTrace) {
+                                                          return Container(
+                                                            color: Colors.white,
+                                                            child: Center(
+                                                              child: AnimatedScale(
+                                                                scale: isActive ? 1.1 : 1.0,
+                                                                duration: const Duration(milliseconds: 75),
+                                                                child: Text(
+                                                                  item.emoji,
+                                                                  style: const TextStyle(fontSize: 40),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
                                           ),
-                                  )
-                                : Center(
-                                    child: AnimatedScale(
-                                      scale: isActive ? 1.1 : 1.0,
-                                      duration: const Duration(milliseconds: 75),
-                                      child: Text(
-                                        item.emoji,
-                                        style: const TextStyle(fontSize: 40),
-                                      ),
-                                    ),
-                                  ),
+                                        )
+                                      : Container(
+                                          color: Colors.white,
+                                          child: Center(
+                                            child: AnimatedScale(
+                                              scale: isActive ? 1.1 : 1.0,
+                                              duration: GameTimingConfig.cardScaleAnimationDuration,
+                                              child: Text(
+                                                item.emoji,
+                                                style: const TextStyle(fontSize: 40),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                );
+                              },
+                            ),
                           ),
                           if ((_settings?.showWordText ?? true))
                             Container(
-                              height: 40,
                               width: double.infinity,
-                              color: Colors.black,
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.only(
+                                  bottomLeft: Radius.circular(12),
+                                  bottomRight: Radius.circular(12),
+                                ),
+                              ),
                               child: Center(
                                 child: Text(
                                   item.word.toUpperCase(),
                                   style: TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w900,
                                     fontFamily: 'Anton',
                                     color: isActive
@@ -520,6 +647,8 @@ class _GamePageState extends State<GamePage>
                                         : Colors.grey.shade500,
                                     letterSpacing: 1,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ),
@@ -607,6 +736,7 @@ class _GamePageState extends State<GamePage>
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
+          audioService.stop();
           context.read<GameBloc>().add(const GameStopped());
           widget.onBack();
         },
@@ -641,6 +771,70 @@ class _GamePageState extends State<GamePage>
   Uint8List _base64ToBytes(String base64String) {
     final base64Data = base64String.split(',').last;
     return base64Decode(base64Data);
+  }
+
+  Uint8List _getCachedImageBytes(String base64String) {
+    if (_imageCache.containsKey(base64String)) {
+      return _imageCache[base64String]!;
+    }
+    final bytes = _base64ToBytes(base64String);
+    _imageCache[base64String] = bytes;
+    return bytes;
+  }
+
+  Widget _buildPreviewWordsScreen(GameState state) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Container(
+        color: Colors.black,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                state.previewWords!.join(' - ').toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.w900,
+                  fontFamily: 'Anton',
+                  color: Colors.white,
+                  letterSpacing: 4,
+                  height: 1.2,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPreviewWordsOverlay(GameState state) {
+    return Positioned.fill(
+      child: Container(
+        color: Colors.black.withOpacity(0.9),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                state.previewWords!.join(' - ').toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.w900,
+                  fontFamily: 'Anton',
+                  color: Colors.white,
+                  letterSpacing: 4,
+                  height: 1.2,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

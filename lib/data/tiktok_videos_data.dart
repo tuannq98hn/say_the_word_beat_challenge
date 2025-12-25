@@ -85,6 +85,60 @@ class TikTokVideosData {
       thumbnailUrl: 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?w=500&q=80',
       tiktokUrl: 'https://www.tiktok.com/@otakoyakisoba/video/7583569890250968351?q=say%20the%20work%20price%20rice&t=1766072250604',
     ),
+    // floatgoat
+    TikTokVideo(
+      id: 'floatgoat-7586807254364458260',
+      author: '@tameemfamily',
+      description: 'Say the word: Float Goat challenge! 🎵',
+      tags: ['challenge', 'wordonbeat', 'tiktok', 'floatgoat'],
+      thumbnailUrl: 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?w=500&q=80',
+      tiktokUrl: 'https://www.tiktok.com/@tameemfamily/video/7586807254364458260?q=say%20the%20word%20on%20beat%20challenge&t=1766588774038',
+    ),
+    // braingrain
+    TikTokVideo(
+      id: 'braingrain-7586807254364458260',
+      author: '@tameemfamily',
+      description: 'Say the word: Brain Grain challenge! 🎵',
+      tags: ['challenge', 'wordonbeat', 'tiktok', 'braingrain'],
+      thumbnailUrl: 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?w=500&q=80',
+      tiktokUrl: 'https://www.tiktok.com/@tameemfamily/video/7586807254364458260?q=say%20the%20word%20on%20beat%20challenge&t=1766588774038',
+    ),
+    // kingring
+    TikTokVideo(
+      id: 'kingring-7586807254364458260',
+      author: '@tameemfamily',
+      description: 'Say the word: King Ring challenge! 🎵',
+      tags: ['challenge', 'wordonbeat', 'tiktok', 'kingring'],
+      thumbnailUrl: 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?w=500&q=80',
+      tiktokUrl: 'https://www.tiktok.com/@tameemfamily/video/7586807254364458260?q=say%20the%20word%20on%20beat%20challenge&t=1766588774038',
+    ),
+    // woolcool
+    TikTokVideo(
+      id: 'woolcool-7586807254364458260',
+      author: '@tameemfamily',
+      description: 'Say the word: Wool Cool challenge! 🎵',
+      tags: ['challenge', 'wordonbeat', 'tiktok', 'woolcool'],
+      thumbnailUrl: 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?w=500&q=80',
+      tiktokUrl: 'https://www.tiktok.com/@tameemfamily/video/7586807254364458260?q=say%20the%20word%20on%20beat%20challenge&t=1766588774038',
+    ),
+    // streamcream
+    TikTokVideo(
+      id: 'streamcream-7586807254364458260',
+      author: '@tameemfamily',
+      description: 'Say the word: Stream Cream challenge! 🎵',
+      tags: ['challenge', 'wordonbeat', 'tiktok', 'streamcream'],
+      thumbnailUrl: 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?w=500&q=80',
+      tiktokUrl: 'https://www.tiktok.com/@tameemfamily/video/7586807254364458260?q=say%20the%20word%20on%20beat%20challenge&t=1766588774038',
+    ),
+    // skateplate
+    TikTokVideo(
+      id: 'skateplate-7586807254364458260',
+      author: '@tameemfamily',
+      description: 'Say the word: Skate Plate challenge! 🎵',
+      tags: ['challenge', 'wordonbeat', 'tiktok', 'skateplate'],
+      thumbnailUrl: 'https://images.unsplash.com/photo-1514525253440-b393452e8d26?w=500&q=80',
+      tiktokUrl: 'https://www.tiktok.com/@tameemfamily/video/7586807254364458260?q=say%20the%20word%20on%20beat%20challenge&t=1766588774038',
+    ),
   ];
 }
 

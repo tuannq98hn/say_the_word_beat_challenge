@@ -254,5 +254,315 @@
         }
       ]
     } 
+    ,
+    {
+      "id": "floatgoat",
+      "topic": "floatgoat",
+      "level": 1,
+      "tiktokUrl": "https://www.tiktok.com/@tameemfamily/video/7586807254364458260?q=say%20the%20word%20on%20beat%20challenge&t=1766588774038",
+      "rounds": [
+        {
+          "id": 1,
+          "items": ["float","float","float","float","goat","goat","goat","goat"]
+        },
+        {
+          "id": 2,
+          "items": ["float","note","note","note","note","note","coat","coat"]
+        },
+        {
+          "id": 3,
+          "items": ["boat","boat","goat","note","float","boat","float","goat"]
+        },
+        {
+          "id": 4,
+          "items": ["coat","coat","goat","float","note","boat","coat","float"]
+        },
+        {
+          "id": 5,
+          "items": ["note","coat","goat","goat","vote","float","float","boat"]
+        }
+      ]
+    },
+    {
+      "id": "braingrain",
+      "topic": "braingrain",
+      "level": 1,
+      "tiktokUrl": "https://www.tiktok.com/@tameemfamily/video/7586807254364458260?q=say%20the%20word%20on%20beat%20challenge&t=1766588774038",
+      "rounds": [
+        {
+          "id": 1,
+          "items": ["brain","brain","brain","brain","grain","grain","grain","grain"]
+        },
+        {
+          "id": 2,
+          "items": ["brain","brain","train","train","plane","plane","train","brain"]
+        },
+        {
+          "id": 3,
+          "items": ["brain","rain","plane","train","brain","brain","train","rain"]
+        },
+        {
+          "id": 4,
+          "items": ["brain","plane","rain","plane","grain","grain","chain","rain"]
+        },
+        {
+          "id": 5,
+          "items": ["train","brain","plane","plane","train","grain","chain","rain"]
+        }
+      ]
+    },
+    {
+      "id": "kingring",
+      "topic": "kingring",
+      "level": 1,
+      "tiktokUrl": "https://www.tiktok.com/@tameemfamily/video/7586807254364458260?q=say%20the%20word%20on%20beat%20challenge&t=1766588774038",
+      "rounds": [
+        {
+          "id": 1,
+          "items": ["king","king","king","king","ring","ring","ring","ring"]
+        },
+        {
+          "id": 2,
+          "items": ["ring","wing","ring","wing","king","king","ring","wing"]
+        },
+        {
+          "id": 3,
+          "items": ["ring","ring","swing","swing","string","swing","string","king"]
+        },
+        {
+          "id": 4,
+          "items": ["wing","string","spring","wing","swing","ring","string","swing"]
+        },
+        {
+          "id": 5,
+          "items": ["spring","wing","swing","king","ring","string","king","string"]
+        }
+      ]
+    },
+    
+    {
+      "id": "woolcool",
+      "topic": "woolcool",
+      "level": 1,
+      "tiktokUrl": "https://www.tiktok.com/@tameemfamily/video/7586807254364458260?q=say%20the%20word%20on%20beat%20challenge&t=1766588774038",
+      "rounds": [
+        {
+          "id": 1,
+          "items": ["wool","wool","wool","wool","cool","cool","cool","cool"]
+        },
+        {
+          "id": 2,
+          "items": ["stool","wool","wool","cool","stool","stool","wool","wool"]
+        },
+        {
+          "id": 3,
+          "items": ["tool","wool","stool","pool","stool","wool","tool","tool"]
+        },
+        {
+          "id": 4,
+          "items": ["stool","cool","pool","wool","cool","stool","wool","school"]
+        },
+        {
+          "id": 5,
+          "items": ["cool","tool","wool","pool","stool","tool","school","wool"]
+        }
+      ]
+    },
+    {
+      "id": "streamcream",
+      "topic": "streamcream",
+      "level": 2,
+      "tiktokUrl": "https://www.tiktok.com/@tameemfamily/video/7586807254364458260?q=say%20the%20word%20on%20beat%20challenge&t=1766588774038",
+      "rounds": [
+        {
+          "id": 1,
+          "items": ["stream","stream","stream","stream","cream","cream","cream","cream"]
+        },
+        {
+          "id": 2,
+          "items": ["cream","cream","cream","cream","cream","steam","beam","cream"]
+        },
+        {
+          "id": 3,
+          "items": ["steam","team","team","steam","cream","dream","steam","team"]
+        },
+        {
+          "id": 4,
+          "items": ["beam","team","cream","steam","stream","stream","cream","steam"]
+        },
+        {
+          "id": 5,
+          "items": ["dream","steam","beam","team","dream","stream","cream","stream"]
+        }
+      ]
+    },
+    {
+      "id": "skateplate",
+      "topic": "skateplate",
+      "level": 3,
+      "tiktokUrl": "https://www.tiktok.com/@tameemfamily/video/7586807254364458260?q=say%20the%20word%20on%20beat%20challenge&t=1766588774038",
+      "rounds": [
+        {
+          "id": 1,
+          "items": ["skate","skate","skate","skate","plate","plate","plate","plate"]
+        },
+        {
+          "id": 2,
+          "items": ["gate","gate","crate","plate","plate","plate","gate","plate"]
+        },
+        {
+          "id": 3,
+          "items": ["plate","skate","slate","plate","skate","grate","grate","skate"]
+        },
+        {
+          "id": 4,
+          "items": ["grate","grate","gate","slate","crate","plate","gate","grate"]
+        },
+        {
+          "id": 5,
+          "items": ["skate","slate","plate","crate","gate","plate","skate","grate"]
+        }
+      ]
+    },
+    {
+      "id": "auherthe",
+      "topic": "auherthe",
+      "level": 1,
+      "tiktokUrl": "",
+      "rounds": [
+        {
+          "id": 1,
+          "items": ["a","u","a","u","a","u","a","u"]
+        },
+        {
+          "id": 2,
+          "items": ["her","the","her","the","her","the","her","the"]
+        },
+        {
+          "id": 3,
+          "items": ["stu","pid","nick","her","stu","pid","nick","her"]
+        },
+        {
+          "id": 4,
+          "items": ["u","lost","the","game","u","lost","the","game"]
+        },
+        {
+          "id": 5,
+          "items": ["stu","pid","nick","her","u","lost","the","game"]
+        }
+      ]
+    },
+    {
+      "id": "pinkwink",
+      "topic": "pinkwink",
+      "level": 1,
+      "tiktokUrl": "",
+      "rounds": [
+        {
+          "id": 1,
+          "items": ["pink","pink","pink","pink","wink","wink","wink","wink"]
+        },
+        {
+          "id": 2,
+          "items": ["wink","think","think","drink","wink","think","drink","drink"]
+        },
+        {
+          "id": 3,
+          "items": ["drink","link","think","wink","link","link","drink","wink"]
+        },
+        {
+          "id": 4,
+          "items": ["link","pink","drink","think","drink","sink","link","link"]
+        },
+        {
+          "id": 5,
+          "items": ["pink","think","link","wink","drink","think","think","sink"]
+        }
+      ]
+    },
+    {
+      "id": "blockclock",
+      "topic": "blockclock",
+      "level": 2,
+      "tiktokUrl": "",
+      "rounds": [
+        {
+          "id": 1,
+          "items": ["block","block","block","block","clock","clock","clock","clock"]
+        },
+        {
+          "id": 2,
+          "items": ["rock","shock","rock","clock","clock","rock","shock","clock"]
+        },
+        {
+          "id": 3,
+          "items": ["block","rock","lock","shock","rock","block","lock","lock"]
+        },
+        {
+          "id": 4,
+          "items": ["sock","block","rock","lock","shock","sock","sock","lock"]
+        },
+        {
+          "id": 5,
+          "items": ["shock","block","block","sock","rock","lock","block","clock"]
+        }
+      ]
+    },
+    {
+      "id": "westtest",
+      "topic": "westtest",
+      "level": 3 ,
+      "tiktokUrl": "",
+      "rounds": [
+        {
+          "id": 1,
+          "items": ["west","west","west","west","test","test","test","test"]
+        },
+        {
+          "id": 2,
+          "items": ["vest","nest","vest","best","nest","vest","best","vest"]
+        },
+        {
+          "id": 3,
+          "items": ["west","best","best","west","nest","best","test","test"]
+        },
+        {
+          "id": 4,
+          "items": ["west","nest","best","nest","test","nest","test","chest"]
+        },
+        {
+          "id": 5,
+          "items": ["vest","vest","chest","best","test","west","nest","nest"]
+        }
+      ]
+    },
+    {
+      "id": "snailwhale",
+      "topic": "snailwhale",
+      "level": 4,
+      "tiktokUrl": "",
+      "rounds": [
+        {
+          "id": 1,
+          "items": ["snail","snail","snail","snail","whale","whale","whale","whale"]
+        },
+        {
+          "id": 2,
+          "items": ["sail","tail","snail","snail","tail","tail","tail","tail"]
+        },
+        {
+          "id": 3,
+          "items": ["snail","tail","tail","tail","nail","sail","snail","nail"]
+        },
+        {
+          "id": 4,
+          "items": ["tail","rail","whale","nail","rail","tail","sail","sail"]
+        },
+        {
+          "id": 5,
+          "items": ["nail","nail","rail","nail","tail","whale","snail","sail"]
+        }
+      ]
+    }
   ]
 }

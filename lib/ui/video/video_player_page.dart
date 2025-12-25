@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -20,23 +21,35 @@ class VideoPlayerPage extends StatefulWidget {
 }
 
 class _VideoPlayerPageState extends State<VideoPlayerPage> {
-  late final WebViewController _webViewController;
+  WebViewController? _webViewController;
   final TikTokService _tiktokService = tiktokService;
-  bool _isLoading = true;
   bool _showWebView = false;
+  bool _isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeWebView();
-  }
-
-  void _initializeWebView() {
-    final embedUrl = _tiktokService.getEmbedUrl(widget.video.tiktokUrl, autoplay: true);
+  /// Hiển thị video TikTok trong WebView
+  Future<void> _openTikTok() async {
+    if (_showWebView) return; // Đã hiển thị rồi thì không làm gì
     
+    setState(() {
+      _showWebView = true;
+      _isLoading = true;
+    });
+    
+    // Khởi tạo WebView nếu chưa có
+    if (_webViewController == null) {
+      await _initializeWebView();
+    }
+  }
+  
+  Future<void> _initializeWebView() async {
+    // Tạo WebViewController
     _webViewController = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.black)
+      // Dùng user-agent iPhone Safari để TikTok trả về player tương thích hơn
+      ..setUserAgent(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+      )
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (String url) {
@@ -50,10 +63,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             if (mounted) {
               setState(() {
                 _isLoading = false;
-                _showWebView = true;
               });
-              // Thử trigger play sau khi page load
-              _tryAutoPlay();
             }
           },
           onWebResourceError: (WebResourceError error) {
@@ -66,61 +76,31 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         ),
       );
 
-    // Cấu hình cho Android platform
-    if (_webViewController.platform is AndroidWebViewController) {
-      (_webViewController.platform as AndroidWebViewController)
+    // Cấu hình cho Android
+    if (_webViewController!.platform is AndroidWebViewController) {
+      final androidController = _webViewController!.platform as AndroidWebViewController;
+      androidController
         ..setMediaPlaybackRequiresUserGesture(false)
         ..setOnShowFileSelector((params) async {
           return [];
         });
     }
 
-    if (embedUrl != null) {
-      _webViewController.loadRequest(Uri.parse(embedUrl));
-    }
-  }
+    // Ưu tiên load URL gốc với tham số webapp để TikTok trả về player
+    final primaryUrl = '${widget.video.tiktokUrl}'
+        '${widget.video.tiktokUrl.contains('?') ? '&' : '?'}is_copy_url=1&is_from_webapp=v1';
 
-  /// Thử tự động play video
-  Future<void> _tryAutoPlay() async {
-    await Future.delayed(const Duration(milliseconds: 2000));
-    if (!mounted) return;
-    
-    try {
-      await _webViewController.runJavaScript('''
-        (function() {
-          try {
-            var iframe = document.querySelector('iframe');
-            if (iframe && iframe.contentWindow) {
-              iframe.contentWindow.postMessage('{"type":"play"}', '*');
-            }
-            var video = document.querySelector('video');
-            if (video) {
-              video.play().catch(function(e) {
-                console.log('Play prevented:', e);
-              });
-            }
-          } catch(e) {
-            console.log('Auto-play error:', e);
+    // Fallback: embed URL
+    final fallbackUrl = _tiktokService.getEmbedUrl(widget.video.tiktokUrl, autoplay: false);
+
+    // Thử URL gốc trước, nếu lỗi sẽ tự chuyển sang embed
+    _webViewController!
+        .loadRequest(Uri.parse(primaryUrl))
+        .catchError((_) async {
+          if (fallbackUrl != null) {
+            await _webViewController!.loadRequest(Uri.parse(fallbackUrl));
           }
-        })();
-      ''');
-    } catch (e) {
-      // Ignore errors
-    }
-  }
-
-  Future<void> _openTikTok() async {
-    // Khi click play button, hiển thị WebView trong app
-    setState(() {
-      _showWebView = true;
-      _isLoading = true;
-    });
-    
-    // Reload WebView nếu cần
-    final embedUrl = _tiktokService.getEmbedUrl(widget.video.tiktokUrl, autoplay: true);
-    if (embedUrl != null) {
-      _webViewController.loadRequest(Uri.parse(embedUrl));
-    }
+        });
   }
 
   Future<void> _openTikTokInBrowser() async {
@@ -273,14 +253,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       ),
                       child: Stack(
                         children: [
-                          // WebView để play video TikTok
-                          if (_showWebView)
+                          // WebView để hiển thị video TikTok
+                          if (_showWebView && _webViewController != null)
                             ClipRRect(
                               borderRadius: BorderRadius.circular(16),
-                              child: WebViewWidget(controller: _webViewController),
+                              child: WebViewWidget(controller: _webViewController!),
                             )
                           else
-                            // Thumbnail background (hiển thị trước khi play)
+                            // Thumbnail background (trước khi mở video)
                             ClipRRect(
                               borderRadius: BorderRadius.circular(16),
                               child: Image.network(
@@ -330,7 +310,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                 ),
                               ),
                             ),
-                          // Play button overlay (chỉ hiển thị khi chưa show WebView)
+                          // Play button overlay (chỉ hiển thị khi chưa mở WebView)
                           if (!_showWebView)
                             GestureDetector(
                               onTap: _openTikTok,
@@ -436,12 +416,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       const SizedBox(height: 12),
                       Center(
                         child: Text(
-                          'Tap the play button above to watch',
+                          _showWebView 
+                            ? 'Tap play button on video to start' 
+                            : 'Tap the play button above to watch in-app',
                           style: TextStyle(
                             color: Colors.grey.shade400,
                             fontSize: 12,
                             fontStyle: FontStyle.italic,
                           ),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ],

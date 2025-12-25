@@ -52,58 +52,69 @@ class TikTokService {
     return null;
   }
 
-  /// Tạo HTML wrapper với iframe để tự động play
+  /// Lấy embed HTML từ TikTok oEmbed API
+  Future<String?> getEmbedHtmlFromApi(String tiktokUrl) async {
+    try {
+      final response = await _dio.get(
+        'https://www.tiktok.com/oembed',
+        queryParameters: {
+          'url': tiktokUrl,
+        },
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final html = response.data['html'] as String?;
+        return html;
+      }
+    } catch (e) {
+      // Fallback nếu API không hoạt động
+      return null;
+    }
+    return null;
+  }
+
+  /// Tạo HTML wrapper với iframe để hiển thị video TikTok
   String? getEmbedHtml(String tiktokUrl) {
-    final embedUrl = getEmbedUrl(tiktokUrl, autoplay: true);
+    final embedUrl = getEmbedUrl(tiktokUrl, autoplay: false);
     if (embedUrl != null) {
       return '''
 <!DOCTYPE html>
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="referrer" content="no-referrer">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        body {
+        html, body {
             background: #000;
             overflow: hidden;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         iframe {
             width: 100%;
             height: 100%;
             border: none;
+            max-width: 100%;
+            max-height: 100%;
         }
     </style>
 </head>
 <body>
     <iframe 
         src="$embedUrl" 
-        allow="autoplay; encrypted-media; fullscreen"
+        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
         allowfullscreen
         scrolling="no"
         frameborder="0">
     </iframe>
-    <script>
-        // Auto play video after iframe loads
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                var iframe = document.querySelector('iframe');
-                if (iframe) {
-                    // Try to trigger play
-                    try {
-                        iframe.contentWindow.postMessage('{"type":"play"}', '*');
-                    } catch(e) {
-                        console.log('Cannot post message:', e);
-                    }
-                }
-            }, 1000);
-        });
-    </script>
 </body>
 </html>
       ''';

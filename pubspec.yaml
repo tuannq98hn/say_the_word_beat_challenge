@@ -87,6 +87,7 @@ dependencies:
   camera: ^0.11.0+1
   path_provider: ^2.1.4
   flutter_screen_recording: ^2.0.24
+  webview_flutter_android: ^4.10.11
 
 dev_dependencies:
   flutter_test:
@@ -120,15 +121,27 @@ flutter:
     - assets/lotties/
     - assets/mp3/
     - assets/data/data.json
-    - assets/data/dogcatrat/
-    - assets/data/spoonbaloon/
-    - assets/data/burger/
-    - assets/data/sockrock/
+    - assets/data/auherthe/
     - assets/data/ballbell/
-    - assets/data/carstar/
-    - assets/data/phonecone/
+    - assets/data/blockclock/
     - assets/data/boxfox/
+    - assets/data/braingrain/
+    - assets/data/burger/
+    - assets/data/carstar/
+    - assets/data/dogcatrat/
+    - assets/data/dogratcat/
+    - assets/data/floatgoat/
+    - assets/data/kingring/
     - assets/data/loghog/
+    - assets/data/phonecone/
+    - assets/data/pinkwink/
+    - assets/data/skateplate/
+    - assets/data/snailwhale/
+    - assets/data/sockrock/
+    - assets/data/spoonbaloon/
+    - assets/data/streamcream/
+    - assets/data/westtest/
+    - assets/data/woolcool/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

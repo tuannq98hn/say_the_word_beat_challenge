@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
@@ -11,6 +10,9 @@ import '../bloc/game_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../config/game_timing_config.dart';
 import '../../../services/audio_service.dart';
+import '../../../services/recording_service.dart';
+import '../../../services/camera_service.dart';
+import 'package:camera/camera.dart';
 
 class GamePage extends StatefulWidget {
   final Challenge challenge;
@@ -35,6 +37,9 @@ class _GamePageState extends State<GamePage>
   late AnimationController _countdownAnimationController;
   late AnimationController _feedbackAnimationController;
   final Map<String, Uint8List> _imageCache = {};
+  final RecordingService _recordingService = RecordingService();
+  final CameraService _cameraService = CameraService();
+  bool _cameraInitialized = false;
 
   static const List<Map<String, dynamic>> _decorations = [
     {'icon': '⭐', 'top': 0.15, 'left': 0.05},
@@ -58,6 +63,30 @@ class _GamePageState extends State<GamePage>
       duration: GameTimingConfig.feedbackWordAnimationDuration,
     );
     _loadSettings();
+    _initializeCamera();
+  }
+
+  Future<void> _initializeCamera() async {
+    final settings = await _getSettings();
+    if (settings?.enableCamera == true) {
+      final initialized = await _cameraService.initialize();
+      if (mounted) {
+        setState(() {
+          _cameraInitialized = initialized;
+        });
+      }
+    }
+  }
+
+  Future<GameSettings?> _getSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    final json = prefs.getString('game_settings');
+    if (json != null) {
+      return GameSettings.fromJson(
+        Map<String, dynamic>.from(jsonDecode(json)),
+      );
+    }
+    return GameSettings();
   }
 
 
@@ -97,9 +126,28 @@ class _GamePageState extends State<GamePage>
     WidgetsBinding.instance.removeObserver(this);
     audioService.stop();
     _gameBloc?.add(const GameStopped());
+    _stopRecording();
+    _cameraService.dispose();
     _countdownAnimationController.dispose();
     _feedbackAnimationController.dispose();
     super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    _stopRecording();
+  }
+
+  Future<void> _stopRecording() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isRecordingActive = prefs.getBool('recording_is_active') ?? false;
+    
+    if (isRecordingActive && _recordingService.isRecording) {
+      await _recordingService.stopRecording();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('recording_is_active', false);
+    }
   }
 
   @override
@@ -127,6 +175,7 @@ class _GamePageState extends State<GamePage>
             _countdownAnimationController.forward();
           }
           if (state.isGameComplete) {
+            _stopRecording();
             Future.delayed(GameTimingConfig.gameCompleteDelay, () {
               if (mounted) {
                 widget.onGameOver();
@@ -257,44 +306,53 @@ class _GamePageState extends State<GamePage>
         ? const Color(0xFF222222)
         : const Color(0xFF111111);
 
+    final hasCamera = _settings?.enableCamera == true && _cameraInitialized;
+
     return Scaffold(
-      backgroundColor: bgColor,
-      body: AnimatedContainer(
-        duration: GameTimingConfig.beatIndicatorAnimationDuration,
-        color: bgColor,
-        child: Stack(
-          children: [
-            _buildDecorations(),
-            SafeArea(
-              child: Column(
-                children: [
-                  Builder(
-                    builder: (context) => _buildTopBar(context, state),
-                  ),
-                  Expanded(
-                    child: _buildGameGrid(state, currentRound),
-                  ),
-                  Builder(
-                    builder: (context) => _buildStopButton(context),
-                  ),
-                ],
+      backgroundColor: hasCamera ? Colors.transparent : bgColor,
+      body: Stack(
+        children: [
+          if (hasCamera && _cameraService.controller != null)
+            Positioned.fill(
+              child: CameraPreview(_cameraService.controller!),
+            )
+          else
+            Positioned.fill(
+              child: Container(
+                color: bgColor,
+                child: _buildDecorations(),
               ),
             ),
-            if (state.previewWords != null && state.previewWords!.isNotEmpty)
-              _buildPreviewWordsOverlay(state),
-          ],
-        ),
+          SafeArea(
+            child: Column(
+              children: [
+                Builder(
+                  builder: (context) => _buildTopBar(context, state),
+                ),
+                if (hasCamera) const Spacer(),
+                Expanded(
+                  flex: hasCamera ? 0 : 1,
+                  child: _buildGameGrid(state, currentRound),
+                ),
+                Builder(
+                  builder: (context) => _buildStopButton(context),
+                ),
+              ],
+            ),
+          ),
+          if (state.previewWords != null && state.previewWords!.isNotEmpty)
+            _buildPreviewWordsOverlay(state),
+        ],
       ),
     );
   }
 
   Widget _buildDecorations() {
     final screenSize = MediaQuery.of(context).size;
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Stack(
-          children: _decorations.map((deco) {
-            return Positioned(
+    return IgnorePointer(
+      child: Stack(
+        children: _decorations.map((deco) {
+          return Positioned(
               top: deco['top'] != null
                   ? screenSize.height * (deco['top'] as double)
                   : null,
@@ -321,8 +379,7 @@ class _GamePageState extends State<GamePage>
                 },
               ),
             );
-          }).toList(),
-        ),
+        }).toList(),
       ),
     );
   }

@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:say_word_challenge/ui/common/widgets/keep_alive_page.dart';
 
+import 'components/bottom_nav.dart';
+import '../topic_list/view/topic_list_page.dart';
+import '../trending/view/trending_page.dart';
+import '../settings/view/settings_page.dart';
+import '../custom/view/custom_tab_page.dart';
+import '../video/view/video_tab_page.dart';
 import '../../common/enums/app_tab.dart';
 import '../../data/model/challenge.dart';
 import '../../data/model/tiktok_video.dart';
@@ -62,10 +68,8 @@ class _MainTabPageState extends State<MainTabPage> {
   Widget _buildTabContent(AppTab tab) {
     switch (tab) {
       case AppTab.trending:
-        return TopicListPage(
+        return TrendingPage(
           key: ValueKey('trending'),
-          topics: GeminiService.trendingTopicsList,
-          tabName: 'Trending Challenge',
           onChallengeSelected: widget.onChallengeSelected,
         );
       case AppTab.featured:
@@ -84,8 +88,6 @@ class _MainTabPageState extends State<MainTabPage> {
         );
       case AppTab.settings:
         return const SettingsPage();
-      default:
-        return const SizedBox();
     }
   }
 }

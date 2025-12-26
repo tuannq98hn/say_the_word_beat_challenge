@@ -1,8 +1,12 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_android/webview_flutter_android.dart';
 import '../../data/model/tiktok_video.dart';
+import '../../services/tiktok_service.dart';
 
-class VideoPlayerPage extends StatelessWidget {
+class VideoPlayerPage extends StatefulWidget {
   final TikTokVideo video;
   final VoidCallback onBack;
 
@@ -12,12 +16,139 @@ class VideoPlayerPage extends StatelessWidget {
     required this.onBack,
   });
 
+  @override
+  State<VideoPlayerPage> createState() => _VideoPlayerPageState();
+}
+
+class _VideoPlayerPageState extends State<VideoPlayerPage> {
+  WebViewController? _webViewController;
+  final TikTokService _tiktokService = tiktokService;
+  bool _showWebView = false;
+  bool _isLoading = false;
+
+  /// Hiển thị video TikTok trong WebView
   Future<void> _openTikTok() async {
-    final url = Uri.parse(
-      'https://www.tiktok.com/${video.author}/video/${video.id}',
-    );
-    if (await canLaunchUrl(url)) {
-      await launchUrl(url, mode: LaunchMode.externalApplication);
+    if (_showWebView) return; // Đã hiển thị rồi thì không làm gì
+    
+    setState(() {
+      _showWebView = true;
+      _isLoading = true;
+    });
+    
+    // Khởi tạo WebView nếu chưa có
+    if (_webViewController == null) {
+      await _initializeWebView();
+    }
+  }
+  
+  Future<void> _initializeWebView() async {
+    // Tạo WebViewController
+    _webViewController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(Colors.black)
+      // Dùng user-agent iPhone Safari để TikTok trả về player tương thích hơn
+      ..setUserAgent(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
+      )
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (String url) {
+            if (mounted) {
+              setState(() {
+                _isLoading = true;
+              });
+            }
+          },
+          onPageFinished: (String url) {
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
+          },
+          onWebResourceError: (WebResourceError error) {
+            if (mounted) {
+              setState(() {
+                _isLoading = false;
+              });
+            }
+          },
+        ),
+      );
+
+    // Cấu hình cho Android
+    if (_webViewController!.platform is AndroidWebViewController) {
+      final androidController = _webViewController!.platform as AndroidWebViewController;
+      androidController
+        ..setMediaPlaybackRequiresUserGesture(false)
+        ..setOnShowFileSelector((params) async {
+          return [];
+        });
+    }
+
+    // Ưu tiên load URL gốc với tham số webapp để TikTok trả về player
+    final primaryUrl = '${widget.video.tiktokUrl}'
+        '${widget.video.tiktokUrl.contains('?') ? '&' : '?'}is_copy_url=1&is_from_webapp=v1';
+
+    // Fallback: embed URL
+    final fallbackUrl = _tiktokService.getEmbedUrl(widget.video.tiktokUrl, autoplay: false);
+
+    // Thử URL gốc trước, nếu lỗi sẽ tự chuyển sang embed
+    _webViewController!
+        .loadRequest(Uri.parse(primaryUrl))
+        .catchError((_) async {
+          if (fallbackUrl != null) {
+            await _webViewController!.loadRequest(Uri.parse(fallbackUrl));
+          }
+        });
+  }
+
+  Future<void> _openTikTokInBrowser() async {
+    // Mở video TikTok trong trình duyệt ngoài
+    try {
+      final url = Uri.parse(widget.video.tiktokUrl);
+      
+      // Thử mở TikTok app trước (nếu có)
+      final tiktokAppUrl = url.toString().replaceFirst('https://www.tiktok.com', 'tiktok://');
+      final tiktokAppUri = Uri.tryParse(tiktokAppUrl);
+      
+      if (tiktokAppUri != null) {
+        try {
+          if (await canLaunchUrl(tiktokAppUri)) {
+            await launchUrl(tiktokAppUri, mode: LaunchMode.externalApplication);
+            return;
+          }
+        } catch (e) {
+          // Nếu không mở được TikTok app, tiếp tục mở browser
+        }
+      }
+      
+      // Fallback: mở trong browser
+      if (await canLaunchUrl(url)) {
+        await launchUrl(
+          url,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        // Nếu không mở được, thử mở với platformDefault
+        await launchUrl(url, mode: LaunchMode.platformDefault);
+      }
+    } catch (e) {
+      // Nếu có lỗi, thử mở với mode đơn giản nhất
+      try {
+        final url = Uri.parse(widget.video.tiktokUrl);
+        await launchUrl(url);
+      } catch (e2) {
+        // Hiển thị thông báo lỗi nếu cần
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Cannot open TikTok video: ${e2.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -31,7 +162,7 @@ class VideoPlayerPage extends StatelessWidget {
             child: Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: NetworkImage(video.thumbnailUrl),
+                  image: NetworkImage(widget.video.thumbnailUrl),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -49,7 +180,7 @@ class VideoPlayerPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
-                        onTap: onBack,
+                        onTap: widget.onBack,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
@@ -94,7 +225,7 @@ class VideoPlayerPage extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          video.author,
+                          widget.video.author,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
@@ -120,26 +251,96 @@ class VideoPlayerPage extends StatelessWidget {
                           width: 1,
                         ),
                       ),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.play_circle_outline,
-                              size: 64,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Video Player',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                      child: Stack(
+                        children: [
+                          // WebView để hiển thị video TikTok
+                          if (_showWebView && _webViewController != null)
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: WebViewWidget(controller: _webViewController!),
+                            )
+                          else
+                            // Thumbnail background (trước khi mở video)
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Image.network(
+                                widget.video.thumbnailUrl,
+                                width: double.infinity,
+                                height: double.infinity,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (context, child, loadingProgress) {
+                                  if (loadingProgress == null) return child;
+                                  return Container(
+                                    color: Colors.grey.shade900,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress.expectedTotalBytes != null
+                                            ? loadingProgress.cumulativeBytesLoaded /
+                                                loadingProgress.expectedTotalBytes!
+                                            : null,
+                                        color: Colors.pink,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey.shade900,
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.video_library,
+                                        color: Colors.grey,
+                                        size: 64,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
-                          ],
-                        ),
+                          // Loading indicator
+                          if (_isLoading)
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.7),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.pink,
+                                ),
+                              ),
+                            ),
+                          // Play button overlay (chỉ hiển thị khi chưa mở WebView)
+                          if (!_showWebView)
+                            GestureDetector(
+                              onTap: _openTikTok,
+                              child: Container(
+                                color: Colors.transparent,
+                                child: Center(
+                                  child: Container(
+                                    width: 100,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      color: Colors.pink.shade600.withOpacity(0.95),
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.pink.shade600.withOpacity(0.6),
+                                          blurRadius: 30,
+                                          spreadRadius: 10,
+                                        ),
+                                      ],
+                                    ),
+                                    child: const Icon(
+                                      Icons.play_arrow,
+                                      color: Colors.white,
+                                      size: 56,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
@@ -159,7 +360,7 @@ class VideoPlayerPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        video.description,
+                        widget.video.description,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
@@ -169,7 +370,7 @@ class VideoPlayerPage extends StatelessWidget {
                       const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
-                        children: video.tags.map((tag) {
+                        children: widget.video.tags.map((tag) {
                           return Text(
                             '#$tag',
                             style: TextStyle(
@@ -185,30 +386,45 @@ class VideoPlayerPage extends StatelessWidget {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _openTikTok,
+                          onPressed: _openTikTokInBrowser,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.pink.shade600,
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(24),
                             ),
+                            elevation: 8,
                           ),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.open_in_new, color: Colors.white),
+                              Icon(Icons.open_in_new, color: Colors.white, size: 24),
                               SizedBox(width: 8),
                               Text(
-                                'OPEN IN TIKTOK',
+                                'WATCH ON TIKTOK',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 14,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: 2,
                                 ),
                               ),
                             ],
                           ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Center(
+                        child: Text(
+                          _showWebView 
+                            ? 'Tap play button on video to start' 
+                            : 'Tap the play button above to watch in-app',
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ),
                     ],

@@ -34,3 +34,11 @@ class GameStopped extends GameEvent {
   const GameStopped();
 }
 
+class GameToggleShowText extends GameEvent {
+  const GameToggleShowText();
+}
+
+class GameTickEvent extends GameEvent {
+  const GameTickEvent();
+}
+

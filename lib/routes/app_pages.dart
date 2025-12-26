@@ -6,6 +6,7 @@ import '../ui/main/main_tab_page.dart';
 import '../ui/game/view/game_page.dart';
 import '../ui/game_over/view/game_over_page.dart';
 import '../ui/video/video_player_page.dart';
+import '../ui/pre_game_settings/view/pre_game_settings_page.dart';
 import '../data/model/challenge.dart';
 import '../data/model/tiktok_video.dart';
 
@@ -22,7 +23,7 @@ class AppPages {
         builder: (context, state) => MainTabPage(
           onChallengeSelected: (challenge) {
             return context.push(
-              AppRoutes.game,
+              AppRoutes.preGameSettings,
               extra: challenge,
             );
           },
@@ -35,6 +36,16 @@ class AppPages {
         ),
       ),
       GoRoute(
+        path: AppRoutes.preGameSettings,
+        builder: (context, state) {
+          final challenge = state.extra as Challenge?;
+          if (challenge == null) {
+            return const SizedBox();
+          }
+          return PreGameSettingsPage(challenge: challenge);
+        },
+      ),
+      GoRoute(
         path: AppRoutes.game,
         builder: (context, state) {
           final challenge = state.extra as Challenge?;
@@ -44,7 +55,7 @@ class AppPages {
           return GamePage(
             challenge: challenge,
             onBack: () {
-              context.pop();
+              context.go(AppRoutes.main);
             },
             onGameOver: () {
               context.go(AppRoutes.gameOver);

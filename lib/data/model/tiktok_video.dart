@@ -4,13 +4,15 @@ class TikTokVideo {
   final String description;
   final List<String> tags;
   final String thumbnailUrl;
+  final String tiktokUrl;
 
-  TikTokVideo({
+  const TikTokVideo({
     required this.id,
     required this.author,
     required this.description,
     required this.tags,
     required this.thumbnailUrl,
+    required this.tiktokUrl,
   });
 
   Map<String, dynamic> toJson() => {
@@ -19,6 +21,7 @@ class TikTokVideo {
         'description': description,
         'tags': tags,
         'thumbnailUrl': thumbnailUrl,
+        'tiktokUrl': tiktokUrl,
       };
 
   factory TikTokVideo.fromJson(Map<String, dynamic> json) => TikTokVideo(
@@ -27,5 +30,6 @@ class TikTokVideo {
         description: json['description'] as String,
         tags: (json['tags'] as List).map((e) => e as String).toList(),
         thumbnailUrl: json['thumbnailUrl'] as String,
+        tiktokUrl: json['tiktokUrl'] as String,
       );
 }

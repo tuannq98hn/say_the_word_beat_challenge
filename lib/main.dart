@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'common/theme/app_theme.dart';
-import 'common/notification/notification_helper.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:say_word_challenge/ui/app/bloc/app_bloc.dart';
+
 import 'di/injection_container.dart';
 import 'ui/main/main_app.dart';
 

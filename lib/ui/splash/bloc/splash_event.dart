@@ -15,3 +15,10 @@ class SplashCompleted extends SplashEvent {
   const SplashCompleted();
 }
 
+class OnCloseNative extends SplashEvent {
+  const OnCloseNative();
+}
+
+class OnAppOpenAdEvent extends SplashEvent {
+  const OnAppOpenAdEvent();
+}

@@ -1,0 +1,124 @@
+package com.example.flutter_ads_native.inter_reward.admob
+
+import android.app.Activity
+import android.content.Context
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.rewarded.RewardItem
+import com.google.android.gms.ads.rewarded.RewardedAd
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
+import com.example.flutter_ads_native.inter_reward.AdLoadCallback
+import com.example.flutter_ads_native.inter_reward.RewardedAdCallback
+import com.example.flutter_ads_native.inter_reward.RewardedAdProvider
+
+/**
+ * Rewarded implementation using AdMob mediation.
+ * Meta bidding is also handled under the hood via AdMob.
+ */
+class AdMobRewardedProvider : RewardedAdProvider {
+
+    private var rewardedAd: RewardedAd? = null
+    private var lastAdUnitId: String? = null
+    
+    // List of ad unit IDs for rotation
+    private var adUnitIds: MutableList<String> = mutableListOf()
+    private var currentIndex: Int = 0
+
+    /**
+     * Set list of ad unit IDs for rotation
+     */
+    fun setAdUnitIds(ids: List<String>) {
+        if (ids.isNotEmpty()) {
+            adUnitIds.clear()
+            adUnitIds.addAll(ids)
+            currentIndex = 0
+        }
+    }
+
+    /**
+     * Load next ad unit ID in rotation
+     */
+    fun loadNext(context: Context, callback: AdLoadCallback?) {
+        if (adUnitIds.isEmpty()) {
+            // Fallback to default if no rotation IDs set
+            load(context, com.example.flutter_ads_native.inter_reward.AdsConfig.REWARDED_ADMOB, callback)
+            return
+        }
+
+        val adUnitId = adUnitIds[currentIndex]
+        load(context, adUnitId, callback)
+        
+        // Rotate to next index for next load
+        currentIndex = (currentIndex + 1) % adUnitIds.size
+    }
+
+    override fun load(context: Context, adUnitId: String, callback: AdLoadCallback?) {
+        lastAdUnitId = adUnitId
+
+        android.util.Log.d("AdMobRewarded", "Loading rewarded ad with unit ID: $adUnitId")
+        
+        val adRequest = AdRequest.Builder().build()
+
+        RewardedAd.load(
+            context,
+            adUnitId,
+            adRequest,
+            object : RewardedAdLoadCallback() {
+                override fun onAdLoaded(ad: RewardedAd) {
+                    android.util.Log.d("AdMobRewarded", "Rewarded ad loaded successfully")
+                    rewardedAd = ad
+                    callback?.onAdLoaded()
+                }
+
+                override fun onAdFailedToLoad(error: LoadAdError) {
+                    android.util.Log.e("AdMobRewarded", "Rewarded ad failed to load: ${error.code} - ${error.message}")
+                    android.util.Log.e("AdMobRewarded", "Error domain: ${error.domain}, cause: ${error.cause}")
+                    rewardedAd = null
+                    val errorMessage = "Error ${error.code}: ${error.message}"
+                    callback?.onAdFailedToLoad(errorMessage)
+                }
+            }
+        )
+    }
+
+    override fun show(activity: Activity, callback: RewardedAdCallback?) {
+        val ad = rewardedAd
+        if (ad == null) {
+            callback?.onAdFailedToShow("Rewarded ad not ready")
+            // Optionally trigger a new load using rotation
+            loadNext(activity.applicationContext, null)
+            return
+        }
+
+        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
+            override fun onAdShowedFullScreenContent() {
+                callback?.onAdShown()
+            }
+
+            override fun onAdDismissedFullScreenContent() {
+                callback?.onAdClosed()
+                rewardedAd = null
+                // Preload next ad using rotation
+                loadNext(activity.applicationContext, null)
+            }
+
+            override fun onAdFailedToShowFullScreenContent(error: AdError) {
+                callback?.onAdFailedToShow(error.message)
+                rewardedAd = null
+                // Try to preload next ad using rotation
+                loadNext(activity.applicationContext, null)
+            }
+        }
+
+        ad.show(activity) { rewardItem: RewardItem ->
+            callback?.onUserEarnedReward(rewardItem.type, rewardItem.amount)
+        }
+    }
+
+    override fun isReady(): Boolean {
+        return rewardedAd != null
+    }
+}
+

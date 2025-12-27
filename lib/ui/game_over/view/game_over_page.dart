@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_ads_native/index.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:lottie/lottie.dart';
+import 'package:say_word_challenge/services/interstitial_ads_controller.dart';
+import 'package:say_word_challenge/services/remote_config_service.dart';
+import 'package:share_plus/share_plus.dart';
+
 import '../bloc/game_over_bloc.dart';
 import '../bloc/game_over_event.dart';
 
@@ -15,7 +19,6 @@ class GameOverPage extends StatefulWidget {
 }
 
 class _GameOverPageState extends State<GameOverPage> {
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -48,104 +51,150 @@ class _GameOverPageState extends State<GameOverPage> {
                             'Challenge\nComplete!',
                             fontSize: 64,
                           ),
-                      const SizedBox(height: 32),
-                      const Text(
-                        'You conquered the beat! What\'s next?',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Color(0xFFD1D5DB),
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                          fontFamily: 'Inter',
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 48),
-                      Wrap(
-                        spacing: 16,
-                        runSpacing: 16,
-                        alignment: WrapAlignment.center,
-                        children: [
-                          ElevatedButton(
-                            onPressed: widget.onPlayAgain,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFACC15),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32,
-                                vertical: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24),
-                              ),
-                              elevation: 0,
+                          const SizedBox(height: 32),
+                          const Text(
+                            'You conquered the beat! What\'s next?',
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Color(0xFFD1D5DB),
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                              fontFamily: 'Inter',
                             ),
-                            child: const Text(
-                              'Play Again',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: 2,
-                                fontFamily: 'Inter',
-                              ),
-                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              try {
-                                await Share.share(
-                                  'I just crushed the Word On Beat challenge!',
-                                  subject: 'Word On Beat',
-                                );
-                              } catch (e) {
-                                if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Share URL copied!'),
-                                    ),
+                          const SizedBox(height: 48),
+                          Wrap(
+                            spacing: 16,
+                            runSpacing: 16,
+                            alignment: WrapAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  _handleShowInter(
+                                    onDone: () {
+                                      widget.onPlayAgain.call();
+                                    },
                                   );
-                                }
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 32,
-                                vertical: 16,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(24),
-                                side: const BorderSide(
-                                  color: Colors.white,
-                                  width: 2,
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFFACC15),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                    vertical: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: const Text(
+                                  'Play Again',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 2,
+                                    fontFamily: 'Inter',
+                                  ),
                                 ),
                               ),
-                              elevation: 0,
-                            ),
-                            child: const Text(
-                              'Share Score',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 2,
-                                fontFamily: 'Inter',
+                              ElevatedButton(
+                                onPressed: () async {
+                                  try {
+                                    await Share.share(
+                                      'I just crushed the Word On Beat challenge!',
+                                      subject: 'Word On Beat',
+                                    );
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Share URL copied!'),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.transparent,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                    vertical: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                    side: const BorderSide(
+                                      color: Colors.white,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: const Text(
+                                  'Share Score',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            if (RemoteConfigService.instance.configAdsDataByScreen(
+                  "GameOverPage",
+                ) !=
+                null)
+              Positioned(
+                bottom: MediaQuery.of(context).padding.bottom,
+                left: 0,
+                right: 0,
+                child: RemoteConfigService.instance.configAdsByScreen(
+                  "GameOverPage",
+                )!,
+              ),
           ],
         ),
       ),
     );
+  }
+
+  static Future<void> _handleShowInter({
+    required void Function() onDone,
+  }) async {
+    final origin_onInterstitialClosed = InterstitialAds.onInterstitialClosed;
+    final origin_onInterstitialFailed = InterstitialAds.onInterstitialFailed;
+    final origin_onInterstitialShown = InterstitialAds.onInterstitialShown;
+    InterstitialAds.onInterstitialClosed = () {
+      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
+      onDone();
+    };
+    InterstitialAds.onInterstitialFailed = (_) {
+      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
+      onDone();
+    };
+    InterstitialAds.onInterstitialShown = () {
+      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+      // todo show native full screen ==> check policy
+    };
+    if (!await InterstitialAdsController.instance.showInterstitialAd()) {
+      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
+      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
+      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+      onDone();
+    }
   }
 }
 
@@ -160,11 +209,7 @@ class _NeonGradientText extends StatelessWidget {
     const gradient = LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
-      colors: [
-        Color(0xFFFF3DAF),
-        Color(0xFFFF3D6E),
-        Color(0xFFFF2D55),
-      ],
+      colors: [Color(0xFFFF3DAF), Color(0xFFFF3D6E), Color(0xFFFF2D55)],
     );
 
     return ShaderMask(
@@ -199,4 +244,3 @@ class _NeonGradientText extends StatelessWidget {
     );
   }
 }
-

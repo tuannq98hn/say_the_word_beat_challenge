@@ -1,8 +1,10 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_ads_native/index.dart';
+import 'package:say_word_challenge/services/interstitial_ads_controller.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
+
 import '../../data/model/tiktok_video.dart';
 import '../../services/tiktok_service.dart';
 
@@ -10,11 +12,7 @@ class VideoPlayerPage extends StatefulWidget {
   final TikTokVideo video;
   final VoidCallback onBack;
 
-  const VideoPlayerPage({
-    super.key,
-    required this.video,
-    required this.onBack,
-  });
+  const VideoPlayerPage({super.key, required this.video, required this.onBack});
 
   @override
   State<VideoPlayerPage> createState() => _VideoPlayerPageState();
@@ -29,18 +27,18 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   /// Hiển thị video TikTok trong WebView
   Future<void> _openTikTok() async {
     if (_showWebView) return; // Đã hiển thị rồi thì không làm gì
-    
+
     setState(() {
       _showWebView = true;
       _isLoading = true;
     });
-    
+
     // Khởi tạo WebView nếu chưa có
     if (_webViewController == null) {
       await _initializeWebView();
     }
   }
-  
+
   Future<void> _initializeWebView() async {
     // Tạo WebViewController
     _webViewController = WebViewController()
@@ -78,7 +76,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
     // Cấu hình cho Android
     if (_webViewController!.platform is AndroidWebViewController) {
-      final androidController = _webViewController!.platform as AndroidWebViewController;
+      final androidController =
+          _webViewController!.platform as AndroidWebViewController;
       androidController
         ..setMediaPlaybackRequiresUserGesture(false)
         ..setOnShowFileSelector((params) async {
@@ -87,31 +86,38 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     }
 
     // Ưu tiên load URL gốc với tham số webapp để TikTok trả về player
-    final primaryUrl = '${widget.video.tiktokUrl}'
+    final primaryUrl =
+        '${widget.video.tiktokUrl}'
         '${widget.video.tiktokUrl.contains('?') ? '&' : '?'}is_copy_url=1&is_from_webapp=v1';
 
     // Fallback: embed URL
-    final fallbackUrl = _tiktokService.getEmbedUrl(widget.video.tiktokUrl, autoplay: false);
+    final fallbackUrl = _tiktokService.getEmbedUrl(
+      widget.video.tiktokUrl,
+      autoplay: false,
+    );
 
     // Thử URL gốc trước, nếu lỗi sẽ tự chuyển sang embed
-    _webViewController!
-        .loadRequest(Uri.parse(primaryUrl))
-        .catchError((_) async {
-          if (fallbackUrl != null) {
-            await _webViewController!.loadRequest(Uri.parse(fallbackUrl));
-          }
-        });
+    _webViewController!.loadRequest(Uri.parse(primaryUrl)).catchError((
+      _,
+    ) async {
+      if (fallbackUrl != null) {
+        await _webViewController!.loadRequest(Uri.parse(fallbackUrl));
+      }
+    });
   }
 
   Future<void> _openTikTokInBrowser() async {
     // Mở video TikTok trong trình duyệt ngoài
     try {
       final url = Uri.parse(widget.video.tiktokUrl);
-      
+
       // Thử mở TikTok app trước (nếu có)
-      final tiktokAppUrl = url.toString().replaceFirst('https://www.tiktok.com', 'tiktok://');
+      final tiktokAppUrl = url.toString().replaceFirst(
+        'https://www.tiktok.com',
+        'tiktok://',
+      );
       final tiktokAppUri = Uri.tryParse(tiktokAppUrl);
-      
+
       if (tiktokAppUri != null) {
         try {
           if (await canLaunchUrl(tiktokAppUri)) {
@@ -122,13 +128,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           // Nếu không mở được TikTok app, tiếp tục mở browser
         }
       }
-      
+
       // Fallback: mở trong browser
       if (await canLaunchUrl(url)) {
-        await launchUrl(
-          url,
-          mode: LaunchMode.externalApplication,
-        );
+        await launchUrl(url, mode: LaunchMode.externalApplication);
       } else {
         // Nếu không mở được, thử mở với platformDefault
         await launchUrl(url, mode: LaunchMode.platformDefault);
@@ -166,9 +169,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   fit: BoxFit.cover,
                 ),
               ),
-              child: Container(
-                color: Colors.black.withOpacity(0.3),
-              ),
+              child: Container(color: Colors.black.withOpacity(0.3)),
             ),
           ),
           SafeArea(
@@ -257,7 +258,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           if (_showWebView && _webViewController != null)
                             ClipRRect(
                               borderRadius: BorderRadius.circular(16),
-                              child: WebViewWidget(controller: _webViewController!),
+                              child: WebViewWidget(
+                                controller: _webViewController!,
+                              ),
                             )
                           else
                             // Thumbnail background (trước khi mở video)
@@ -268,21 +271,27 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                 width: double.infinity,
                                 height: double.infinity,
                                 fit: BoxFit.cover,
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Container(
-                                    color: Colors.grey.shade900,
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                        value: loadingProgress.expectedTotalBytes != null
-                                            ? loadingProgress.cumulativeBytesLoaded /
-                                                loadingProgress.expectedTotalBytes!
-                                            : null,
-                                        color: Colors.pink,
-                                      ),
-                                    ),
-                                  );
-                                },
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        color: Colors.grey.shade900,
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            value:
+                                                loadingProgress
+                                                        .expectedTotalBytes !=
+                                                    null
+                                                ? loadingProgress
+                                                          .cumulativeBytesLoaded /
+                                                      loadingProgress
+                                                          .expectedTotalBytes!
+                                                : null,
+                                            color: Colors.pink,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
                                     color: Colors.grey.shade900,
@@ -321,11 +330,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                     width: 100,
                                     height: 100,
                                     decoration: BoxDecoration(
-                                      color: Colors.pink.shade600.withOpacity(0.95),
+                                      color: Colors.pink.shade600.withOpacity(
+                                        0.95,
+                                      ),
                                       shape: BoxShape.circle,
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.pink.shade600.withOpacity(0.6),
+                                          color: Colors.pink.shade600
+                                              .withOpacity(0.6),
                                           blurRadius: 30,
                                           spreadRadius: 10,
                                         ),
@@ -350,10 +362,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFF111111),
                     border: Border(
-                      top: BorderSide(
-                        color: Colors.grey.shade800,
-                        width: 1,
-                      ),
+                      top: BorderSide(color: Colors.grey.shade800, width: 1),
                     ),
                   ),
                   child: Column(
@@ -386,7 +395,8 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: _openTikTokInBrowser,
+                          onPressed: () =>
+                              _handleShowInter(onDone: _openTikTokInBrowser),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.pink.shade600,
                             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -398,7 +408,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.open_in_new, color: Colors.white, size: 24),
+                              Icon(
+                                Icons.open_in_new,
+                                color: Colors.white,
+                                size: 24,
+                              ),
                               SizedBox(width: 8),
                               Text(
                                 'WATCH ON TIKTOK',
@@ -416,9 +430,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       const SizedBox(height: 12),
                       Center(
                         child: Text(
-                          _showWebView 
-                            ? 'Tap play button on video to start' 
-                            : 'Tap the play button above to watch in-app',
+                          _showWebView
+                              ? 'Tap play button on video to start'
+                              : 'Tap the play button above to watch in-app',
                           style: TextStyle(
                             color: Colors.grey.shade400,
                             fontSize: 12,
@@ -436,5 +450,31 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
         ],
       ),
     );
+  }
+
+  static Future<void> _handleShowInter({
+    required void Function() onDone,
+  }) async {
+    final origin_onInterstitialClosed = InterstitialAds.onInterstitialClosed;
+    final origin_onInterstitialFailed = InterstitialAds.onInterstitialFailed;
+    final origin_onInterstitialShown = InterstitialAds.onInterstitialShown;
+    InterstitialAds.onInterstitialClosed = () {
+      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
+      onDone();
+    };
+    InterstitialAds.onInterstitialFailed = (_) {
+      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
+      onDone();
+    };
+    InterstitialAds.onInterstitialShown = () {
+      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+      // todo show native full screen ==> check policy
+    };
+    if (!await InterstitialAdsController.instance.showInterstitialAd()) {
+      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
+      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
+      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+      onDone();
+    }
   }
 }

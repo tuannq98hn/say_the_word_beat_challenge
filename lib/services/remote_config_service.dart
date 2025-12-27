@@ -149,6 +149,12 @@ class RemoteConfigService {
         "size": "LARGE_BANNER",
         "isShow": true,
       },
+      {
+        "screenName": "BottomNav",
+        "adUnitId": "ca-app-pub-3940256099942544/6300978111",
+        "size": "SMART_BANNER",
+        "isShow": true,
+      },
     ],
     "native": [
       {
@@ -160,7 +166,19 @@ class RemoteConfigService {
       {
         "screenName": "GameOverPage",
         "adUnitId": "ca-app-pub-3940256099942544/2247696110",
-        "size": "FULL_SCREEN",
+        "size": "NATIVE_MEDIUM_RECTANGLE",
+        "isShow": true,
+      },
+      {
+        "screenName": "SettingsPage",
+        "adUnitId": "ca-app-pub-3940256099942544/1044960115",
+        "size": "NATIVE_MEDIUM_RECTANGLE",
+        "isShow": true,
+      },
+      {
+        "screenName": "PreGameSettingsPage",
+        "adUnitId": "ca-app-pub-3940256099942544/2247696110",
+        "size": "NATIVE_MEDIUM_RECTANGLE",
         "isShow": true,
       }
     ],
@@ -172,10 +190,10 @@ class RemoteConfigService {
         "ca-app-pub-3940256099942544/1033173712",
       ],
       "showRateTime": 15,
-      "interMaxPerSession": 5,
-      "interMinSecondsBetween": 90,
-      "interMaxPerDay": 20,
-      "interMinActionBetween": 3,
+      "interMaxPerSession": 20,
+      "interMinSecondsBetween": 10,
+      "interMaxPerDay": 300,
+      "interMinActionBetween": 9,
     },
     "reward": {
       "adUnitIds": [

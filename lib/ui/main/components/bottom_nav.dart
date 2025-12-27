@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:say_word_challenge/services/remote_config_service.dart';
 import '../../../common/enums/app_tab.dart';
 
 class BottomNav extends StatelessWidget {
@@ -14,55 +15,51 @@ class BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: Stack(
-        children: [
-          Positioned(
-            top: -40,
-            left: 0,
-            right: 0,
-            height: 40,
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black,
-                  ],
-                ),
+    return Stack(
+      children: [
+        Positioned(
+          top: -40,
+          left: 0,
+          right: 0,
+          height: 40,
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black,
+                ],
               ),
             ),
           ),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.9),
-              border: Border(
-                top: BorderSide(
-                  color: Colors.white.withOpacity(0.1),
-                  width: 1,
-                ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.9),
+            border: Border(
+              top: BorderSide(
+                color: Colors.white.withOpacity(0.1),
+                width: 1,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
-                  blurRadius: 20,
-                  offset: const Offset(0, -5),
-                ),
-              ],
             ),
-            child: ClipRRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 12, bottom: 24),
-                    child: Row(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.5),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Column(
+                  children: [
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         _buildNavItem(
@@ -97,13 +94,21 @@ class BottomNav extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ),
+                    if (RemoteConfigService.instance.configAdsDataByScreen(
+                      "BottomNav",
+                    ) !=
+                        null) ...[
+                      SizedBox.square(dimension: 5),
+                      RemoteConfigService.instance.configAdsByScreen("BottomNav")!,
+                      SizedBox(height: MediaQuery.of(context).padding.bottom),
+                    ],
+                  ],
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 

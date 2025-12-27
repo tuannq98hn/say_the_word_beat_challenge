@@ -158,6 +158,12 @@ class RemoteConfigService {
     ],
     "native": [
       {
+        "screenName": "BottomNav",
+        "adUnitId": "ca-app-pub-3940256099942544/2247696110",
+        "size": "NATIVE_BANNER",
+        "isShow": true,
+      },
+      {
         "screenName": "SplashPageFull",
         "adUnitId": "ca-app-pub-3940256099942544/2247696110",
         "size": "FULL_SCREEN",

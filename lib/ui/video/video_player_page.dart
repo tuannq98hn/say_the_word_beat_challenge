@@ -185,7 +185,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
-                        onTap: widget.onBack,
+                        onTap: () => _handleShowInter(onDone: widget.onBack),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,

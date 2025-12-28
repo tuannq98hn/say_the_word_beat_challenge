@@ -75,6 +75,7 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
     OnAppOpenAdEvent event,
     Emitter<SplashState> emit,
   ) {
-    emit(state.copyWith(isOpenAppSuccess: true));
+    // emit(state.copyWith(isOpenAppSuccess: true));
+    emit(state.copyWith(isCompleted: true));
   }
 }

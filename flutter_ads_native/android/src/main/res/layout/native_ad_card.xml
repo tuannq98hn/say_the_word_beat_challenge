@@ -154,8 +154,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="30dp"
                     android:background="@drawable/ripple_blue_button"
-                    android:clickable="false"
-                    android:focusable="false"
                     android:paddingStart="12dp"
                     android:paddingTop="4dp"
                     android:paddingEnd="12dp"

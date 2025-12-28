@@ -63,8 +63,16 @@ class NativeCardView(
             val title = root.findViewById<TextView>(R.id.adTitle)
             val description = root.findViewById<TextView>(R.id.adDescription)
             val icon = root.findViewById<ImageView>(R.id.adIcon)
-            val image = root.findViewById<ImageView>(R.id.adImage)
-            val lnRating = root.findViewById<LinearLayout>(R.id.lnRating)
+            val image = try {
+                root.findViewById<ImageView>(R.id.adImage)
+            } catch (ex: Exception) {
+                null
+            }
+            val lnRating = try {
+                root.findViewById<LinearLayout>(R.id.lnRating)
+            } catch (ex: Exception) {
+                null
+            }
             val adView = root as NativeAdView
             val mediaView = try {
                 root.findViewById<MediaView>(R.id.adMediaView)
@@ -92,13 +100,11 @@ class NativeCardView(
 //                adView.mediaView = null
 //            }
 //            val btnInstall = root.findViewById<FrameLayout>(R.id.btnInstall)
-            val loadingMedia = root.findViewById<ProgressBar>(R.id.loadingMedia)
-
-            val star1 = root.findViewById<ImageView>(R.id.star1)
-            val star2 = root.findViewById<ImageView>(R.id.star2)
-            val star3 = root.findViewById<ImageView>(R.id.star3)
-            val star4 = root.findViewById<ImageView>(R.id.star4)
-            val star5 = root.findViewById<ImageView>(R.id.star5)
+            val loadingMedia = try {
+                root.findViewById<ProgressBar>(R.id.loadingMedia)
+            } catch (err: Exception) {
+                null
+            }
 
             // Try to find Close button (may not exist in all layouts)
             val btnClose = try {
@@ -141,22 +147,22 @@ class NativeCardView(
                     object : VideoController.VideoLifecycleCallbacks() {
                         override fun onVideoPlay() {
                             super.onVideoPlay()
-                            loadingMedia.visibility = View.GONE
+                            loadingMedia?.visibility = View.GONE
                         }
 
                         override fun onVideoStart() {
                             super.onVideoStart()
-                            loadingMedia.visibility = View.GONE
+                            loadingMedia?.visibility = View.GONE
                         }
                     }
                 nativeAd.mediaContent!!.videoController.play()
             } else {
-                loadingMedia.visibility = View.GONE
-                image.visibility = View.VISIBLE
+                loadingMedia?.visibility = View.GONE
+                image?.visibility = View.VISIBLE
                 val images = nativeAd.images
                 if (images.isNotEmpty()) {
                     val drawable = images[0].drawable
-                    image.setImageDrawable(drawable)
+                    image?.setImageDrawable(drawable)
                 }
             }
 //            mediaView?.let { mediaView ->
@@ -196,15 +202,22 @@ class NativeCardView(
             val installText = root.findViewById<TextView>(R.id.install_text)
             installText?.text = nativeAd.callToAction ?: "Start now"
 
-            // --- Set rating stars ---
-            // Update star rating if stars exist
-            val stars = listOf(star1, star2, star3, star4, star5)
-            if (nativeAd.starRating == null) {
-                lnRating.visibility = View.GONE
-                return
+            if (lnRating != null) {
+                val star1 = root.findViewById<ImageView>(R.id.star1)
+                val star2 = root.findViewById<ImageView>(R.id.star2)
+                val star3 = root.findViewById<ImageView>(R.id.star3)
+                val star4 = root.findViewById<ImageView>(R.id.star4)
+                val star5 = root.findViewById<ImageView>(R.id.star5)
+                // --- Set rating stars ---
+                // Update star rating if stars exist
+                val stars = listOf(star1, star2, star3, star4, star5)
+                if (nativeAd.starRating == null) {
+                    lnRating.visibility = View.GONE
+                    return
+                }
+                val rating = nativeAd.starRating ?: 0.0
+                updateStarRating(rating, stars)
             }
-            val rating = nativeAd.starRating ?: 0.0
-            updateStarRating(rating, stars)
             adView.setNativeAd(nativeAd)
 
         } catch (e: Exception) {
@@ -215,7 +228,6 @@ class NativeCardView(
 
     private fun updateStarRating(rating: Double, stars: List<ImageView>) {
         if (stars.isEmpty()) {
-
             return
         }
 

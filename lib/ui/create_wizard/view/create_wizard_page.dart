@@ -1,9 +1,10 @@
-import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:say_word_challenge/services/remote_config_service.dart';
+
 import '../bloc/create_wizard_bloc.dart';
 import '../bloc/create_wizard_event.dart';
 import '../bloc/create_wizard_state.dart';
@@ -12,11 +13,7 @@ class CreateWizardPage extends StatefulWidget {
   final Function()? onCancel;
   final Function()? onFinish;
 
-  const CreateWizardPage({
-    super.key,
-    this.onCancel,
-    this.onFinish,
-  });
+  const CreateWizardPage({super.key, this.onCancel, this.onFinish});
 
   @override
   State<CreateWizardPage> createState() => _CreateWizardPageState();
@@ -28,7 +25,8 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => CreateWizardBloc()..add(const CreateWizardInitialized()),
+      create: (context) =>
+          CreateWizardBloc()..add(const CreateWizardInitialized()),
       child: BlocListener<CreateWizardBloc, CreateWizardState>(
         listener: (context, state) {
           if (state.createdChallenge != null) {
@@ -69,10 +67,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                   const SizedBox(height: 32),
                   ShaderMask(
                     shaderCallback: (bounds) => const LinearGradient(
-                      colors: [
-                        Color(0xFFFACC15),
-                        Color(0xFFF97316),
-                      ],
+                      colors: [Color(0xFFFACC15), Color(0xFFF97316)],
                     ).createShader(bounds),
                     child: const Text(
                       'UPLOAD PHOTOS',
@@ -174,7 +169,9 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                                 ),
                                 TextField(
                                   key: ValueKey('name_${img.id}'),
-                                  controller: TextEditingController(text: img.name),
+                                  controller: TextEditingController(
+                                    text: img.name,
+                                  ),
                                   onChanged: (value) {
                                     context.read<CreateWizardBloc>().add(
                                       ImageNameUpdated(
@@ -244,98 +241,106 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                         ],
                       ),
                     );
-                  }).toList(),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF111111),
-                border: Border(
-                  top: BorderSide(
-                    color: Colors.grey.shade800,
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  }),
+                  Column(
+                    spacing: 8,
                     children: [
-                      TextButton(
-                        onPressed: widget.onCancel ?? () => Navigator.of(context).pop(),
-                        child: Text(
-                          'CANCEL',
-                          style: TextStyle(
-                            color: Colors.grey.shade400,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                            fontFamily: 'Inter',
+                      if (RemoteConfigService.instance.configAdsDataByScreen(
+                            "CreateWizardPageUpload",
+                          ) !=
+                          null)
+                        RemoteConfigService.instance.configAdsByScreen(
+                          "CreateWizardPageUpload",
+                        )!,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF111111),
+                          border: Border(
+                            top: BorderSide(
+                              color: Colors.grey.shade800,
+                              width: 1,
+                            ),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              TextButton(
+                                onPressed:
+                                    widget.onCancel ??
+                                    () => Navigator.of(context).pop(),
+                                child: Text(
+                                  'CANCEL',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade400,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  if (!state.canProceedFromUpload &&
+                                      state.images.isNotEmpty)
+                                    Text(
+                                      'NAME ALL IMAGES TO PROCEED',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.red.shade400,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 2,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                  const SizedBox(height: 4),
+                                  ElevatedButton(
+                                    onPressed: state.canProceedFromUpload
+                                        ? () {
+                                            context
+                                                .read<CreateWizardBloc>()
+                                                .add(const StepChanged('MODE'));
+                                          }
+                                        : null,
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          state.canProceedFromUpload
+                                          ? Colors.yellow.shade400
+                                          : Colors.grey.shade800,
+                                      foregroundColor:
+                                          state.canProceedFromUpload
+                                          ? Colors.black
+                                          : Colors.grey.shade600,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 32,
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'NEXT STEP',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 4,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        if (!state.canProceedFromUpload &&
-                            state.images.isNotEmpty)
-                          Text(
-                            'NAME ALL IMAGES TO PROCEED',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.red.shade400,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 2,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        const SizedBox(height: 4),
-                        ElevatedButton(
-                          onPressed: state.canProceedFromUpload
-                              ? () {
-                                  context.read<CreateWizardBloc>().add(
-                                    const StepChanged('MODE'),
-                                  );
-                                }
-                              : null,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: state.canProceedFromUpload
-                                ? Colors.yellow.shade400
-                                : Colors.grey.shade800,
-                            foregroundColor: state.canProceedFromUpload
-                                ? Colors.black
-                                : Colors.grey.shade600,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                          ),
-                          child: const Text(
-                            'NEXT STEP',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 4,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
@@ -346,10 +351,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      '⏳',
-                      style: TextStyle(fontSize: 48),
-                    ),
+                    Text('⏳', style: TextStyle(fontSize: 48)),
                     SizedBox(height: 16),
                     Text(
                       'SAVING DECK...',
@@ -402,10 +404,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF2563EB),
-                        Color(0xFF9333EA),
-                      ],
+                      colors: [Color(0xFF2563EB), Color(0xFF9333EA)],
                     ),
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
@@ -418,10 +417,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                   ),
                   child: Column(
                     children: [
-                      const Text(
-                        '🎲',
-                        style: TextStyle(fontSize: 48),
-                      ),
+                      const Text('🎲', style: TextStyle(fontSize: 48)),
                       const SizedBox(height: 8),
                       const Text(
                         'AUTO RANDOM',
@@ -476,17 +472,11 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                   decoration: BoxDecoration(
                     color: Colors.grey.shade900,
                     borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: Colors.grey.shade700,
-                      width: 1,
-                    ),
+                    border: Border.all(color: Colors.grey.shade700, width: 1),
                   ),
                   child: Column(
                     children: [
-                      const Text(
-                        '🖐️',
-                        style: TextStyle(fontSize: 48),
-                      ),
+                      const Text('🖐️', style: TextStyle(fontSize: 48)),
                       const SizedBox(height: 8),
                       Text(
                         'MANUAL SORT',
@@ -513,7 +503,21 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                   ),
                 ),
               ),
-              const SizedBox(height: 32),
+              if (RemoteConfigService.instance.configAdsDataByScreen(
+                    "CreateWizardPageMode",
+                  ) !=
+                  null)
+                Padding(
+                  padding: EdgeInsetsGeometry.symmetric(
+                    horizontal: 20,
+                    vertical: 32,
+                  ),
+                  child: RemoteConfigService.instance.configAdsByScreen(
+                    "CreateWizardPageMode",
+                  )!,
+                )
+              else
+                const SizedBox(height: 32),
               TextButton(
                 onPressed: () {
                   context.read<CreateWizardBloc>().add(
@@ -559,10 +563,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                     decoration: BoxDecoration(
                       color: Colors.grey.shade900,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.grey.shade800,
-                        width: 1,
-                      ),
+                      border: Border.all(color: Colors.grey.shade800, width: 1),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -593,9 +594,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                           ),
                           decoration: InputDecoration(
                             hintText: 'e.g. My Funny Mix',
-                            hintStyle: TextStyle(
-                              color: Colors.grey.shade700,
-                            ),
+                            hintStyle: TextStyle(color: Colors.grey.shade700),
                             border: UnderlineInputBorder(
                               borderSide: BorderSide(
                                 color: Colors.grey.shade700,
@@ -671,9 +670,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                               decoration: BoxDecoration(
                                 color: Colors.grey.shade800,
                                 borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: Colors.grey.shade700,
-                                ),
+                                border: Border.all(color: Colors.grey.shade700),
                               ),
                               child: Row(
                                 children: [
@@ -706,11 +703,11 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 1.0,
-                    ),
+                          crossAxisCount: 4,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1.0,
+                        ),
                     itemCount: 8,
                     itemBuilder: (context, index) {
                       final imgId = currentLevelData[index];
@@ -742,8 +739,9 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                             boxShadow: isSelected
                                 ? [
                                     BoxShadow(
-                                      color: Colors.yellow.shade400
-                                          .withOpacity(0.2),
+                                      color: Colors.yellow.shade400.withOpacity(
+                                        0.2,
+                                      ),
                                       blurRadius: 8,
                                       spreadRadius: 2,
                                     ),
@@ -799,7 +797,9 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                                           color: Colors.black.withOpacity(0.5),
                                           shape: BoxShape.circle,
                                           border: Border.all(
-                                            color: Colors.white.withOpacity(0.2),
+                                            color: Colors.white.withOpacity(
+                                              0.2,
+                                            ),
                                           ),
                                         ),
                                         child: Center(
@@ -853,9 +853,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                             decoration: BoxDecoration(
                               color: Colors.grey.shade900,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.grey.shade800,
-                              ),
+                              border: Border.all(color: Colors.grey.shade800),
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -902,17 +900,21 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                                         child: Container(
                                           width: 80,
                                           height: 80,
-                                          margin: const EdgeInsets.only(right: 12),
+                                          margin: const EdgeInsets.only(
+                                            right: 12,
+                                          ),
                                           decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                             border: Border.all(
                                               color: Colors.grey.shade700,
                                             ),
                                           ),
                                           child: ClipRRect(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                             child: Stack(
                                               children: [
                                                 Image.memory(
@@ -927,15 +929,16 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                                                   child: Container(
                                                     padding:
                                                         const EdgeInsets.symmetric(
-                                                      horizontal: 4,
-                                                      vertical: 2,
-                                                    ),
+                                                          horizontal: 4,
+                                                          vertical: 2,
+                                                        ),
                                                     decoration: BoxDecoration(
                                                       color: Colors.black
                                                           .withOpacity(0.6),
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                              4),
+                                                            4,
+                                                          ),
                                                     ),
                                                     child: Text(
                                                       img.name,
@@ -965,131 +968,137 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                           )
                         : const SizedBox(),
                   ),
+                  if (RemoteConfigService.instance.configAdsDataByScreen(
+                        "CreateWizardPageManual",
+                      ) !=
+                      null)
+                    Padding(
+                      padding: EdgeInsetsGeometry.symmetric(
+                        vertical: 16,
+                      ),
+                      child: RemoteConfigService.instance.configAdsByScreen(
+                        "CreateWizardPageManual",
+                      )!,
+                    )
+                  else
+                    const SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF111111),
+                      border: Border(
+                        top: BorderSide(color: Colors.grey.shade800, width: 1),
+                      ),
+                    ),
+                    child: SafeArea(
+                      top: false,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (state.currentLevel > 0)
+                              TextButton(
+                                onPressed: () {
+                                  context.read<CreateWizardBloc>().add(
+                                    LevelChanged(state.currentLevel - 1),
+                                  );
+                                },
+                                child: Text(
+                                  '← BACK',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade400,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              )
+                            else
+                              TextButton(
+                                onPressed: () {
+                                  context.read<CreateWizardBloc>().add(
+                                    const CreateWizardInitialized(),
+                                  );
+                                },
+                                child: Text(
+                                  'RESTART',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade400,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                            if (state.currentLevel < 4)
+                              ElevatedButton(
+                                onPressed: () {
+                                  context.read<CreateWizardBloc>().add(
+                                    LevelChanged(state.currentLevel + 1),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'NEXT LEVEL →',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              )
+                            else
+                              ElevatedButton(
+                                onPressed: state.canFinish
+                                    ? () {
+                                        context.read<CreateWizardBloc>().add(
+                                          const FinishCreation(),
+                                        );
+                                      }
+                                    : null,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: state.canFinish
+                                      ? Colors.green.shade500
+                                      : Colors.grey.shade800,
+                                  foregroundColor: state.canFinish
+                                      ? Colors.black
+                                      : Colors.grey.shade600,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 32,
+                                    vertical: 12,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                  elevation: state.canFinish ? 8 : 0,
+                                ),
+                                child: const Text(
+                                  'FINISH & SAVE',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    letterSpacing: 2,
+                                    fontFamily: 'Inter',
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF111111),
-                border: Border(
-                  top: BorderSide(
-                    color: Colors.grey.shade800,
-                    width: 1,
-                  ),
-                ),
-              ),
-              child: SafeArea(
-                top: false,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (state.currentLevel > 0)
-                      TextButton(
-                        onPressed: () {
-                          context.read<CreateWizardBloc>().add(
-                            LevelChanged(state.currentLevel - 1),
-                          );
-                        },
-                        child: Text(
-                          '← BACK',
-                          style: TextStyle(
-                            color: Colors.grey.shade400,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      )
-                      else
-                        TextButton(
-                        onPressed: () {
-                          context.read<CreateWizardBloc>().add(
-                            const CreateWizardInitialized(),
-                          );
-                        },
-                        child: Text(
-                          'RESTART',
-                          style: TextStyle(
-                            color: Colors.grey.shade400,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      ),
-                      if (state.currentLevel < 4)
-                      ElevatedButton(
-                        onPressed: () {
-                          context.read<CreateWizardBloc>().add(
-                            LevelChanged(state.currentLevel + 1),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                        ),
-                        child: const Text(
-                          'NEXT LEVEL →',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      )
-                    else
-                      ElevatedButton(
-                        onPressed: state.canFinish
-                            ? () {
-                                context.read<CreateWizardBloc>().add(
-                                  const FinishCreation(),
-                                );
-                              }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: state.canFinish
-                              ? Colors.green.shade500
-                              : Colors.grey.shade800,
-                          foregroundColor: state.canFinish
-                              ? Colors.black
-                              : Colors.grey.shade600,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          elevation: state.canFinish ? 8 : 0,
-                        ),
-                        child: const Text(
-                          'FINISH & SAVE',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ),
           ),
@@ -1100,10 +1109,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      '⏳',
-                      style: TextStyle(fontSize: 48),
-                    ),
+                    Text('⏳', style: TextStyle(fontSize: 48)),
                     SizedBox(height: 16),
                     Text(
                       'SAVING DECK...',
@@ -1129,9 +1135,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
     if (remainingSlots <= 0) return;
 
     try {
-      final List<XFile> images = await _picker.pickMultiImage(
-        imageQuality: 85,
-      );
+      final List<XFile> images = await _picker.pickMultiImage(imageQuality: 85);
 
       if (images.isEmpty) return;
 
@@ -1146,10 +1150,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
 
       if (context.mounted) {
         context.read<CreateWizardBloc>().add(
-          ImagesSelected(
-            imageBytes: imageBytes,
-            imagePaths: imagePaths,
-          ),
+          ImagesSelected(imageBytes: imageBytes, imagePaths: imagePaths),
         );
       }
     } catch (e) {

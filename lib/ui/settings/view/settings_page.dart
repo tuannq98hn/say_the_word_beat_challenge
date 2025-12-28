@@ -147,7 +147,15 @@ class _SettingsPageState extends State<SettingsPage> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 32),
+                          const SizedBox(height: 16),
+                          if (RemoteConfigService.instance
+                                  .configAdsDataByScreen("SettingsPage") !=
+                              null) ...[
+                            RemoteConfigService.instance.configAdsByScreen(
+                              "SettingsPage",
+                            )!,
+                          ],
+                          const SizedBox(height: 16),
                           const Text(
                             'DIFFICULTY (SPEED)',
                             style: TextStyle(
@@ -247,15 +255,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 24),
-                          if (RemoteConfigService.instance
-                                  .configAdsDataByScreen("SettingsPage") !=
-                              null) ...[
-                            RemoteConfigService.instance.configAdsByScreen(
-                              "SettingsPage",
-                            )!,
-                            const SizedBox(height: 24),
-                          ],
+                          SizedBox(height: 12),
                           Center(
                             child: Text(
                               'Version 1.2.0 • Build 2024',

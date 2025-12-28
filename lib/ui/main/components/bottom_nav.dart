@@ -1,6 +1,8 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:say_word_challenge/services/remote_config_service.dart';
+
 import '../../../common/enums/app_tab.dart';
 
 class BottomNav extends StatelessWidget {
@@ -27,10 +29,7 @@ class BottomNav extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.black,
-                ],
+                colors: [Colors.transparent, Colors.black],
               ),
             ),
           ),
@@ -39,10 +38,7 @@ class BottomNav extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.black.withOpacity(0.9),
             border: Border(
-              top: BorderSide(
-                color: Colors.white.withOpacity(0.1),
-                width: 1,
-              ),
+              top: BorderSide(color: Colors.white.withOpacity(0.1), width: 1),
             ),
             boxShadow: [
               BoxShadow(
@@ -95,12 +91,16 @@ class BottomNav extends StatelessWidget {
                       ],
                     ),
                     if (RemoteConfigService.instance.configAdsDataByScreen(
-                      "BottomNav",
-                    ) !=
+                          "BottomNav",
+                        ) !=
                         null) ...[
-                      SizedBox.square(dimension: 5),
-                      RemoteConfigService.instance.configAdsByScreen("BottomNav")!,
-                      SizedBox(height: MediaQuery.of(context).padding.bottom),
+                      const SizedBox(height: 8),
+                      RemoteConfigService.instance.configAdsByScreen(
+                        "BottomNav",
+                      )!,
+                      SizedBox(
+                        height: MediaQuery.of(context).padding.bottom + 8,
+                      ),
                     ],
                   ],
                 ),
@@ -160,9 +160,7 @@ class BottomNav extends StatelessWidget {
                       Icon(
                         icon,
                         size: 24,
-                        color: isActive
-                            ? activeColor
-                            : Colors.grey.shade500,
+                        color: isActive ? activeColor : Colors.grey.shade500,
                       ),
                     ],
                   ),

@@ -1,18 +1,22 @@
 import 'dart:convert';
 import 'dart:typed_data';
+
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ads_native/index.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:say_word_challenge/services/interstitial_ads_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../../data/model/challenge.dart';
 import '../../../data/model/game_settings.dart';
+import '../../../services/audio_service.dart';
+import '../../../services/camera_service.dart';
+import '../../../services/recording_service.dart';
 import '../bloc/game_bloc.dart';
 import '../bloc/game_event.dart';
 import '../bloc/game_state.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../config/game_timing_config.dart';
-import '../../../services/audio_service.dart';
-import '../../../services/recording_service.dart';
-import '../../../services/camera_service.dart';
-import 'package:camera/camera.dart';
 
 class GamePage extends StatefulWidget {
   final Challenge challenge;
@@ -82,24 +86,17 @@ class _GamePageState extends State<GamePage>
     final prefs = await SharedPreferences.getInstance();
     final json = prefs.getString('game_settings');
     if (json != null) {
-      return GameSettings.fromJson(
-        Map<String, dynamic>.from(jsonDecode(json)),
-      );
+      return GameSettings.fromJson(Map<String, dynamic>.from(jsonDecode(json)));
     }
     return GameSettings();
   }
-
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     final json = prefs.getString('game_settings');
     if (!mounted) return;
     final newSettings = json != null
-        ? GameSettings.fromJson(
-            Map<String, dynamic>.from(
-              jsonDecode(json),
-            ),
-          )
+        ? GameSettings.fromJson(Map<String, dynamic>.from(jsonDecode(json)))
         : GameSettings();
     if (_settings?.showWordText != newSettings.showWordText) {
       setState(() {
@@ -142,7 +139,7 @@ class _GamePageState extends State<GamePage>
   Future<void> _stopRecording() async {
     final prefs = await SharedPreferences.getInstance();
     final isRecordingActive = prefs.getBool('recording_is_active') ?? false;
-    
+
     if (isRecordingActive && _recordingService.isRecording) {
       await _recordingService.stopRecording();
       final prefs = await SharedPreferences.getInstance();
@@ -160,7 +157,8 @@ class _GamePageState extends State<GamePage>
       },
       child: BlocListener<GameBloc, GameState>(
         listenWhen: (previous, current) {
-          final shouldListen = previous.flashFeedback != current.flashFeedback ||
+          final shouldListen =
+              previous.flashFeedback != current.flashFeedback ||
               previous.currentRoundIndex != current.currentRoundIndex ||
               previous.countdownValue != current.countdownValue ||
               previous.isCountingDown != current.isCountingDown ||
@@ -237,13 +235,14 @@ class _GamePageState extends State<GamePage>
                   animation: _countdownAnimationController,
                   builder: (context, child) {
                     return Transform.scale(
-                      scale: Tween<double>(
-                        begin: 3.0,
-                        end: 1.0,
-                      ).animate(CurvedAnimation(
-                        parent: _countdownAnimationController,
-                        curve: Curves.easeOutCubic,
-                      )).value,
+                      scale: Tween<double>(begin: 3.0, end: 1.0)
+                          .animate(
+                            CurvedAnimation(
+                              parent: _countdownAnimationController,
+                              curve: Curves.easeOutCubic,
+                            ),
+                          )
+                          .value,
                       child: Opacity(
                         opacity: _countdownAnimationController.value,
                         child: Text(
@@ -313,30 +312,21 @@ class _GamePageState extends State<GamePage>
       body: Stack(
         children: [
           if (hasCamera && _cameraService.controller != null)
-            Positioned.fill(
-              child: CameraPreview(_cameraService.controller!),
-            )
+            Positioned.fill(child: CameraPreview(_cameraService.controller!))
           else
             Positioned.fill(
-              child: Container(
-                color: bgColor,
-                child: _buildDecorations(),
-              ),
+              child: Container(color: bgColor, child: _buildDecorations()),
             ),
           SafeArea(
             child: Column(
               children: [
-                Builder(
-                  builder: (context) => _buildTopBar(context, state),
-                ),
+                Builder(builder: (context) => _buildTopBar(context, state)),
                 if (hasCamera) const Spacer(),
                 Expanded(
                   flex: hasCamera ? 0 : 1,
                   child: _buildGameGrid(state, currentRound),
                 ),
-                Builder(
-                  builder: (context) => _buildStopButton(context),
-                ),
+                Builder(builder: (context) => _buildStopButton(context)),
               ],
             ),
           ),
@@ -353,32 +343,32 @@ class _GamePageState extends State<GamePage>
       child: Stack(
         children: _decorations.map((deco) {
           return Positioned(
-              top: deco['top'] != null
-                  ? screenSize.height * (deco['top'] as double)
-                  : null,
-              bottom: deco['bottom'] != null
-                  ? screenSize.height * (deco['bottom'] as double)
-                  : null,
-              left: deco['left'] != null
-                  ? screenSize.width * (deco['left'] as double)
-                  : null,
-              right: deco['right'] != null
-                  ? screenSize.width * (deco['right'] as double)
-                  : null,
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: GameTimingConfig.decorationAnimationDuration,
-                builder: (context, value, child) {
-                  return Opacity(
-                    opacity: 0.5 + (value * 0.5),
-                    child: Text(
-                      deco['icon'] as String,
-                      style: const TextStyle(fontSize: 32),
-                    ),
-                  );
-                },
-              ),
-            );
+            top: deco['top'] != null
+                ? screenSize.height * (deco['top'] as double)
+                : null,
+            bottom: deco['bottom'] != null
+                ? screenSize.height * (deco['bottom'] as double)
+                : null,
+            left: deco['left'] != null
+                ? screenSize.width * (deco['left'] as double)
+                : null,
+            right: deco['right'] != null
+                ? screenSize.width * (deco['right'] as double)
+                : null,
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: GameTimingConfig.decorationAnimationDuration,
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: 0.5 + (value * 0.5),
+                  child: Text(
+                    deco['icon'] as String,
+                    style: const TextStyle(fontSize: 32),
+                  ),
+                );
+              },
+            ),
+          );
         }).toList(),
       ),
     );
@@ -446,7 +436,9 @@ class _GamePageState extends State<GamePage>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    (_settings?.showWordText ?? true) ? Icons.text_fields : Icons.text_fields_outlined,
+                    (_settings?.showWordText ?? true)
+                        ? Icons.text_fields
+                        : Icons.text_fields_outlined,
                     color: Colors.white,
                     size: 18,
                   ),
@@ -567,7 +559,9 @@ class _GamePageState extends State<GamePage>
                         boxShadow: isActive
                             ? [
                                 BoxShadow(
-                                  color: Colors.yellow.shade400.withOpacity(0.8),
+                                  color: Colors.yellow.shade400.withOpacity(
+                                    0.8,
+                                  ),
                                   blurRadius: 30,
                                   spreadRadius: 4,
                                 ),
@@ -587,17 +581,24 @@ class _GamePageState extends State<GamePage>
                                 return SizedBox(
                                   width: size,
                                   height: size,
-                                  child: item.image != null && item.image!.isNotEmpty
+                                  child:
+                                      item.image != null &&
+                                          item.image!.isNotEmpty
                                       ? RepaintBoundary(
                                           child: ClipRRect(
                                             borderRadius: BorderRadius.only(
                                               topLeft: Radius.circular(12),
                                               topRight: Radius.circular(12),
                                             ),
-                                            child: item.image!.startsWith('assets/')
+                                            child:
+                                                item.image!.startsWith(
+                                                  'assets/',
+                                                )
                                                 ? Image.asset(
                                                     item.image!,
-                                                    key: ValueKey('asset_${item.image!}_$index'),
+                                                    key: ValueKey(
+                                                      'asset_${item.image!}_$index',
+                                                    ),
                                                     fit: BoxFit.cover,
                                                     width: double.infinity,
                                                     height: double.infinity,
@@ -606,62 +607,108 @@ class _GamePageState extends State<GamePage>
                                                         color: Colors.white,
                                                         child: Center(
                                                           child: AnimatedScale(
-                                                            scale: isActive ? 1.1 : 1.0,
-                                                            duration: GameTimingConfig.cardScaleAnimationDuration,
+                                                            scale: isActive
+                                                                ? 1.1
+                                                                : 1.0,
+                                                            duration:
+                                                                GameTimingConfig
+                                                                    .cardScaleAnimationDuration,
                                                             child: Text(
                                                               item.emoji,
-                                                              style: const TextStyle(fontSize: 40),
+                                                              style:
+                                                                  const TextStyle(
+                                                                    fontSize:
+                                                                        40,
+                                                                  ),
                                                             ),
                                                           ),
                                                         ),
                                                       );
                                                     },
                                                   )
-                                                : item.image!.startsWith('data:image')
-                                                    ? Image.memory(
-                                                        _getCachedImageBytes(item.image!),
-                                                        key: ValueKey('img_${item.image!.hashCode}_$index'),
-                                                        fit: BoxFit.cover,
-                                                        width: double.infinity,
-                                                        height: double.infinity,
-                                                        errorBuilder: (context, error, stackTrace) {
+                                                : item.image!.startsWith(
+                                                    'data:image',
+                                                  )
+                                                ? Image.memory(
+                                                    _getCachedImageBytes(
+                                                      item.image!,
+                                                    ),
+                                                    key: ValueKey(
+                                                      'img_${item.image!.hashCode}_$index',
+                                                    ),
+                                                    fit: BoxFit.cover,
+                                                    width: double.infinity,
+                                                    height: double.infinity,
+                                                    errorBuilder:
+                                                        (
+                                                          context,
+                                                          error,
+                                                          stackTrace,
+                                                        ) {
                                                           return Container(
                                                             color: Colors.white,
                                                             child: Center(
                                                               child: AnimatedScale(
-                                                                scale: isActive ? 1.1 : 1.0,
-                                                                duration: const Duration(milliseconds: 75),
+                                                                scale: isActive
+                                                                    ? 1.1
+                                                                    : 1.0,
+                                                                duration:
+                                                                    const Duration(
+                                                                      milliseconds:
+                                                                          75,
+                                                                    ),
                                                                 child: Text(
                                                                   item.emoji,
-                                                                  style: const TextStyle(fontSize: 40),
+                                                                  style:
+                                                                      const TextStyle(
+                                                                        fontSize:
+                                                                            40,
+                                                                      ),
                                                                 ),
                                                               ),
                                                             ),
                                                           );
                                                         },
-                                                      )
-                                                    : Image.network(
-                                                        item.image!,
-                                                        key: ValueKey('net_${item.image!}_$index'),
-                                                        fit: BoxFit.cover,
-                                                        width: double.infinity,
-                                                        height: double.infinity,
-                                                        errorBuilder: (context, error, stackTrace) {
+                                                  )
+                                                : Image.network(
+                                                    item.image!,
+                                                    key: ValueKey(
+                                                      'net_${item.image!}_$index',
+                                                    ),
+                                                    fit: BoxFit.cover,
+                                                    width: double.infinity,
+                                                    height: double.infinity,
+                                                    errorBuilder:
+                                                        (
+                                                          context,
+                                                          error,
+                                                          stackTrace,
+                                                        ) {
                                                           return Container(
                                                             color: Colors.white,
                                                             child: Center(
                                                               child: AnimatedScale(
-                                                                scale: isActive ? 1.1 : 1.0,
-                                                                duration: const Duration(milliseconds: 75),
+                                                                scale: isActive
+                                                                    ? 1.1
+                                                                    : 1.0,
+                                                                duration:
+                                                                    const Duration(
+                                                                      milliseconds:
+                                                                          75,
+                                                                    ),
                                                                 child: Text(
                                                                   item.emoji,
-                                                                  style: const TextStyle(fontSize: 40),
+                                                                  style:
+                                                                      const TextStyle(
+                                                                        fontSize:
+                                                                            40,
+                                                                      ),
                                                                 ),
                                                               ),
                                                             ),
                                                           );
                                                         },
-                                                      ),
+                                                  ),
                                           ),
                                         )
                                       : Container(
@@ -669,10 +716,13 @@ class _GamePageState extends State<GamePage>
                                           child: Center(
                                             child: AnimatedScale(
                                               scale: isActive ? 1.1 : 1.0,
-                                              duration: GameTimingConfig.cardScaleAnimationDuration,
+                                              duration: GameTimingConfig
+                                                  .cardScaleAnimationDuration,
                                               child: Text(
                                                 item.emoji,
-                                                style: const TextStyle(fontSize: 40),
+                                                style: const TextStyle(
+                                                  fontSize: 40,
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -750,13 +800,14 @@ class _GamePageState extends State<GamePage>
                 animation: _feedbackAnimationController,
                 builder: (context, child) {
                   return Transform.scale(
-                    scale: Tween<double>(
-                      begin: 0.5,
-                      end: 1.0,
-                    ).animate(CurvedAnimation(
-                      parent: _feedbackAnimationController,
-                      curve: Curves.easeOut,
-                    )).value,
+                    scale: Tween<double>(begin: 0.5, end: 1.0)
+                        .animate(
+                          CurvedAnimation(
+                            parent: _feedbackAnimationController,
+                            curve: Curves.easeOut,
+                          ),
+                        )
+                        .value,
                     child: Transform.rotate(
                       angle: -0.087,
                       child: Text(
@@ -795,20 +846,14 @@ class _GamePageState extends State<GamePage>
         onTap: () {
           audioService.stop();
           context.read<GameBloc>().add(const GameStopped());
-          widget.onBack();
+          _handleShowInter(onDone: widget.onBack);
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 24,
-            vertical: 12,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.black.withOpacity(0.3),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: Colors.grey.shade800,
-              width: 1,
-            ),
+            border: Border.all(color: Colors.grey.shade800, width: 1),
           ),
           child: const Text(
             'STOP',
@@ -893,5 +938,28 @@ class _GamePageState extends State<GamePage>
       ),
     );
   }
-}
 
+  Future<void> _handleShowInter({required void Function() onDone}) async {
+    final origin_onInterstitialClosed = InterstitialAds.onInterstitialClosed;
+    final origin_onInterstitialFailed = InterstitialAds.onInterstitialFailed;
+    final origin_onInterstitialShown = InterstitialAds.onInterstitialShown;
+    InterstitialAds.onInterstitialClosed = () {
+      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
+      onDone();
+    };
+    InterstitialAds.onInterstitialFailed = (_) {
+      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
+      onDone();
+    };
+    InterstitialAds.onInterstitialShown = () {
+      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+      // todo show native full screen ==> check policy
+    };
+    if (!await InterstitialAdsController.instance.showInterstitialAd()) {
+      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
+      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
+      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+      onDone();
+    }
+  }
+}

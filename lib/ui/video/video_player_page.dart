@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_ads_native/index.dart';
 import 'package:say_word_challenge/services/interstitial_ads_controller.dart';
+import 'package:say_word_challenge/services/remote_config_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
@@ -172,7 +173,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
               child: Container(color: Colors.black.withOpacity(0.3)),
             ),
           ),
-          SafeArea(
+          Padding(
+            padding: EdgeInsetsGeometry.only(
+              top: MediaQuery.of(context).padding.top,
+            ),
             child: Column(
               children: [
                 Padding(
@@ -181,7 +185,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
-                        onTap: widget.onBack,
+                        onTap: () => _handleShowInter(onDone: widget.onBack),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
@@ -392,6 +396,14 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         }).toList(),
                       ),
                       const SizedBox(height: 24),
+                      if (RemoteConfigService.instance.configAdsDataByScreen(
+                            "VideoPlayerPage",
+                          ) !=
+                          null)
+                        RemoteConfigService.instance.configAdsByScreen(
+                          "VideoPlayerPage",
+                        )!,
+                      const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -441,6 +453,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           textAlign: TextAlign.center,
                         ),
                       ),
+                      SizedBox(height: MediaQuery.of(context).padding.bottom),
                     ],
                   ),
                 ),

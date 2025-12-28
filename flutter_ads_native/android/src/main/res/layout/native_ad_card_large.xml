@@ -25,19 +25,10 @@
             android:elevation="8dp"
             android:visibility="gone"
             tools:visibility="visible">
-
-            <com.google.android.gms.ads.nativead.AdChoicesView
-                android:id="@+id/adChoicesView"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="top|end"
-                android:elevation="4dp" />
             <!-- Main Content Container -->
             <LinearLayout
                 android:layout_gravity="center"
                 android:id="@+id/lnAdContent"
-                android:clickable="true"
-                android:focusable="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
@@ -165,8 +156,6 @@
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="12dp"
                     android:background="@drawable/ripple_blue_button"
-                    android:clickable="false"
-                    android:focusable="false"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="10dp">
 
@@ -191,6 +180,12 @@
                     </LinearLayout>
                 </FrameLayout>
             </LinearLayout>
+            <com.google.android.gms.ads.nativead.AdChoicesView
+                android:id="@+id/adChoicesView"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="top|end"
+                android:elevation="4dp" />
             <!-- Ad Label (Absolute positioned) -->
             <TextView
                 android:id="@+id/adLabel"

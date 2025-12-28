@@ -7,7 +7,7 @@
     <FrameLayout
         android:id="@+id/frmNativeRoot"
         android:layout_width="match_parent"
-        android:layout_height="60dp">
+        android:layout_height="80dp">
 
         <FrameLayout
             android:id="@+id/frmAdsNativeLoading"
@@ -25,26 +25,19 @@
             android:elevation="8dp"
             android:visibility="gone"
             tools:visibility="visible">
-
-            <com.google.android.gms.ads.nativead.AdChoicesView
-                android:id="@+id/adChoicesView"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="top|start"
-                android:layout_marginStart="30dp"
-                android:elevation="4dp" />
             <!-- Main Content Container -->
             <LinearLayout
                 android:id="@+id/lnAdContent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="0dp"
-                android:gravity="center_vertical"
+                android:gravity="top"
                 android:orientation="horizontal"
                 android:padding="8dp">
 
                 <!-- Image Container -->
                 <FrameLayout
+                    android:layout_gravity="center"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginEnd="8dp"
@@ -60,8 +53,8 @@
                 </FrameLayout>
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:gravity="center_vertical"
                     android:orientation="vertical">
@@ -75,63 +68,15 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:layout_width="match_parent"
                             android:id="@+id/adTitle"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:maxLines="1"
-                            android:text="Giáng Sinh Diệu Kỳ"
+                            android:maxLines="2"
+                            android:text="Giáng Sinh Diệu KỳGiáng Sinh Diệu KỳGiáng Sinh Diệu KỳGiáng Sinh Diệu KỳGiáng Sinh Diệu Kỳ"
                             android:textColor="#FFFFFF"
                             android:textSize="11sp"
                             android:textStyle="bold" />
-
-                        <LinearLayout
-                            android:id="@+id/lnRating"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:id="@+id/star1"
-                                android:layout_width="8dp"
-                                android:layout_height="8dp"
-                                android:contentDescription="Star 1"
-                                android:src="@drawable/star_icon" />
-
-                            <ImageView
-                                android:id="@+id/star2"
-                                android:layout_width="8dp"
-                                android:layout_height="8dp"
-                                android:layout_marginStart="1dp"
-                                android:contentDescription="Star 2"
-                                android:src="@drawable/star_icon" />
-
-                            <ImageView
-                                android:id="@+id/star3"
-                                android:layout_width="8dp"
-                                android:layout_height="8dp"
-                                android:layout_marginStart="1dp"
-                                android:contentDescription="Star 3"
-                                android:src="@drawable/star_icon" />
-
-                            <ImageView
-                                android:id="@+id/star4"
-                                android:layout_width="8dp"
-                                android:layout_height="8dp"
-                                android:layout_marginStart="1dp"
-                                android:contentDescription="Star 4"
-                                android:src="@drawable/star_icon" />
-
-                            <ImageView
-                                android:id="@+id/star5"
-                                android:layout_width="8dp"
-                                android:layout_height="8dp"
-                                android:layout_marginStart="1dp"
-                                android:contentDescription="Star 5"
-                                android:src="@drawable/star_icon" />
-                        </LinearLayout>
                     </LinearLayout>
 
 
@@ -139,8 +84,6 @@
                         android:id="@+id/adDescription"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:lineSpacingExtra="0dp"
-                        android:lineSpacingMultiplier="1.0"
                         android:maxLines="2"
                         android:text="Khám phá kho tàng đồ chơi và quà tặng độc đáo cho bé yêu mùa lễ hội này."
                         android:textColor="#9CA3AF"
@@ -149,39 +92,103 @@
                     <!-- Install Button -->
                 </LinearLayout>
 
-                <FrameLayout
-                    android:layout_marginStart="8dp"
-                    android:id="@+id/btnInstall"
+                <LinearLayout
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/ripple_blue_button"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:minWidth="120dp"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="12dp">
+                    android:layout_gravity="center"
+                    android:layout_marginStart="8dp"
+                    android:gravity="end"
+
+                    android:orientation="vertical">
 
                     <LinearLayout
+                        android:layout_marginBottom="8sp"
+                        android:id="@+id/lnRating"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
+                        android:layout_marginStart="4dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <TextView
-                            android:id="@+id/install_text"
+                        <ImageView
+                            android:id="@+id/star1"
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:contentDescription="Star 1"
+                            android:src="@drawable/star_icon" />
+
+                        <ImageView
+                            android:id="@+id/star2"
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:layout_marginStart="1dp"
+                            android:contentDescription="Star 2"
+                            android:src="@drawable/star_icon" />
+
+                        <ImageView
+                            android:id="@+id/star3"
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:layout_marginStart="1dp"
+                            android:contentDescription="Star 3"
+                            android:src="@drawable/star_icon" />
+
+                        <ImageView
+                            android:id="@+id/star4"
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:layout_marginStart="1dp"
+                            android:contentDescription="Star 4"
+                            android:src="@drawable/star_icon" />
+
+                        <ImageView
+                            android:id="@+id/star5"
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:layout_marginStart="1dp"
+                            android:contentDescription="Star 5"
+                            android:src="@drawable/star_icon" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/btnInstall"
+                        android:layout_width="150dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="0dp"
+                        android:background="@drawable/ripple_blue_button"
+                        android:elevation="10dp"
+                        android:minWidth="120dp">
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Start now"
-                            android:textColor="#FFFFFF"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </FrameLayout>
+                            android:layout_gravity="center"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/install_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Start now"
+                                android:textColor="#FFFFFF"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </FrameLayout>
+                </LinearLayout>
             </LinearLayout>
 
 
         </FrameLayout>
+
+        <com.google.android.gms.ads.nativead.AdChoicesView
+            android:id="@+id/adChoicesView"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="top|start"
+            android:layout_marginStart="30dp"
+            android:elevation="4dp" />
 
         <TextView
             android:id="@+id/adLabel"

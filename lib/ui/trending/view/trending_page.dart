@@ -1,9 +1,13 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_ads_native/ad_data.dart';
+import 'package:flutter_ads_native/index.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../data/model/challenge.dart';
-import '../../../services/trending_server_service.dart';
 import '../../../services/data/trending_server_metadata.dart';
+import '../../../services/trending_server_service.dart';
 import '../../common/widgets/challenge_card.dart';
 import '../bloc/trending_bloc.dart';
 import '../bloc/trending_event.dart';
@@ -12,24 +16,21 @@ import '../bloc/trending_state.dart';
 class TrendingPage extends StatefulWidget {
   final Future<void> Function(Challenge)? onChallengeSelected;
 
-  const TrendingPage({
-    super.key,
-    required this.onChallengeSelected,
-  });
+  const TrendingPage({super.key, required this.onChallengeSelected});
 
   @override
   State<TrendingPage> createState() => _TrendingPageState();
 }
 
 class _TrendingPageState extends State<TrendingPage> {
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => TrendingBloc()..add(const TrendingInitialized()),
       child: BlocListener<TrendingBloc, TrendingState>(
         listener: (context, state) async {
-          if (state.selectedChallenge != null && widget.onChallengeSelected != null) {
+          if (state.selectedChallenge != null &&
+              widget.onChallengeSelected != null) {
             final challenge = state.selectedChallenge!;
             context.read<TrendingBloc>().add(const TrendingInitialized());
             if (context.mounted) {
@@ -48,10 +49,7 @@ class _TrendingPageState extends State<TrendingPage> {
                   decoration: BoxDecoration(
                     color: const Color(0xFF111111).withOpacity(0.9),
                     border: Border(
-                      bottom: BorderSide(
-                        color: Colors.grey.shade800,
-                        width: 1,
-                      ),
+                      bottom: BorderSide(color: Colors.grey.shade800, width: 1),
                     ),
                   ),
                   child: ClipRect(
@@ -59,10 +57,7 @@ class _TrendingPageState extends State<TrendingPage> {
                       filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                       child: ShaderMask(
                         shaderCallback: (bounds) => const LinearGradient(
-                          colors: [
-                            Color(0xFFFFD700),
-                            Color(0xFFFF6B35),
-                          ],
+                          colors: [Color(0xFFFFD700), Color(0xFFFF6B35)],
                         ).createShader(bounds),
                         child: const Text(
                           'Trending Challenge',
@@ -135,9 +130,9 @@ class _TrendingPageState extends State<TrendingPage> {
                                 isLoading: isLoading,
                                 isDisabled: isDisabled,
                                 onTap: () {
-                                  context
-                                      .read<TrendingBloc>()
-                                      .add(TrendingTopicSelected(topic));
+                                  context.read<TrendingBloc>().add(
+                                    TrendingTopicSelected(topic),
+                                  );
                                 },
                               );
                             },
@@ -155,4 +150,3 @@ class _TrendingPageState extends State<TrendingPage> {
     );
   }
 }
-

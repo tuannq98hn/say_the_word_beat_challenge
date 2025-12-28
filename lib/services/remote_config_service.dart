@@ -177,14 +177,38 @@ class RemoteConfigService {
       },
       {
         "screenName": "SettingsPage",
-        "adUnitId": "ca-app-pub-3940256099942544/1044960115",
-        "size": "NATIVE_MEDIUM_RECTANGLE",
+        "adUnitId": "ca-app-pub-3940256099942544/2247696110",
+        "size": "NATIVE_LARGE",
         "isShow": true,
       },
       {
         "screenName": "PreGameSettingsPage",
         "adUnitId": "ca-app-pub-3940256099942544/2247696110",
         "size": "NATIVE_MEDIUM_RECTANGLE",
+        "isShow": true,
+      },
+      {
+        "screenName": "VideoPlayerPage",
+        "adUnitId": "ca-app-pub-3940256099942544/2247696110",
+        "size": "NATIVE_LARGE",
+        "isShow": true,
+      },
+      {
+        "screenName": "CreateWizardPageUpload",
+        "adUnitId": "ca-app-pub-3940256099942544/2247696110",
+        "size": "NATIVE_LARGE",
+        "isShow": true,
+      },
+      {
+        "screenName": "CreateWizardPageMode",
+        "adUnitId": "ca-app-pub-3940256099942544/2247696110",
+        "size": "NATIVE_LARGE",
+        "isShow": true,
+      },
+      {
+        "screenName": "CreateWizardPageManual",
+        "adUnitId": "ca-app-pub-3940256099942544/2247696110",
+        "size": "NATIVE_LARGE",
         "isShow": true,
       }
     ],
@@ -196,10 +220,10 @@ class RemoteConfigService {
         "ca-app-pub-3940256099942544/1033173712",
       ],
       "showRateTime": 15,
-      "interMaxPerSession": 20,
+      "interMaxPerSession": 100,
       "interMinSecondsBetween": 10,
       "interMaxPerDay": 300,
-      "interMinActionBetween": 9,
+      "interMinActionBetween": 1,
     },
     "reward": {
       "adUnitIds": [

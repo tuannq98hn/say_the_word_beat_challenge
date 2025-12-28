@@ -40,8 +40,6 @@
             <!-- Main Content Container -->
             <LinearLayout
                 android:id="@+id/lnAdContent"
-                android:clickable="true"
-                android:focusable="true"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:fitsSystemWindows="true"
@@ -64,7 +62,7 @@
                         <com.google.android.gms.ads.nativead.MediaView
                             android:id="@+id/adMediaView"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:layout_centerInParent="true"
                             android:minHeight="120dp" />
 
@@ -206,8 +204,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:background="@drawable/ripple_blue_button"
-                    android:clickable="false"
-                    android:focusable="false"
                     android:minWidth="110dp"
                     android:paddingStart="18dp"
                     android:paddingTop="10dp"

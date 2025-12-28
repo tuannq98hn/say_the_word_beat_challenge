@@ -258,7 +258,7 @@ class _PreGameSettingsPageState extends State<PreGameSettingsPage> {
     );
   }
 
-  static Future<void> _handleShowInter({
+  Future<void> _handleShowInter({
     required void Function() onDone,
   }) async {
     final origin_onInterstitialClosed = InterstitialAds.onInterstitialClosed;

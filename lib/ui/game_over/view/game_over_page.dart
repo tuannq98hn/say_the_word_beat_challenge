@@ -63,7 +63,15 @@ class _GameOverPageState extends State<GameOverPage> {
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 48),
+                          const SizedBox(height: 24),
+                          if (RemoteConfigService.instance.configAdsDataByScreen(
+                            "GameOverPage",
+                          ) !=
+                              null)
+                            RemoteConfigService.instance.configAdsByScreen(
+                              "GameOverPage",
+                            )!,
+                          const SizedBox(height: 24),
                           Wrap(
                             spacing: 16,
                             runSpacing: 16,
@@ -153,18 +161,6 @@ class _GameOverPageState extends State<GameOverPage> {
                 },
               ),
             ),
-            if (RemoteConfigService.instance.configAdsDataByScreen(
-                  "GameOverPage",
-                ) !=
-                null)
-              Positioned(
-                bottom: MediaQuery.of(context).padding.bottom,
-                left: 0,
-                right: 0,
-                child: RemoteConfigService.instance.configAdsByScreen(
-                  "GameOverPage",
-                )!,
-              ),
           ],
         ),
       ),

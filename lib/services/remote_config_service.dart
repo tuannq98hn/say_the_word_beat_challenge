@@ -186,6 +186,12 @@ class RemoteConfigService {
         "adUnitId": "ca-app-pub-3940256099942544/2247696110",
         "size": "NATIVE_MEDIUM_RECTANGLE",
         "isShow": true,
+      },
+      {
+        "screenName": "VideoPlayerPage",
+        "adUnitId": "ca-app-pub-3940256099942544/2247696110",
+        "size": "NATIVE_LARGE",
+        "isShow": true,
       }
     ],
     "inter": {
@@ -196,10 +202,10 @@ class RemoteConfigService {
         "ca-app-pub-3940256099942544/1033173712",
       ],
       "showRateTime": 15,
-      "interMaxPerSession": 20,
+      "interMaxPerSession": 100,
       "interMinSecondsBetween": 10,
       "interMaxPerDay": 300,
-      "interMinActionBetween": 9,
+      "interMinActionBetween": 1,
     },
     "reward": {
       "adUnitIds": [

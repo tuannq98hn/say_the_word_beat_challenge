@@ -32,8 +32,6 @@
                 android:id="@+id/lnAdContent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:clickable="true"
-                android:focusable="true"
                 android:orientation="vertical"
                 android:padding="12dp">
 
@@ -190,8 +188,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:background="@drawable/ripple_blue_button"
-                    android:clickable="false"
-                    android:focusable="false"
                     android:minWidth="110dp"
                     android:paddingHorizontal="18dp"
                     android:paddingVertical="12sp">

@@ -31,7 +31,7 @@ enum AdNativeSize {
   double get adHeight => switch (this) {
     AdNativeSize.FULL_SCREEN => double.infinity,
     AdNativeSize.NATIVE_MEDIUM_RECTANGLE => 270,
-    AdNativeSize.NATIVE_FULL_BANNER => 60,
+    AdNativeSize.NATIVE_FULL_BANNER => 80,
     AdNativeSize.NATIVE_LARGE => 120,
   };
 }

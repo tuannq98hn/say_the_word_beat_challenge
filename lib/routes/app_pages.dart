@@ -53,7 +53,12 @@ class AppPages {
       GoRoute(
         path: AppRoutes.game,
         builder: (context, state) {
-          final challenge = state.extra as Challenge?;
+          Challenge? challenge;
+          try {
+            challenge = state.extra as Challenge?;
+          } catch (e) {
+            challenge = null;
+          }
           if (challenge == null) {
             return const SizedBox();
           }

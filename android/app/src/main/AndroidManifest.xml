@@ -18,9 +18,9 @@
     <uses-feature android:name="android.hardware.camera.front" android:required="false"/>
 
     <application
-        android:label="say_word_challenge"
+        android:label="@string/app_name"
         android:name=".App"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:enableOnBackInvokedCallback="true">
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"

@@ -77,17 +77,12 @@ class RemoteConfigService {
     String? adsString;
     try {
       adsString = _remoteConfig.getString('ads');
-    } catch(err){
-      adsString = null;
+    } catch (err) {
+      adsString = jsonEncode(_defaultAdsConfig);
     }
     // return AdsModel.fromJson(_defaultAdsConfig);
-    return AdsModel.fromJson(
-      jsonDecode(
-        adsString?.isNotEmpty == true
-            ? _remoteConfig.getString('ads')
-            : jsonEncode(_defaultAdsConfig),
-      ),
-    );
+
+    return AdsModel.fromJson(jsonDecode(adsString));
   }
 
   /// Get list of interstitial ad unit IDs from remote config
@@ -210,7 +205,7 @@ class RemoteConfigService {
         "adUnitId": "ca-app-pub-3940256099942544/2247696110",
         "size": "NATIVE_LARGE",
         "isShow": true,
-      }
+      },
     ],
     "inter": {
       "adUnitIds": [

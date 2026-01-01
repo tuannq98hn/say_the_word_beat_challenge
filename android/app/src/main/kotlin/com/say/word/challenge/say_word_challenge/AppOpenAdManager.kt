@@ -19,7 +19,7 @@ class AppOpenAdManager(
     companion object {
         private const val TAG = "AppOpenAd"
         private var isSatingApp = true
-        private val AD_UNIT_ID = "ca-app-pub-3940256099942544/9257395921"// TEST ID
+        private val AD_UNIT_ID = "ca-app-pub-3361561931511510/8320459592"// TEST ID
     }
 
     private var appOpenAd: AppOpenAd? = null

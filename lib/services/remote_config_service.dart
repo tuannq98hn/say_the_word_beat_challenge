@@ -27,51 +27,7 @@ class RemoteConfigService {
       ),
     );
     await _remoteConfig.fetchAndActivate();
-    debugPrint("Remote Config initialized: $appPackage");
   }
-
-  int get adsMaxPerSession => _remoteConfig.getInt('ads_max_per_session');
-
-  int get adsMinSecondsBetween =>
-      _remoteConfig.getInt('ads_min_seconds_between');
-
-  bool get enableInterstitial =>
-      _remoteConfig.getBool('ads_enable_interstitial');
-
-  bool get enableRewarded => _remoteConfig.getBool('ads_enable_rewarded');
-
-  String get appPackage => _remoteConfig.getString('app_package');
-
-  // Video Call
-  int get videoCallFreeUses => _remoteConfig.getInt('video_call_free_uses');
-
-  bool get videoCallIsFree => _remoteConfig.getBool('video_call_is_free');
-
-  // Audio Call
-  int get audioCallFreeUses => _remoteConfig.getInt('audio_call_free_uses');
-
-  bool get audioCallIsFree => _remoteConfig.getBool('audio_call_is_free');
-
-  // Chat with Santa
-  int get chatSantaFreeUses => _remoteConfig.getInt('chat_santa_free_uses');
-
-  bool get chatSantaIsFree => _remoteConfig.getBool('chat_santa_is_free');
-
-  // Track Santa
-  int get trackSantaFreeUses => _remoteConfig.getInt('track_santa_free_uses');
-
-  bool get trackSantaIsFree => _remoteConfig.getBool('track_santa_is_free');
-
-  // Schedule Call
-  int get scheduleCallFreeUses =>
-      _remoteConfig.getInt('schedule_call_free_uses');
-
-  bool get scheduleCallIsFree => _remoteConfig.getBool('schedule_call_is_free');
-
-  // Select Santa
-  int get selectSantaFreeUses => _remoteConfig.getInt('select_santa_free_uses');
-
-  bool get selectSantaIsFree => _remoteConfig.getBool('select_santa_is_free');
 
   AdsModel get adsModel {
     String? adsString;
@@ -81,7 +37,6 @@ class RemoteConfigService {
       adsString = jsonEncode(_defaultAdsConfig);
     }
     // return AdsModel.fromJson(_defaultAdsConfig);
-
     return AdsModel.fromJson(jsonDecode(adsString));
   }
 

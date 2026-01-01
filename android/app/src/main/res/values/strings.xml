@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Say Word on Beat Challenge</string>
+    <string name="tiktok_app_id">7589941883724496914</string>
+    <string name="tiktok_app_secret">TTNinOTTYdpsOgQ1QUEDuPK2F0C8KwkV</string>
 </resources>

@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import com.example.flutter_ads_native.R
+import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
+import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -31,6 +33,8 @@ class BannerView(
         )
     }
 
+    val tracker = TikTokAdTracker(debugLog = true)
+
     init {
         loadBanner()
     }
@@ -44,6 +48,8 @@ class BannerView(
         }
 
         val request = AdRequest.Builder().build()
+        TikTokAdMobLogger.bindBanner(adView, params?.get("adUnitId") as? String
+            ?: "ca-app-pub-3940256099942544/6300978111", tracker)
         adView.loadAd(request)
         adView.adListener = object : AdListener() {
             override fun onAdFailedToLoad(p0: LoadAdError) {

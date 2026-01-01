@@ -8,13 +8,13 @@ import android.os.Looper
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.example.flutter_ads_native.inter_reward.admob.AdMobAdsInitializer
 //import com.facebook.FacebookSdk
 //import com.facebook.appevents.AppEventsLogger
 import com.google.android.gms.ads.MobileAds
-//import com.tiktok.TikTokBusinessSdk
-//import com.tiktok.TikTokBusinessSdk.TTConfig
-//import com.rbxmaster.callsanta.R
-//import com.tiktok.appevents.base.EventName
+import com.tiktok.TikTokBusinessSdk
+import com.tiktok.TikTokBusinessSdk.TTConfig
+import com.tiktok.appevents.base.EventName
 
 
 class App : Application(), Application.ActivityLifecycleCallbacks, DefaultLifecycleObserver {
@@ -27,7 +27,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, DefaultLifecy
     override fun onCreate() {
         super<Application>.onCreate()
         MobileAds.initialize(this)
-//        AdMobAdsInitializer.init(this)
+        AdMobAdsInitializer.init(this)
 //        FacebookSdk.sdkInitialize(applicationContext)
 //        AppEventsLogger.activateApp(this)
         openAdManager = AppOpenAdManager(this)
@@ -45,25 +45,25 @@ class App : Application(), Application.ActivityLifecycleCallbacks, DefaultLifecy
         registerActivityLifecycleCallbacks(this)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
 
-//        val accessToken = getString(R.string.tiktok_app)
-//        val appId = applicationContext.packageName
-//        val tiktokAppId = getString(R.string.tiktok_app_id)
-//
-//        val ttConfig = TTConfig(applicationContext, accessToken)
-//            .setAppId(appId)
-//            .setTTAppId(tiktokAppId)
-//
-//        TikTokBusinessSdk.initializeSdk(ttConfig, object : TikTokBusinessSdk.TTInitCallback {
-//            override fun success() {
-//            }
-//
-//            override fun fail(code: Int, msg: String) {
-//            }
-//        })
-//
-//        TikTokBusinessSdk.startTrack()
-//
-//        TikTokBusinessSdk.trackTTEvent(EventName.LAUNCH_APP);
+        val accessToken = getString(R.string.tiktok_app_secret)
+        val appId = applicationContext.packageName
+        val tiktokAppId = getString(R.string.tiktok_app_id)
+
+        val ttConfig = TTConfig(applicationContext, accessToken)
+            .setAppId(appId)
+            .setTTAppId(tiktokAppId)
+
+        TikTokBusinessSdk.initializeSdk(ttConfig, object : TikTokBusinessSdk.TTInitCallback {
+            override fun success() {
+            }
+
+            override fun fail(code: Int, msg: String) {
+            }
+        })
+
+        TikTokBusinessSdk.startTrack()
+
+        TikTokBusinessSdk.trackTTEvent(EventName.LAUNCH_APP);
 
     }
 

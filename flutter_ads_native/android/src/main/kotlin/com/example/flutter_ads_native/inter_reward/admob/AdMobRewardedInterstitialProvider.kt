@@ -13,6 +13,8 @@ import com.example.flutter_ads_native.inter_reward.AdLoadCallback
 import com.example.flutter_ads_native.inter_reward.AdsConfig
 import com.example.flutter_ads_native.inter_reward.RewardedInterstitialAdCallback
 import com.example.flutter_ads_native.inter_reward.RewardedInterstitialAdProvider
+import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
+import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
 
 /**
  * Rewarded Interstitial implementation using AdMob mediation.
@@ -26,6 +28,8 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
     // List of ad unit IDs for rotation
     private var adUnitIds: MutableList<String> = mutableListOf()
     private var currentIndex: Int = 0
+
+    val tracker = TikTokAdTracker(debugLog = true)
 
     /**
      * Set list of ad unit IDs for rotation
@@ -71,6 +75,7 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
                     android.util.Log.d("AdMobRewardedInterstitial", "Rewarded interstitial ad loaded successfully")
                     rewardedInterstitialAd = ad
                     callback?.onAdLoaded()
+                    TikTokAdMobLogger.bindRewardedInterstitial(ad, adUnitId, tracker)
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {

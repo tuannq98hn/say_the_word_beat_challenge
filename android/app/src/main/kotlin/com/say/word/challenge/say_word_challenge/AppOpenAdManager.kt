@@ -3,6 +3,8 @@ package com.say.word.challenge.say_word_challenge
 import android.app.Activity
 import android.app.Application
 import android.util.Log
+import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
+import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -27,6 +29,8 @@ class AppOpenAdManager(
     private var isShowing = false
     private var loadTime = 0L
 
+    val tracker = TikTokAdTracker(debugLog = true)
+
     fun setEventHandler(handler: AppEventStreamHandler) {
         eventHandler = handler
     }
@@ -48,6 +52,7 @@ class AppOpenAdManager(
                     isLoading = false
                     loadTime = System.currentTimeMillis()
                     onAdLoaded?.invoke()
+                    TikTokAdMobLogger.bindAppOpen(ad, AD_UNIT_ID, tracker)
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {

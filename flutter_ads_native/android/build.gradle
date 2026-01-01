@@ -18,6 +18,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -51,6 +52,7 @@ android {
         testImplementation("org.jetbrains.kotlin:kotlin-test")
         testImplementation("org.mockito:mockito-core:5.0.0")
         implementation("com.google.android.gms:play-services-ads:24.9.0")
+        implementation("com.github.tiktok:tiktok-business-android-sdk:1.6.0")
     }
 
     testOptions {

@@ -71,4 +71,14 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.android.material:material:1.13.0")
+
+    implementation("com.github.tiktok:tiktok-business-android-sdk:1.6.0")
+// replace the version with the one which suits your need
+//to listen for app life cycle
+    implementation("androidx.lifecycle:lifecycle-process:2.3.1")
+    implementation("androidx.lifecycle:lifecycle-common-java8:2.3.1")
+//to get Google install referrer
+    implementation("com.android.installreferrer:installreferrer:2.2")
+
+    implementation("com.android.billingclient:billing:6.0.1")
 }

@@ -11,6 +11,8 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import com.example.flutter_ads_native.AdsEventStreamHandler
 import com.example.flutter_ads_native.R
+import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
+import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
@@ -35,6 +37,10 @@ class NativeCardView(
         loadNativeAd(context, params)
     }
 
+    val tracker = TikTokAdTracker()
+    var nativeAds: NativeAd? = null
+    var AD_UNIT_ID: String? = null
+
     private fun loadNativeAd(context: Context, params: Map<String, Any>?) {
         val adUnitId = params?.get("adUnitId")?.toString()
             ?: "ca-app-pub-3940256099942544/2247696110" // test id
@@ -44,12 +50,27 @@ class NativeCardView(
             frmAdsLoading.visibility = View.GONE
             frmAdsContent.visibility = View.VISIBLE
             bindNativeAd(nativeAd)
+            TikTokAdMobLogger.bindNativeRevenue(nativeAd, adUnitId, tracker)
+            nativeAds = nativeAd
+            AD_UNIT_ID = adUnitId
         }.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(error: LoadAdError) {
                 val frmNativeRoot = root.findViewById<FrameLayout>(R.id.frmNativeRoot)
 //                frmNativeRoot.removeAllViews()
                 // Notify Flutter that ad failed to load
                 eventHandler.sendEvent("ads_custom_view_failed", mapOf("id" to viewId))
+            }
+            override fun onAdImpression() {
+                // Check null nativeAds and AD_UNIT_ID before logging impression
+                if (nativeAds != null && AD_UNIT_ID != null) {
+                    TikTokAdMobLogger.logNativeImpression(tracker, AD_UNIT_ID!!, nativeAds!!)
+                }
+            }
+
+            override fun onAdClicked() {
+                if (nativeAds != null && AD_UNIT_ID != null) {
+                    TikTokAdMobLogger.logNativeClick(tracker, AD_UNIT_ID!!, nativeAds!!)
+                }
             }
         }).build()
         adLoader.loadAd(AdRequest.Builder().build())

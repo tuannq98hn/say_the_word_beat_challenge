@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Say Word on Beat Challenge</string>
+    <string name="tiktok_app_id">7589941883724496914</string>
+    <string name="tiktok_app_secret">TTNinOTTYdpsOgQ1QUEDuPK2F0C8KwkV</string>
     <string name="facebook_app_id">1812035019497037</string>
     <string name="facebook_client_token">EAAZAwCUeoXk0BQRyN50b6viXwooBDsZANWbxZCurSzWhmLtiKJydK2fJSeY8WZBrkIyZAW82a2cPx0UoD2Rgm3Q5ZB7Yb0LfNZAKg7mdu5W5lBs7QPOGW0wnbev1okSNRyvUK2j0D0upRd4QUKAA4UL6vRqJONQCriM4FY563xLLzE1aYmcVtZC7yP2NqWF3k6nHsMeqBxocswQbJ9qsDfaZA0RVlWc1DniY6IH1gmxSyyA8aZCKphffzCm7bFZCP0h5Bsy0bTm3Pk2b1yiZCFbzMGZAZAr804</string>
 </resources>

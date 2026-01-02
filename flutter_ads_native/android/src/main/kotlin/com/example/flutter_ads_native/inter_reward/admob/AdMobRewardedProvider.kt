@@ -12,6 +12,8 @@ import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
 import com.example.flutter_ads_native.inter_reward.AdLoadCallback
 import com.example.flutter_ads_native.inter_reward.RewardedAdCallback
 import com.example.flutter_ads_native.inter_reward.RewardedAdProvider
+import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
+import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
 
 /**
  * Rewarded implementation using AdMob mediation.
@@ -25,6 +27,8 @@ class AdMobRewardedProvider : RewardedAdProvider {
     // List of ad unit IDs for rotation
     private var adUnitIds: MutableList<String> = mutableListOf()
     private var currentIndex: Int = 0
+
+    val tracker = TikTokAdTracker()
 
     /**
      * Set list of ad unit IDs for rotation
@@ -70,6 +74,7 @@ class AdMobRewardedProvider : RewardedAdProvider {
                     android.util.Log.d("AdMobRewarded", "Rewarded ad loaded successfully")
                     rewardedAd = ad
                     callback?.onAdLoaded()
+                    TikTokAdMobLogger.bindRewardedRevenue(ad, adUnitId, tracker)
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
@@ -109,6 +114,13 @@ class AdMobRewardedProvider : RewardedAdProvider {
                 rewardedAd = null
                 // Try to preload next ad using rotation
                 loadNext(activity.applicationContext, null)
+            }
+
+            override fun onAdImpression() {
+                if(lastAdUnitId != null) TikTokAdMobLogger.logImpression(tracker, lastAdUnitId!!, "REWARDED", ad.responseInfo)
+            }
+            override fun onAdClicked() {
+                if(lastAdUnitId != null) TikTokAdMobLogger.logClick(tracker, lastAdUnitId!!, "REWARDED", ad.responseInfo)
             }
         }
 

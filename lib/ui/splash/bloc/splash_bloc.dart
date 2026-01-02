@@ -37,7 +37,7 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
     await RewardedInterstitialAds.init(
       rewardedInterstitialAdUnitIds: rewardedInterstitialAdUnitIds,
     );
-    emit(state.copyWith(isLoading: false));
+    emit(state.copyWith(isLoading: false, isCompleted: true));
   }
 
   void _handleListenAppEvent(Emitter<SplashState> emit) {
@@ -75,6 +75,6 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
     Emitter<SplashState> emit,
   ) {
     // emit(state.copyWith(isOpenAppSuccess: true));
-    emit(state.copyWith(isCompleted: true));
+    // emit(state.copyWith(isCompleted: true));
   }
 }

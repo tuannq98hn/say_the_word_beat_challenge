@@ -10,7 +10,8 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.appopen.AppOpenAd
-import com.say.word.challenge.say_word_challenge.AppEventStreamHandler
+import com.example.flutter_ads_native.facebook_event.FacebookROASTracker
+import com.facebook.appevents.AppEventsLogger
 
 class AppOpenAdManager(
     private val application: Application
@@ -30,6 +31,7 @@ class AppOpenAdManager(
     private var loadTime = 0L
 
     val tracker = TikTokAdTracker()
+    val facebookEventLogger = AppEventsLogger.newLogger(application)
 
     fun setEventHandler(handler: AppEventStreamHandler) {
         eventHandler = handler
@@ -52,7 +54,8 @@ class AppOpenAdManager(
                     isLoading = false
                     loadTime = System.currentTimeMillis()
                     onAdLoaded?.invoke()
-                    TikTokAdMobLogger.bindAppOpenRevenue(ad, AD_UNIT_ID, tracker)
+                    TikTokAdMobLogger.bindAppOpenRevenue(application, ad, AD_UNIT_ID, tracker)
+                    FacebookROASTracker.bindAppOpenRevenue(application, ad, AD_UNIT_ID, facebookEventLogger)
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
@@ -87,10 +90,37 @@ class AppOpenAdManager(
             }
 
             override fun onAdImpression() {
-                TikTokAdMobLogger.logImpression(tracker, AD_UNIT_ID, "APP_OPEN", appOpenAd?.responseInfo)
+                TikTokAdMobLogger.logImpression(
+                    application,
+                    tracker,
+                    AD_UNIT_ID,
+                    "APP_OPEN",
+                    appOpenAd?.responseInfo
+                )
+                FacebookROASTracker.logImpression(
+                    application,
+                    facebookEventLogger,
+                    AD_UNIT_ID,
+                    "APP_OPEN",
+                    appOpenAd?.responseInfo
+                )
             }
+
             override fun onAdClicked() {
-                TikTokAdMobLogger.logClick(tracker, AD_UNIT_ID, "APP_OPEN", appOpenAd?.responseInfo)
+                TikTokAdMobLogger.logClick(
+                    application,
+                    tracker,
+                    AD_UNIT_ID,
+                    "APP_OPEN",
+                    appOpenAd?.responseInfo
+                )
+                FacebookROASTracker.logClick(
+                    application,
+                    facebookEventLogger,
+                    AD_UNIT_ID,
+                    "APP_OPEN",
+                    appOpenAd?.responseInfo
+                )
             }
         }
 

@@ -23,6 +23,8 @@ import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdView
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
+import com.example.flutter_ads_native.facebook_event.FacebookROASTracker
+import com.facebook.appevents.AppEventsLogger
 
 class NativeCardView(
     context: Context,
@@ -38,6 +40,7 @@ class NativeCardView(
     }
 
     val tracker = TikTokAdTracker()
+    val facebookEventLogger = AppEventsLogger.newLogger(context)
     var nativeAds: NativeAd? = null
     var AD_UNIT_ID: String? = null
 
@@ -50,7 +53,8 @@ class NativeCardView(
             frmAdsLoading.visibility = View.GONE
             frmAdsContent.visibility = View.VISIBLE
             bindNativeAd(nativeAd)
-            TikTokAdMobLogger.bindNativeRevenue(nativeAd, adUnitId, tracker)
+            TikTokAdMobLogger.bindNativeRevenue(context = context, nativeAd, adUnitId, tracker)
+            FacebookROASTracker.bindNativeRevenue(context = context, nativeAd, adUnitId, facebookEventLogger)
             nativeAds = nativeAd
             AD_UNIT_ID = adUnitId
         }.withAdListener(object : AdListener() {
@@ -58,18 +62,44 @@ class NativeCardView(
                 val frmNativeRoot = root.findViewById<FrameLayout>(R.id.frmNativeRoot)
 //                frmNativeRoot.removeAllViews()
                 // Notify Flutter that ad failed to load
-                eventHandler.sendEvent("ads_custom_view_failed", mapOf("id" to viewId))
+                eventHandler.sendEvent(
+                    "ads_custom_view_failed",
+                    mapOf("id" to viewId)
+                )
             }
+
             override fun onAdImpression() {
                 // Check null nativeAds and AD_UNIT_ID before logging impression
                 if (nativeAds != null && AD_UNIT_ID != null) {
-                    TikTokAdMobLogger.logNativeImpression(tracker, AD_UNIT_ID!!, nativeAds!!)
+                    TikTokAdMobLogger.logNativeImpression(
+                        context = context,
+                        tracker,
+                        AD_UNIT_ID!!,
+                        nativeAds!!
+                    )
+                    FacebookROASTracker.logNativeImpression(
+                        context = context,
+                        facebookEventLogger,
+                        AD_UNIT_ID!!,
+                        nativeAds!!
+                    )
                 }
             }
 
             override fun onAdClicked() {
                 if (nativeAds != null && AD_UNIT_ID != null) {
-                    TikTokAdMobLogger.logNativeClick(tracker, AD_UNIT_ID!!, nativeAds!!)
+                    TikTokAdMobLogger.logNativeClick(
+                        context = context,
+                        tracker,
+                        AD_UNIT_ID!!,
+                        nativeAds!!
+                    )
+                    FacebookROASTracker.logNativeClick(
+                        context = context,
+                        facebookEventLogger,
+                        AD_UNIT_ID!!,
+                        nativeAds!!
+                    )
                 }
             }
         }).build()
@@ -106,27 +136,7 @@ class NativeCardView(
             adView.headlineView = title
             adView.bodyView = description
             adView.iconView = icon
-            if (mediaView != null && nativeAd.mediaContent != null) {
-                adView.mediaView = mediaView
-                mediaView.setMediaContent(nativeAd.mediaContent!!)
-                adView.imageView = null
-            } else {
-                adView.mediaView = null
-                adView.imageView = image
-            }
             adView.starRatingView = lnRating
-//            adView.advertiserView = adAdvertiser
-//             Try to find MediaView (may not exist in all layouts)
-//            adAdvertiser.apply {
-//                text = "Ad"
-//                visibility = View.VISIBLE
-//            }
-//            if(isRootLargerThan120dp(root)){
-//                  adView.mediaView = mediaView
-//            }else{
-//                adView.mediaView = null
-//            }
-//            val btnInstall = root.findViewById<FrameLayout>(R.id.btnInstall)
             val loadingMedia = try {
                 root.findViewById<ProgressBar>(R.id.loadingMedia)
             } catch (err: Exception) {
@@ -170,6 +180,9 @@ class NativeCardView(
                 }
             }
             if (mediaView != null && nativeAd.mediaContent?.hasVideoContent() == true) {
+                adView.mediaView = mediaView
+                mediaView.setMediaContent(nativeAd.mediaContent!!)
+                adView.imageView = null
                 nativeAd.mediaContent!!.videoController.videoLifecycleCallbacks =
                     object : VideoController.VideoLifecycleCallbacks() {
                         override fun onVideoPlay() {
@@ -183,6 +196,8 @@ class NativeCardView(
                         }
                     }
             } else {
+                adView.mediaView = null
+                adView.imageView = image
                 loadingMedia?.visibility = View.GONE
                 image?.visibility = View.VISIBLE
                 val images = nativeAd.images
@@ -191,38 +206,6 @@ class NativeCardView(
                     image?.setImageDrawable(drawable)
                 }
             }
-//            mediaView?.let { mediaView ->
-//                nativeAd.mediaContent?.let {
-//                    if (it.hasVideoContent()) {
-//
-//                    } else {
-//
-//                    }
-//                }
-//            }
-
-//            image.visibility = View.VISIBLE
-//            val images = nativeAd.images
-//            if (images.isNotEmpty()) {
-//                val drawable = images[0].drawable
-//                image.setImageDrawable(drawable)
-//            }
-            // Bind MediaView or fallback to ImageView
-//            if (mediaView != null && nativeAd.mediaContent != null) {
-//                // Use MediaView for video/image content
-//                mediaView.mediaContent = nativeAd.mediaContent!!
-//                mediaView.visibility = View.VISIBLE
-//                image.visibility = View.GONE
-//            } else {
-//                // Fallback to ImageView if MediaView not available or no media content
-//                mediaView?.visibility = View.GONE
-//                image.visibility = View.VISIBLE
-//                val images = nativeAd.images
-//                if (images.isNotEmpty()) {
-//                    val drawable = images[0].drawable
-//                    image.setImageDrawable(drawable)
-//                }
-//            }
 
             // CALL TO ACTION BUTTON
             val installText = root.findViewById<TextView>(R.id.install_text)

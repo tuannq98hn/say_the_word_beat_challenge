@@ -8,13 +8,10 @@ import android.os.Looper
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.example.flutter_ads_native.inter_reward.admob.AdMobAdsInitializer
 import com.example.flutter_ads_native.NativeAdsApplication
 //import com.facebook.FacebookSdk
 //import com.facebook.appevents.AppEventsLogger
 import com.google.android.gms.ads.MobileAds
-import com.tiktok.TikTokBusinessSdk
-import com.tiktok.TikTokBusinessSdk.TTConfig
 import com.tiktok.appevents.base.EventName
 
 
@@ -27,10 +24,6 @@ class App : NativeAdsApplication(), Application.ActivityLifecycleCallbacks, Defa
 
     override fun onCreate() {
         super<NativeAdsApplication>.onCreate()
-        MobileAds.initialize(this)
-        AdMobAdsInitializer.init(this)
-//        FacebookSdk.sdkInitialize(applicationContext)
-//        AppEventsLogger.activateApp(this)
         openAdManager = AppOpenAdManager(this)
         openAdManager.loadAd {
             Handler(Looper.getMainLooper()).postDelayed({
@@ -45,27 +38,6 @@ class App : NativeAdsApplication(), Application.ActivityLifecycleCallbacks, Defa
 
         registerActivityLifecycleCallbacks(this)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
-
-        val accessToken = getString(R.string.tiktok_app_secret)
-        val appId = applicationContext.packageName
-        val tiktokAppId = getString(R.string.tiktok_app_id)
-
-        val ttConfig = TTConfig(applicationContext, accessToken)
-            .setAppId(appId)
-            .setTTAppId(tiktokAppId)
-
-        TikTokBusinessSdk.initializeSdk(ttConfig, object : TikTokBusinessSdk.TTInitCallback {
-            override fun success() {
-            }
-
-            override fun fail(code: Int, msg: String) {
-            }
-        })
-
-        TikTokBusinessSdk.startTrack()
-
-        TikTokBusinessSdk.trackTTEvent(EventName.LAUNCH_APP);
-
     }
 
     override fun onActivityResumed(activity: Activity) {

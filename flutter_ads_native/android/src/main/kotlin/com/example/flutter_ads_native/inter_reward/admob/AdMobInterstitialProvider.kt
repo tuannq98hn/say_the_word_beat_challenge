@@ -2,19 +2,20 @@ package com.example.flutter_ads_native.inter_reward.admob
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
-import com.google.android.gms.ads.AdError
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.FullScreenContentCallback
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import com.example.flutter_ads_native.facebook_event.FacebookROASTracker
 import com.example.flutter_ads_native.inter_reward.AdLoadCallback
 import com.example.flutter_ads_native.inter_reward.AdsConfig
 import com.example.flutter_ads_native.inter_reward.InterstitialAdCallback
 import com.example.flutter_ads_native.inter_reward.InterstitialAdProvider
 import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
 import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
+import com.facebook.appevents.AppEventsLogger
+import com.google.android.gms.ads.AdError
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.FullScreenContentCallback
+import com.google.android.gms.ads.LoadAdError
+import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 
 /**
  * Interstitial implementation using AdMob mediation.
@@ -27,7 +28,7 @@ class AdMobInterstitialProvider : InterstitialAdProvider {
 
     private var interstitialAd: InterstitialAd? = null
     private var lastAdUnitId: String? = null
-    
+
     // List of ad unit IDs for rotation
     private var adUnitIds: MutableList<String> = mutableListOf()
     private var currentIndex: Int = 0
@@ -57,14 +58,14 @@ class AdMobInterstitialProvider : InterstitialAdProvider {
 
         val adUnitId = adUnitIds[currentIndex]
         load(context, adUnitId, callback)
-        
+
         // Rotate to next index for next load
         currentIndex = (currentIndex + 1) % adUnitIds.size
     }
 
     override fun load(context: Context, adUnitId: String, callback: AdLoadCallback?) {
         lastAdUnitId = adUnitId
-
+        val facebookEventLogger = AppEventsLogger.newLogger(context)
         val adRequest = AdRequest.Builder().build()
 
         InterstitialAd.load(
@@ -75,7 +76,18 @@ class AdMobInterstitialProvider : InterstitialAdProvider {
                 override fun onAdLoaded(ad: InterstitialAd) {
                     interstitialAd = ad
                     callback?.onAdLoaded()
-                    TikTokAdMobLogger.bindInterstitialRevenue(ad, adUnitId, tracker)
+                    TikTokAdMobLogger.bindInterstitialRevenue(
+                        context = context,
+                        ad,
+                        adUnitId,
+                        tracker
+                    )
+                    FacebookROASTracker.bindInterstitialRevenue(
+                        context = context,
+                        ad,
+                        adUnitId,
+                        facebookEventLogger
+                    )
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
@@ -115,10 +127,45 @@ class AdMobInterstitialProvider : InterstitialAdProvider {
             }
 
             override fun onAdImpression() {
-                if(lastAdUnitId != null) TikTokAdMobLogger.logImpression(tracker, lastAdUnitId!!, "INTERSTITIAL", ad.responseInfo)
+                if (lastAdUnitId != null) {
+                    val facebookEventLogger = AppEventsLogger.newLogger(activity)
+                    TikTokAdMobLogger.logImpression(
+                        context = activity,
+                        tracker,
+                        lastAdUnitId!!,
+                        "INTERSTITIAL",
+                        ad.responseInfo
+                    )
+
+                    FacebookROASTracker.logImpression(
+                        context = activity,
+                        facebookEventLogger,
+                        lastAdUnitId!!,
+                        "INTERSTITIAL",
+                        ad.responseInfo
+                    )
+
+                }
             }
+
             override fun onAdClicked() {
-                if(lastAdUnitId != null) TikTokAdMobLogger.logClick(tracker, lastAdUnitId!!, "INTERSTITIAL", ad.responseInfo)
+                if (lastAdUnitId != null) {
+                    val facebookEventLogger = AppEventsLogger.newLogger(activity)
+                    TikTokAdMobLogger.logClick(
+                        context = activity,
+                        tracker,
+                        lastAdUnitId!!,
+                        "INTERSTITIAL",
+                        ad.responseInfo
+                    )
+                    FacebookROASTracker.logClick(
+                        context = activity,
+                        facebookEventLogger,
+                        lastAdUnitId!!,
+                        "INTERSTITIAL",
+                        ad.responseInfo
+                    )
+                }
             }
         }
 

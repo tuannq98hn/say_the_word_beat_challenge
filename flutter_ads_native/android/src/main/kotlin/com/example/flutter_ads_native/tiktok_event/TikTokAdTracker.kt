@@ -1,5 +1,7 @@
 package com.example.flutter_ads_native.tiktok_event
 
+import android.content.Context
+import android.content.pm.PackageManager
 import com.google.android.gms.ads.AdValue
 import com.tiktok.TikTokBusinessSdk
 import com.tiktok.appevents.base.TTBaseEvent
@@ -19,7 +21,31 @@ class TikTokAdTracker(
     private val E_IMP = EventName.IN_APP_AD_IMPR.toString()
     private val E_CLICK = EventName.IN_APP_AD_CLICK.toString()
     private val E_REV = EventName.IMPRESSION_LEVEL_AD_REVENUE.toString()
+    private var checked = false
+    private var enabled = false
 
+    fun isEnabled(context: Context): Boolean {
+        if (checked) return enabled
+
+        enabled = try {
+            val appInfo = context.packageManager.getApplicationInfo(
+                context.packageName,
+                PackageManager.GET_META_DATA
+            )
+
+            val accessToken =
+                appInfo.metaData?.getString("com.tiktok.sdk.AccessToken")
+            val appId =
+                appInfo.metaData?.getString("com.tiktok.sdk.AppId")
+
+            !accessToken.isNullOrBlank() && !appId.isNullOrBlank()
+        } catch (e: Exception) {
+            false
+        }
+
+        checked = true
+        return enabled
+    }
     fun trackImpression(meta: AdMobAdMeta, extraProps: Map<String, Any> = emptyMap()) {
         trackBase(E_IMP, meta, extraProps)
     }

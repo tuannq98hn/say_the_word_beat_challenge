@@ -15,6 +15,8 @@ import com.example.flutter_ads_native.inter_reward.RewardedInterstitialAdCallbac
 import com.example.flutter_ads_native.inter_reward.RewardedInterstitialAdProvider
 import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
 import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
+import com.facebook.appevents.AppEventsLogger
+import com.example.flutter_ads_native.facebook_event.FacebookROASTracker
 
 /**
  * Rewarded Interstitial implementation using AdMob mediation.
@@ -75,7 +77,9 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
                     android.util.Log.d("AdMobRewardedInterstitial", "Rewarded interstitial ad loaded successfully")
                     rewardedInterstitialAd = ad
                     callback?.onAdLoaded()
-                    TikTokAdMobLogger.bindRewardedInterstitialRevenue(ad, adUnitId, tracker)
+                    val facebookEventLogger = AppEventsLogger.newLogger(context)
+                    TikTokAdMobLogger.bindRewardedInterstitialRevenue(context,ad, adUnitId, tracker)
+                    FacebookROASTracker.bindRewardedInterstitialRevenue(context,ad, adUnitId, facebookEventLogger)
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
@@ -117,10 +121,42 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
             }
 
             override fun onAdImpression() {
-                if(lastAdUnitId != null) TikTokAdMobLogger.logImpression(tracker, lastAdUnitId!!, "INTERSTITIAL_REWARDED", ad.responseInfo)
+                if(lastAdUnitId != null) {
+                    val facebookEventLogger = AppEventsLogger.newLogger(activity)
+                    TikTokAdMobLogger.logImpression(
+                        activity,
+                        tracker,
+                        lastAdUnitId!!,
+                        "INTERSTITIAL_REWARDED",
+                        ad.responseInfo
+                    )
+                    FacebookROASTracker.logImpression(
+                        activity,
+                        facebookEventLogger,
+                        lastAdUnitId!!,
+                        "INTERSTITIAL_REWARDED",
+                        ad.responseInfo
+                    )
+                }
             }
             override fun onAdClicked() {
-                if(lastAdUnitId != null) TikTokAdMobLogger.logClick(tracker, lastAdUnitId!!, "INTERSTITIAL_REWARDED", ad.responseInfo)
+                if(lastAdUnitId != null) {
+                    val facebookEventLogger = AppEventsLogger.newLogger(activity)
+                    TikTokAdMobLogger.logClick(
+                        activity,
+                        tracker,
+                        lastAdUnitId!!,
+                        "INTERSTITIAL_REWARDED",
+                        ad.responseInfo
+                    )
+                    FacebookROASTracker.logClick(
+                        activity,
+                        facebookEventLogger,
+                        lastAdUnitId!!,
+                        "INTERSTITIAL_REWARDED",
+                        ad.responseInfo
+                    )
+                }
             }
         }
 

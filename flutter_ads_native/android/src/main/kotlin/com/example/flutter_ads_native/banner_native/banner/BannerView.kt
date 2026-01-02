@@ -5,8 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import com.example.flutter_ads_native.R
+import com.example.flutter_ads_native.facebook_event.FacebookROASTracker
 import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
 import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
+import com.facebook.appevents.AppEventsLogger
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdSize
@@ -16,12 +18,12 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
 
 class BannerView(
-    private val context: Context, 
-    private val viewId: Int, 
+    private val context: Context,
+    private val viewId: Int,
     private val params: Map<String, Any>?,
     private val channel: MethodChannel
 ) : PlatformView {
-    
+
     private val root: View =
         LayoutInflater.from(context).inflate(R.layout.banner_layout, null, false)
     private lateinit var adView: AdView
@@ -34,6 +36,7 @@ class BannerView(
     }
 
     val tracker = TikTokAdTracker()
+    val facebookEventLogger = AppEventsLogger.newLogger(context)
 
     init {
         loadBanner()
@@ -51,21 +54,45 @@ class BannerView(
             ?: "ca-app-pub-3940256099942544/6300978111"
 
         val request = AdRequest.Builder().build()
-        TikTokAdMobLogger.bindBannerRevenue(adView, ad_unit_id, tracker)
+        TikTokAdMobLogger.bindBannerRevenue(context = context, adView, ad_unit_id, tracker)
+        FacebookROASTracker.bindBannerRevenue(
+            context = context,
+            adView,
+            ad_unit_id,
+            facebookEventLogger
+        )
         adView.loadAd(request)
         adView.adListener = object : AdListener() {
             override fun onAdImpression() {
                 TikTokAdMobLogger.logImpression(
+                    context = context,
                     tracker = tracker,
                     adUnitId = ad_unit_id,
                     format = "BANNER",
                     responseInfo = adView.responseInfo
                 )
+
+                FacebookROASTracker.logImpression(
+                    context = context,
+                    logger = facebookEventLogger,
+                    adUnitId = ad_unit_id,
+                    format = "BANNER",
+                    responseInfo = adView.responseInfo
+                )
+
             }
 
             override fun onAdClicked() {
                 TikTokAdMobLogger.logClick(
+                    context = context,
                     tracker = tracker,
+                    adUnitId = ad_unit_id,
+                    format = "BANNER",
+                    responseInfo = adView.responseInfo
+                )
+                FacebookROASTracker.logClick(
+                    context = context,
+                    logger = facebookEventLogger,
                     adUnitId = ad_unit_id,
                     format = "BANNER",
                     responseInfo = adView.responseInfo

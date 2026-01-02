@@ -2,6 +2,13 @@ package com.example.flutter_ads_native.inter_reward.admob
 
 import android.app.Activity
 import android.content.Context
+import com.example.flutter_ads_native.facebook_event.FacebookROASTracker
+import com.example.flutter_ads_native.inter_reward.AdLoadCallback
+import com.example.flutter_ads_native.inter_reward.RewardedAdCallback
+import com.example.flutter_ads_native.inter_reward.RewardedAdProvider
+import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
+import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
+import com.facebook.appevents.AppEventsLogger
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -9,11 +16,6 @@ import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.rewarded.RewardItem
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback
-import com.example.flutter_ads_native.inter_reward.AdLoadCallback
-import com.example.flutter_ads_native.inter_reward.RewardedAdCallback
-import com.example.flutter_ads_native.inter_reward.RewardedAdProvider
-import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
-import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
 
 /**
  * Rewarded implementation using AdMob mediation.
@@ -23,7 +25,7 @@ class AdMobRewardedProvider : RewardedAdProvider {
 
     private var rewardedAd: RewardedAd? = null
     private var lastAdUnitId: String? = null
-    
+
     // List of ad unit IDs for rotation
     private var adUnitIds: MutableList<String> = mutableListOf()
     private var currentIndex: Int = 0
@@ -47,13 +49,17 @@ class AdMobRewardedProvider : RewardedAdProvider {
     fun loadNext(context: Context, callback: AdLoadCallback?) {
         if (adUnitIds.isEmpty()) {
             // Fallback to default if no rotation IDs set
-            load(context, com.example.flutter_ads_native.inter_reward.AdsConfig.REWARDED_ADMOB, callback)
+            load(
+                context,
+                com.example.flutter_ads_native.inter_reward.AdsConfig.REWARDED_ADMOB,
+                callback
+            )
             return
         }
 
         val adUnitId = adUnitIds[currentIndex]
         load(context, adUnitId, callback)
-        
+
         // Rotate to next index for next load
         currentIndex = (currentIndex + 1) % adUnitIds.size
     }
@@ -62,30 +68,38 @@ class AdMobRewardedProvider : RewardedAdProvider {
         lastAdUnitId = adUnitId
 
         android.util.Log.d("AdMobRewarded", "Loading rewarded ad with unit ID: $adUnitId")
-        
+
         val adRequest = AdRequest.Builder().build()
 
         RewardedAd.load(
-            context,
-            adUnitId,
-            adRequest,
-            object : RewardedAdLoadCallback() {
+            context, adUnitId, adRequest, object : RewardedAdLoadCallback() {
                 override fun onAdLoaded(ad: RewardedAd) {
                     android.util.Log.d("AdMobRewarded", "Rewarded ad loaded successfully")
                     rewardedAd = ad
                     callback?.onAdLoaded()
-                    TikTokAdMobLogger.bindRewardedRevenue(ad, adUnitId, tracker)
+                    val facebookEventLogger = AppEventsLogger.newLogger(context)
+                    TikTokAdMobLogger.bindRewardedRevenue(context, ad, adUnitId, tracker)
+                    FacebookROASTracker.bindRewardedRevenue(
+                        context,
+                        ad,
+                        adUnitId,
+                        facebookEventLogger
+                    )
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
-                    android.util.Log.e("AdMobRewarded", "Rewarded ad failed to load: ${error.code} - ${error.message}")
-                    android.util.Log.e("AdMobRewarded", "Error domain: ${error.domain}, cause: ${error.cause}")
+                    android.util.Log.e(
+                        "AdMobRewarded",
+                        "Rewarded ad failed to load: ${error.code} - ${error.message}"
+                    )
+                    android.util.Log.e(
+                        "AdMobRewarded", "Error domain: ${error.domain}, cause: ${error.cause}"
+                    )
                     rewardedAd = null
                     val errorMessage = "Error ${error.code}: ${error.message}"
                     callback?.onAdFailedToLoad(errorMessage)
                 }
-            }
-        )
+            })
     }
 
     override fun show(activity: Activity, callback: RewardedAdCallback?) {
@@ -117,10 +131,27 @@ class AdMobRewardedProvider : RewardedAdProvider {
             }
 
             override fun onAdImpression() {
-                if(lastAdUnitId != null) TikTokAdMobLogger.logImpression(tracker, lastAdUnitId!!, "REWARDED", ad.responseInfo)
+                if (lastAdUnitId != null) {
+                    TikTokAdMobLogger.logImpression(
+                        activity, tracker, lastAdUnitId!!, "REWARDED", ad.responseInfo
+                    )
+                    val facebookEventLogger = AppEventsLogger.newLogger(activity)
+                    FacebookROASTracker.logImpression(
+                        activity, facebookEventLogger, lastAdUnitId!!, "REWARDED", ad.responseInfo
+                    )
+                }
             }
+
             override fun onAdClicked() {
-                if(lastAdUnitId != null) TikTokAdMobLogger.logClick(tracker, lastAdUnitId!!, "REWARDED", ad.responseInfo)
+                if (lastAdUnitId != null) {
+                    val facebookEventLogger = AppEventsLogger.newLogger(activity)
+                    TikTokAdMobLogger.logClick(
+                        activity, tracker, lastAdUnitId!!, "REWARDED", ad.responseInfo
+                    )
+                    FacebookROASTracker.logClick(
+                        activity, facebookEventLogger, lastAdUnitId!!, "REWARDED", ad.responseInfo
+                    )
+                }
             }
         }
 

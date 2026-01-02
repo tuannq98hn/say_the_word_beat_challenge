@@ -79,14 +79,22 @@ class NativeCardView(
             } catch (err: Exception) {
                 null
             }
-//            val adAdvertiser = root.findViewById<TextView>(R.id.adLabel)
-            adView.callToActionView = root.findViewById(R.id.btnInstall)
+            val cta = root.findViewById<FrameLayout>(R.id.btnInstall)
+            cta.isClickable = true
+            cta.isFocusable = true
+            cta.isEnabled = true
+            adView.callToActionView = cta
             adView.adChoicesView = root.findViewById(R.id.adChoicesView)
             adView.headlineView = title
             adView.bodyView = description
             adView.iconView = icon
-            adView.imageView = image
-            adView.mediaView = mediaView
+            if (mediaView != null && nativeAd.mediaContent != null) {
+                adView.mediaView = mediaView
+                adView.imageView = null
+            } else {
+                adView.mediaView = null
+                adView.imageView = image
+            }
             adView.starRatingView = lnRating
 //            adView.advertiserView = adAdvertiser
 //             Try to find MediaView (may not exist in all layouts)
@@ -155,7 +163,6 @@ class NativeCardView(
                             loadingMedia?.visibility = View.GONE
                         }
                     }
-                nativeAd.mediaContent!!.videoController.play()
             } else {
                 loadingMedia?.visibility = View.GONE
                 image?.visibility = View.VISIBLE

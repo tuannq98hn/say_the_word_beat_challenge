@@ -8,6 +8,7 @@ import android.os.Looper
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.example.flutter_ads_native.NativeAdsApplication
 //import com.facebook.FacebookSdk
 //import com.facebook.appevents.AppEventsLogger
 import com.google.android.gms.ads.MobileAds
@@ -17,7 +18,7 @@ import com.google.android.gms.ads.MobileAds
 //import com.tiktok.appevents.base.EventName
 
 
-class App : Application(), Application.ActivityLifecycleCallbacks, DefaultLifecycleObserver {
+class App : NativeAdsApplication(), Application.ActivityLifecycleCallbacks, DefaultLifecycleObserver {
 
     lateinit var openAdManager: AppOpenAdManager
     private var currentActivity: Activity? = null
@@ -25,7 +26,7 @@ class App : Application(), Application.ActivityLifecycleCallbacks, DefaultLifecy
     private var hasShownAdOnStartup = false
 
     override fun onCreate() {
-        super<Application>.onCreate()
+        super<NativeAdsApplication>.onCreate()
         MobileAds.initialize(this)
 //        AdMobAdsInitializer.init(this)
 //        FacebookSdk.sdkInitialize(applicationContext)

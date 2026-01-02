@@ -143,7 +143,7 @@ class _PreGameSettingsPageState extends State<PreGameSettingsPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,11 +188,11 @@ class _PreGameSettingsPageState extends State<PreGameSettingsPage> {
                   });
                 },
               ),
-              const Spacer(),
               if (RemoteConfigService.instance.configAdsDataByScreen(
                     "PreGameSettingsPage",
                   ) !=
                   null) ...[
+                const SizedBox(height: 12),
                 RemoteConfigService.instance.configAdsByScreen(
                   "PreGameSettingsPage",
                 )!,

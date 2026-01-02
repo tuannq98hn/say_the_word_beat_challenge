@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ads_native/index.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+import 'package:say_word_challenge/data/model/ads_model.dart';
 import 'package:say_word_challenge/services/interstitial_ads_controller.dart';
 import 'package:say_word_challenge/services/remote_config_service.dart';
+import 'package:say_word_challenge/services/rewarded_interstitial_ads_controller.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../bloc/game_over_bloc.dart';
@@ -170,25 +172,25 @@ class _GameOverPageState extends State<GameOverPage> {
   static Future<void> _handleShowInter({
     required void Function() onDone,
   }) async {
-    final origin_onInterstitialClosed = InterstitialAds.onInterstitialClosed;
-    final origin_onInterstitialFailed = InterstitialAds.onInterstitialFailed;
-    final origin_onInterstitialShown = InterstitialAds.onInterstitialShown;
-    InterstitialAds.onInterstitialClosed = () {
-      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
+    final origin_onInterstitialClosed = RewardedInterstitialAds.onRewardedInterstitialClosed;
+    final origin_onInterstitialFailed = RewardedInterstitialAds.onRewardedInterstitialFailed;
+    final origin_onInterstitialShown = RewardedInterstitialAds.onRewardedInterstitialShown;
+    RewardedInterstitialAds.onRewardedInterstitialClosed = () {
+      RewardedInterstitialAds.onRewardedInterstitialClosed = origin_onInterstitialClosed;
       onDone();
     };
-    InterstitialAds.onInterstitialFailed = (_) {
-      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
+    RewardedInterstitialAds.onRewardedInterstitialFailed = (_) {
+      RewardedInterstitialAds.onRewardedInterstitialFailed = origin_onInterstitialFailed;
       onDone();
     };
-    InterstitialAds.onInterstitialShown = () {
-      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+    RewardedInterstitialAds.onRewardedInterstitialShown = () {
+      RewardedInterstitialAds.onRewardedInterstitialShown = origin_onInterstitialShown;
       // todo show native full screen ==> check policy
     };
-    if (!await InterstitialAdsController.instance.showInterstitialAd()) {
-      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
-      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
-      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+    if (!await RewardedInterstitialAdsController.instance.showRewardedInterstitialAd()) {
+      RewardedInterstitialAds.onRewardedInterstitialClosed = origin_onInterstitialClosed;
+      RewardedInterstitialAds.onRewardedInterstitialFailed = origin_onInterstitialFailed;
+      RewardedInterstitialAds.onRewardedInterstitialShown = origin_onInterstitialShown;
       onDone();
     }
   }

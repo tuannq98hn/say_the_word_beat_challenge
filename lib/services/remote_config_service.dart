@@ -172,8 +172,8 @@ class RemoteConfigService {
       "showRateTime": 15,
       "interMaxPerSession": 100,
       "interMinSecondsBetween": 10,
-      "interMaxPerDay": 300,
-      "interMinActionBetween": 1,
+      "interMaxPerDay": 20,
+      "interMinActionBetween": 3,
     },
     "reward": {
       "adUnitIds": [

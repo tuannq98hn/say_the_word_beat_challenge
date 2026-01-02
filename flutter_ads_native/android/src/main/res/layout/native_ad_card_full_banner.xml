@@ -188,7 +188,7 @@
             android:layout_height="24dp"
             android:layout_gravity="top|start"
             android:layout_marginStart="30dp"
-            android:elevation="4dp" />
+            android:elevation="20dp" />
 
         <TextView
             android:id="@+id/adLabel"

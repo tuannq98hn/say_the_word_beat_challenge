@@ -101,9 +101,6 @@ class NativeCardView(
                 null
             }
             val cta = root.findViewById<FrameLayout>(R.id.btnInstall)
-            cta.isClickable = true
-            cta.isFocusable = true
-            cta.isEnabled = true
             adView.callToActionView = cta
             adView.adChoicesView = root.findViewById(R.id.adChoicesView)
             adView.headlineView = title
@@ -111,6 +108,7 @@ class NativeCardView(
             adView.iconView = icon
             if (mediaView != null && nativeAd.mediaContent != null) {
                 adView.mediaView = mediaView
+                mediaView.setMediaContent(nativeAd.mediaContent!!)
                 adView.imageView = null
             } else {
                 adView.mediaView = null

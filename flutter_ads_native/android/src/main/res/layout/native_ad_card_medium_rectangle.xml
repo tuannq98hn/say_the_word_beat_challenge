@@ -233,7 +233,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="top|end"
-            android:elevation="4dp" />
+            android:elevation="20dp" />
     </FrameLayout>
 
 </com.google.android.gms.ads.nativead.NativeAdView>

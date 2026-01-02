@@ -1,119 +1,84 @@
 package com.example.flutter_ads_native.tiktok_event
 
-import com.google.android.gms.ads.*
+import com.google.android.gms.ads.AdListener
+import com.google.android.gms.ads.AdView
+import com.google.android.gms.ads.ResponseInfo
 import com.google.android.gms.ads.appopen.AppOpenAd
 import com.google.android.gms.ads.interstitial.InterstitialAd
+import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.rewarded.RewardedAd
 import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd
-import com.google.android.gms.ads.nativead.NativeAd
 
 object TikTokAdMobLogger {
 
-    private const val E_IMP = "InAppADImpr"
-    private const val E_CLICK = "InAppADClick"
-    private const val E_REV = "ImpressionLevelAdRevenue"
+    // ---------- Manual IMP / CLICK (you call yourself) ----------
 
-    // -------- Full-screen formats --------
+    fun logImpression(tracker: TikTokAdTracker, adUnitId: String, format: String, responseInfo: ResponseInfo?) {
+        val meta = AdMobAdMeta.fromResponseInfo(adUnitId, format, responseInfo)
+        tracker.trackImpression(meta)
+    }
 
-    fun bindInterstitial(ad: InterstitialAd, adUnitId: String, tracker: TikTokAdTracker) {
-        val meta = AdMobMetaExtractor.fromResponseInfo(adUnitId, "INTERSTITIAL", ad.responseInfo)
+    fun logClick(tracker: TikTokAdTracker, adUnitId: String, format: String, responseInfo: ResponseInfo?) {
+        val meta = AdMobAdMeta.fromResponseInfo(adUnitId, format, responseInfo)
+        tracker.trackClick(meta)
+    }
 
-        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdImpression() = tracker.track(E_IMP, meta)
-            override fun onAdClicked() = tracker.track(E_CLICK, meta)
-        }
+    fun logNativeImpression(tracker: TikTokAdTracker, adUnitId: String, nativeAd: NativeAd) {
+        val meta = AdMobAdMeta.fromResponseInfo(adUnitId, "NATIVE", nativeAd.responseInfo)
+        tracker.trackImpression(meta)
+    }
 
-        ad.setOnPaidEventListener { adValue ->
-            val revenueProps = AdMobMetaExtractor.adValueToRevenueProps(adValue)
-            tracker.track(E_REV, meta, revenueProps)
+    fun logNativeClick(tracker: TikTokAdTracker, adUnitId: String, nativeAd: NativeAd) {
+        val meta = AdMobAdMeta.fromResponseInfo(adUnitId, "NATIVE", nativeAd.responseInfo)
+        tracker.trackClick(meta)
+    }
+
+    // ---------- Bind ONLY Revenue (ILRD) ----------
+
+    fun bindInterstitialRevenue(ad: InterstitialAd, adUnitId: String, tracker: TikTokAdTracker) {
+        val meta = AdMobAdMeta.fromResponseInfo(adUnitId, "INTERSTITIAL", ad.responseInfo)
+        ad.setOnPaidEventListener { adValue -> tracker.trackRevenue(meta, adValue) }
+    }
+
+    fun bindRewardedRevenue(ad: RewardedAd, adUnitId: String, tracker: TikTokAdTracker) {
+        val meta = AdMobAdMeta.fromResponseInfo(adUnitId, "REWARDED", ad.responseInfo)
+        ad.setOnPaidEventListener { adValue -> tracker.trackRevenue(meta, adValue) }
+    }
+
+    fun bindRewardedInterstitialRevenue(ad: RewardedInterstitialAd, adUnitId: String, tracker: TikTokAdTracker) {
+        val meta = AdMobAdMeta.fromResponseInfo(adUnitId, "REWARDED_INTERSTITIAL", ad.responseInfo)
+        ad.setOnPaidEventListener { adValue -> tracker.trackRevenue(meta, adValue) }
+    }
+
+    fun bindAppOpenRevenue(ad: AppOpenAd, adUnitId: String, tracker: TikTokAdTracker) {
+        val meta = AdMobAdMeta.fromResponseInfo(adUnitId, "APP_OPEN", ad.responseInfo)
+        ad.setOnPaidEventListener { adValue -> tracker.trackRevenue(meta, adValue) }
+    }
+
+    fun bindBannerRevenue(adView: AdView, adUnitId: String, tracker: TikTokAdTracker) {
+        // Revenue uses responseInfo at paid time
+        adView.setOnPaidEventListener { adValue ->
+            val meta = AdMobAdMeta.fromResponseInfo(adUnitId, "BANNER", adView.responseInfo)
+            tracker.trackRevenue(meta, adValue)
         }
     }
 
-    fun bindRewarded(ad: RewardedAd, adUnitId: String, tracker: TikTokAdTracker) {
-        val meta = AdMobMetaExtractor.fromResponseInfo(adUnitId, "REWARDED", ad.responseInfo)
-
-        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdImpression() = tracker.track(E_IMP, meta)
-            override fun onAdClicked() = tracker.track(E_CLICK, meta)
-        }
-
-        ad.setOnPaidEventListener { adValue ->
-            val revenueProps = AdMobMetaExtractor.adValueToRevenueProps(adValue)
-            tracker.track(E_REV, meta, revenueProps)
-        }
+    fun bindNativeRevenue(nativeAd: NativeAd, adUnitId: String, tracker: TikTokAdTracker) {
+        val meta = AdMobAdMeta.fromResponseInfo(adUnitId, "NATIVE", nativeAd.responseInfo)
+        nativeAd.setOnPaidEventListener { adValue -> tracker.trackRevenue(meta, adValue) }
     }
 
-    fun bindRewardedInterstitial(ad: RewardedInterstitialAd, adUnitId: String, tracker: TikTokAdTracker) {
-        val meta = AdMobMetaExtractor.fromResponseInfo(adUnitId, "INTERSTITIAL_REWARDED", ad.responseInfo)
+    // ---------- Optional helpers for Banner/Naitve listeners ----------
 
-        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdImpression() = tracker.track(E_IMP, meta)
-            override fun onAdClicked() = tracker.track(E_CLICK, meta)
-        }
-
-        ad.setOnPaidEventListener { adValue ->
-            val revenueProps = AdMobMetaExtractor.adValueToRevenueProps(adValue)
-            tracker.track(E_REV, meta, revenueProps)
-        }
-    }
-
-    fun bindAppOpen(ad: AppOpenAd, adUnitId: String, tracker: TikTokAdTracker) {
-        val meta = AdMobMetaExtractor.fromResponseInfo(adUnitId, "APP_OPEN", ad.responseInfo)
-
-        ad.fullScreenContentCallback = object : FullScreenContentCallback() {
-            override fun onAdImpression() = tracker.track(E_IMP, meta)
-            override fun onAdClicked() = tracker.track(E_CLICK, meta)
-        }
-
-        ad.setOnPaidEventListener { adValue ->
-            val revenueProps = AdMobMetaExtractor.adValueToRevenueProps(adValue)
-            tracker.track(E_REV, meta, revenueProps)
-        }
-    }
-
-    // -------- Banner --------
-
-    fun bindBanner(adView: AdView, adUnitId: String, tracker: TikTokAdTracker) {
+    fun attachBannerListenerForImpClick(adView: AdView, adUnitId: String, tracker: TikTokAdTracker) {
         adView.adListener = object : AdListener() {
             override fun onAdImpression() {
-                val meta = AdMobMetaExtractor.fromResponseInfo(adUnitId, "BANNER", adView.responseInfo)
-                tracker.track(E_IMP, meta)
+                logImpression(tracker, adUnitId, "BANNER", adView.responseInfo)
             }
 
             override fun onAdClicked() {
-                val meta = AdMobMetaExtractor.fromResponseInfo(adUnitId, "BANNER", adView.responseInfo)
-                tracker.track(E_CLICK, meta)
+                logClick(tracker, adUnitId, "BANNER", adView.responseInfo)
             }
         }
-
-        adView.setOnPaidEventListener { adValue ->
-            val meta = AdMobMetaExtractor.fromResponseInfo(adUnitId, "BANNER", adView.responseInfo)
-            val revenueProps = AdMobMetaExtractor.adValueToRevenueProps(adValue)
-            tracker.track(E_REV, meta, revenueProps)
-        }
-    }
-
-    // -------- Native --------
-    /**
-     * Native thường lấy click/impression qua AdListener của AdLoader,
-     * còn revenue lấy từ NativeAd.setOnPaidEventListener.
-     */
-    fun bindNative(nativeAd: NativeAd, adUnitId: String, tracker: TikTokAdTracker) {
-        nativeAd.setOnPaidEventListener { adValue ->
-            val meta = AdMobMetaExtractor.fromResponseInfo(adUnitId, "NATIVE", nativeAd.responseInfo)
-            val revenueProps = AdMobMetaExtractor.adValueToRevenueProps(adValue)
-            tracker.track(E_REV, meta, revenueProps)
-        }
-    }
-
-    fun onNativeImpressionFromAdLoader(nativeAd: NativeAd, adUnitId: String, tracker: TikTokAdTracker) {
-        val meta = AdMobMetaExtractor.fromResponseInfo(adUnitId, "NATIVE", nativeAd.responseInfo)
-        tracker.track(E_IMP, meta)
-    }
-
-    fun onNativeClickFromAdLoader(nativeAd: NativeAd, adUnitId: String, tracker: TikTokAdTracker) {
-        val meta = AdMobMetaExtractor.fromResponseInfo(adUnitId, "NATIVE", nativeAd.responseInfo)
-        tracker.track(E_CLICK, meta)
     }
 }
-

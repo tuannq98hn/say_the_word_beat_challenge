@@ -28,7 +28,7 @@ class AdMobRewardedProvider : RewardedAdProvider {
     private var adUnitIds: MutableList<String> = mutableListOf()
     private var currentIndex: Int = 0
 
-    val tracker = TikTokAdTracker(debugLog = true)
+    val tracker = TikTokAdTracker()
 
     /**
      * Set list of ad unit IDs for rotation
@@ -74,7 +74,7 @@ class AdMobRewardedProvider : RewardedAdProvider {
                     android.util.Log.d("AdMobRewarded", "Rewarded ad loaded successfully")
                     rewardedAd = ad
                     callback?.onAdLoaded()
-                    TikTokAdMobLogger.bindRewarded(ad, adUnitId, tracker)
+                    TikTokAdMobLogger.bindRewardedRevenue(ad, adUnitId, tracker)
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
@@ -114,6 +114,13 @@ class AdMobRewardedProvider : RewardedAdProvider {
                 rewardedAd = null
                 // Try to preload next ad using rotation
                 loadNext(activity.applicationContext, null)
+            }
+
+            override fun onAdImpression() {
+                if(lastAdUnitId != null) TikTokAdMobLogger.logImpression(tracker, lastAdUnitId!!, "REWARDED", ad.responseInfo)
+            }
+            override fun onAdClicked() {
+                if(lastAdUnitId != null) TikTokAdMobLogger.logClick(tracker, lastAdUnitId!!, "REWARDED", ad.responseInfo)
             }
         }
 

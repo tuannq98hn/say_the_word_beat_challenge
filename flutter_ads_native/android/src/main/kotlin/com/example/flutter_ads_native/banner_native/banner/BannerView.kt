@@ -33,7 +33,7 @@ class BannerView(
         )
     }
 
-    val tracker = TikTokAdTracker(debugLog = true)
+    val tracker = TikTokAdTracker()
 
     init {
         loadBanner()
@@ -47,11 +47,31 @@ class BannerView(
                 ?: "ca-app-pub-3940256099942544/6300978111"
         }
 
+        val ad_unit_id = params?.get("adUnitId") as? String
+            ?: "ca-app-pub-3940256099942544/6300978111"
+
         val request = AdRequest.Builder().build()
-        TikTokAdMobLogger.bindBanner(adView, params?.get("adUnitId") as? String
-            ?: "ca-app-pub-3940256099942544/6300978111", tracker)
+        TikTokAdMobLogger.bindBannerRevenue(adView, ad_unit_id, tracker)
         adView.loadAd(request)
         adView.adListener = object : AdListener() {
+            override fun onAdImpression() {
+                TikTokAdMobLogger.logImpression(
+                    tracker = tracker,
+                    adUnitId = ad_unit_id,
+                    format = "BANNER",
+                    responseInfo = adView.responseInfo
+                )
+            }
+
+            override fun onAdClicked() {
+                TikTokAdMobLogger.logClick(
+                    tracker = tracker,
+                    adUnitId = ad_unit_id,
+                    format = "BANNER",
+                    responseInfo = adView.responseInfo
+                )
+            }
+
             override fun onAdFailedToLoad(p0: LoadAdError) {
                 super.onAdFailedToLoad(p0)
                 frameAds.removeAllViews()

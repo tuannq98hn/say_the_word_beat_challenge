@@ -2,6 +2,7 @@ package com.example.flutter_ads_native.inter_reward.admob
 
 import android.app.Activity
 import android.content.Context
+import android.util.Log
 import com.google.android.gms.ads.AdError
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
@@ -31,7 +32,7 @@ class AdMobInterstitialProvider : InterstitialAdProvider {
     private var adUnitIds: MutableList<String> = mutableListOf()
     private var currentIndex: Int = 0
 
-    val tracker = TikTokAdTracker(debugLog = true)
+    val tracker = TikTokAdTracker()
 
     /**
      * Set list of ad unit IDs for rotation
@@ -74,7 +75,7 @@ class AdMobInterstitialProvider : InterstitialAdProvider {
                 override fun onAdLoaded(ad: InterstitialAd) {
                     interstitialAd = ad
                     callback?.onAdLoaded()
-                    TikTokAdMobLogger.bindInterstitial(ad, adUnitId, tracker)
+                    TikTokAdMobLogger.bindInterstitialRevenue(ad, adUnitId, tracker)
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
@@ -111,6 +112,13 @@ class AdMobInterstitialProvider : InterstitialAdProvider {
                 interstitialAd = null
                 // Try to preload next ad using rotation
                 loadNext(activity.applicationContext, null)
+            }
+
+            override fun onAdImpression() {
+                if(lastAdUnitId != null) TikTokAdMobLogger.logImpression(tracker, lastAdUnitId!!, "INTERSTITIAL", ad.responseInfo)
+            }
+            override fun onAdClicked() {
+                if(lastAdUnitId != null) TikTokAdMobLogger.logClick(tracker, lastAdUnitId!!, "INTERSTITIAL", ad.responseInfo)
             }
         }
 

@@ -37,7 +37,7 @@ class NativeCardView(
         loadNativeAd(context, params)
     }
 
-    val tracker = TikTokAdTracker(debugLog = true)
+    val tracker = TikTokAdTracker()
     var nativeAds: NativeAd? = null
     var AD_UNIT_ID: String? = null
 
@@ -50,7 +50,7 @@ class NativeCardView(
             frmAdsLoading.visibility = View.GONE
             frmAdsContent.visibility = View.VISIBLE
             bindNativeAd(nativeAd)
-            TikTokAdMobLogger.bindNative(nativeAd, adUnitId, tracker)
+            TikTokAdMobLogger.bindNativeRevenue(nativeAd, adUnitId, tracker)
             nativeAds = nativeAd
             AD_UNIT_ID = adUnitId
         }.withAdListener(object : AdListener() {
@@ -63,13 +63,13 @@ class NativeCardView(
             override fun onAdImpression() {
                 // Check null nativeAds and AD_UNIT_ID before logging impression
                 if (nativeAds != null && AD_UNIT_ID != null) {
-                    TikTokAdMobLogger.onNativeImpressionFromAdLoader(nativeAds!!, AD_UNIT_ID!!, tracker)
+                    TikTokAdMobLogger.logNativeImpression(tracker, AD_UNIT_ID!!, nativeAds!!)
                 }
             }
 
             override fun onAdClicked() {
                 if (nativeAds != null && AD_UNIT_ID != null) {
-                    TikTokAdMobLogger.onNativeClickFromAdLoader(nativeAds!!, AD_UNIT_ID!!, tracker)
+                    TikTokAdMobLogger.logNativeClick(tracker, AD_UNIT_ID!!, nativeAds!!)
                 }
             }
         }).build()

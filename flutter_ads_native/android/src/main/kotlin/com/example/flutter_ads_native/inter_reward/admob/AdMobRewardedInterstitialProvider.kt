@@ -29,7 +29,7 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
     private var adUnitIds: MutableList<String> = mutableListOf()
     private var currentIndex: Int = 0
 
-    val tracker = TikTokAdTracker(debugLog = true)
+    val tracker = TikTokAdTracker()
 
     /**
      * Set list of ad unit IDs for rotation
@@ -75,7 +75,7 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
                     android.util.Log.d("AdMobRewardedInterstitial", "Rewarded interstitial ad loaded successfully")
                     rewardedInterstitialAd = ad
                     callback?.onAdLoaded()
-                    TikTokAdMobLogger.bindRewardedInterstitial(ad, adUnitId, tracker)
+                    TikTokAdMobLogger.bindRewardedInterstitialRevenue(ad, adUnitId, tracker)
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
@@ -114,6 +114,13 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
                 rewardedInterstitialAd = null
                 // Try to preload next ad using rotation
                 loadNext(activity.applicationContext, null)
+            }
+
+            override fun onAdImpression() {
+                if(lastAdUnitId != null) TikTokAdMobLogger.logImpression(tracker, lastAdUnitId!!, "INTERSTITIAL_REWARDED", ad.responseInfo)
+            }
+            override fun onAdClicked() {
+                if(lastAdUnitId != null) TikTokAdMobLogger.logClick(tracker, lastAdUnitId!!, "INTERSTITIAL_REWARDED", ad.responseInfo)
             }
         }
 

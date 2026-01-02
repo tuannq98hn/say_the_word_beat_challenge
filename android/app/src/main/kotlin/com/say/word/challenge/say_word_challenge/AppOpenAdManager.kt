@@ -29,7 +29,7 @@ class AppOpenAdManager(
     private var isShowing = false
     private var loadTime = 0L
 
-    val tracker = TikTokAdTracker(debugLog = true)
+    val tracker = TikTokAdTracker()
 
     fun setEventHandler(handler: AppEventStreamHandler) {
         eventHandler = handler
@@ -52,7 +52,7 @@ class AppOpenAdManager(
                     isLoading = false
                     loadTime = System.currentTimeMillis()
                     onAdLoaded?.invoke()
-                    TikTokAdMobLogger.bindAppOpen(ad, AD_UNIT_ID, tracker)
+                    TikTokAdMobLogger.bindAppOpenRevenue(ad, AD_UNIT_ID, tracker)
                 }
 
                 override fun onAdFailedToLoad(error: LoadAdError) {
@@ -84,6 +84,13 @@ class AppOpenAdManager(
                 appOpenAd = null
                 isShowing = false
                 loadAd(null)
+            }
+
+            override fun onAdImpression() {
+                TikTokAdMobLogger.logImpression(tracker, AD_UNIT_ID, "APP_OPEN", appOpenAd?.responseInfo)
+            }
+            override fun onAdClicked() {
+                TikTokAdMobLogger.logClick(tracker, AD_UNIT_ID, "APP_OPEN", appOpenAd?.responseInfo)
             }
         }
 

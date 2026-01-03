@@ -1,8 +1,10 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_ads_native/index.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:say_word_challenge/services/interstitial_ads_controller.dart';
 import 'package:say_word_challenge/services/remote_config_service.dart';
 
 import '../bloc/create_wizard_bloc.dart';
@@ -973,9 +975,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                       ) !=
                       null)
                     Padding(
-                      padding: EdgeInsetsGeometry.symmetric(
-                        vertical: 16,
-                      ),
+                      padding: EdgeInsetsGeometry.symmetric(vertical: 16),
                       child: RemoteConfigService.instance.configAdsByScreen(
                         "CreateWizardPageManual",
                       )!,
@@ -1062,8 +1062,12 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                               ElevatedButton(
                                 onPressed: state.canFinish
                                     ? () {
-                                        context.read<CreateWizardBloc>().add(
-                                          const FinishCreation(),
+                                        _handleShowInter(
+                                          onDone: () {
+                                            context
+                                                .read<CreateWizardBloc>()
+                                                .add(const FinishCreation());
+                                          },
                                         );
                                       }
                                     : null,
@@ -1162,6 +1166,30 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
           ),
         );
       }
+    }
+  }
+
+  Future<void> _handleShowInter({required void Function() onDone}) async {
+    final origin_onInterstitialClosed = InterstitialAds.onInterstitialClosed;
+    final origin_onInterstitialFailed = InterstitialAds.onInterstitialFailed;
+    final origin_onInterstitialShown = InterstitialAds.onInterstitialShown;
+    InterstitialAds.onInterstitialClosed = () {
+      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
+      onDone();
+    };
+    InterstitialAds.onInterstitialFailed = (_) {
+      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
+      onDone();
+    };
+    InterstitialAds.onInterstitialShown = () {
+      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+      // todo show native full screen ==> check policy
+    };
+    if (!await InterstitialAdsController.instance.showInterstitialAd()) {
+      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
+      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
+      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+      onDone();
     }
   }
 }

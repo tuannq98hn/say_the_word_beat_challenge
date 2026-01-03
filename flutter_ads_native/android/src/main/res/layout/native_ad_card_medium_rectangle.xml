@@ -114,6 +114,7 @@
                                 android:ellipsize="end"
                                 android:maxLines="1"
                                 android:minWidth="0dp"
+                                android:fontFamily="@font/inter_variable_font"
                                 android:text="Giáng Sinh Diệu Kỳ"
                                 android:textColor="#FFFFFF"
                                 android:textSize="14sp"
@@ -176,6 +177,7 @@
                             android:lineSpacingExtra="2dp"
                             android:lineSpacingMultiplier="1.1"
                             android:maxLines="2"
+                            android:fontFamily="@font/inter_variable_font"
                             android:text="Khám phá kho tàng đồ chơi và quà tặng độc đáo cho bé yêu mùa lễ hội này."
                             android:textColor="#D1D5DB"
                             android:textSize="12sp" />
@@ -204,8 +206,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Start now"
-                            android:textColor="#FFFFFF"
-                            android:textSize="13sp"
+                            android:fontFamily="@font/inter_variable_font"
+                            android:textColor="#000000"
+                            android:textSize="14sp"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </FrameLayout>

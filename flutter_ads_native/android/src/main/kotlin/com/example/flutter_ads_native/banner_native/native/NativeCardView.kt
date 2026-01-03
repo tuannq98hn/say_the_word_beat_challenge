@@ -59,8 +59,6 @@ class NativeCardView(
             AD_UNIT_ID = adUnitId
         }.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(error: LoadAdError) {
-                val frmNativeRoot = root.findViewById<FrameLayout>(R.id.frmNativeRoot)
-//                frmNativeRoot.removeAllViews()
                 // Notify Flutter that ad failed to load
                 eventHandler.sendEvent(
                     "ads_custom_view_failed",
@@ -197,14 +195,15 @@ class NativeCardView(
                     }
             } else {
                 adView.mediaView = null
-                adView.imageView = image
                 loadingMedia?.visibility = View.GONE
-                image?.visibility = View.VISIBLE
-                val images = nativeAd.images
-                if (images.isNotEmpty()) {
-                    val drawable = images[0].drawable
-                    image?.setImageDrawable(drawable)
-                }
+//                adView.imageView = image
+//                loadingMedia?.visibility = View.GONE
+//                image?.visibility = View.VISIBLE
+//                val images = nativeAd.images
+//                if (images.isNotEmpty()) {
+//                    val drawable = images[0].drawable
+//                    image?.setImageDrawable(drawable)
+//                }
             }
 
             // CALL TO ACTION BUTTON

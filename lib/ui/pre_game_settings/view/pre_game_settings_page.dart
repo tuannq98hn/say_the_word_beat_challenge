@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -26,11 +27,14 @@ class _PreGameSettingsPageState extends State<PreGameSettingsPage> {
   bool _showWordText = false;
   bool _enableRecording = false;
   bool _enableCamera = false;
+  int? delayCountDown = 0;
+  Timer? countDownTimer;
 
   @override
   void initState() {
     super.initState();
     _loadSettings();
+    _handleCountDown();
   }
 
   Future<void> _loadSettings() async {
@@ -229,20 +233,24 @@ class _PreGameSettingsPageState extends State<PreGameSettingsPage> {
                   Expanded(
                     flex: 2,
                     child: ElevatedButton(
-                      onPressed: _startGame,
+                      onPressed: delayCountDown == null ? _startGame : null,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         backgroundColor: Colors.black87,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        disabledBackgroundColor: Colors.grey[300],
                       ),
-                      child: const Text(
-                        'Start',
+                      child: Text(
+                        (delayCountDown != null ? "Loading game" : "Start")
+                            .trim(),
                         style: TextStyle(
                           fontFamily: 'Inter',
                           fontSize: 16,
-                          color: Colors.white,
+                          color: delayCountDown != null
+                              ? Colors.black
+                              : Colors.white,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -258,9 +266,7 @@ class _PreGameSettingsPageState extends State<PreGameSettingsPage> {
     );
   }
 
-  Future<void> _handleShowInter({
-    required void Function() onDone,
-  }) async {
+  Future<void> _handleShowInter({required void Function() onDone}) async {
     final origin_onInterstitialClosed = InterstitialAds.onInterstitialClosed;
     final origin_onInterstitialFailed = InterstitialAds.onInterstitialFailed;
     final origin_onInterstitialShown = InterstitialAds.onInterstitialShown;
@@ -318,5 +324,37 @@ class _PreGameSettingsPageState extends State<PreGameSettingsPage> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    countDownTimer?.cancel();
+    countDownTimer = null;
+    super.dispose();
+  }
+
+  void _handleCountDown() {
+    final delayInPreGame = RemoteConfigService.instance.delayInPreGame;
+    delayCountDown = delayInPreGame;
+    if (delayInPreGame != null && delayInPreGame != 0) {
+      //count down
+      countDownTimer = Timer.periodic(Duration(seconds: 1), (_) {
+        if (delayCountDown == 0) {
+          delayCountDown = null;
+          countDownTimer?.cancel();
+          countDownTimer = null;
+        }
+        setState(() {
+          delayCountDown = delayCountDown! - 1;
+          if (delayCountDown == 0) {
+            delayCountDown = null;
+          }
+        });
+      });
+    } else {
+      setState(() {
+        delayCountDown = null;
+      });
+    }
   }
 }

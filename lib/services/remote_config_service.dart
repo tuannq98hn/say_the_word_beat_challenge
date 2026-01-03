@@ -18,7 +18,10 @@ class RemoteConfigService {
 
   Future<void> init() async {
     _remoteConfig = FirebaseRemoteConfig.instance;
-    await _remoteConfig.setDefaults({"ads": jsonEncode(_defaultAdsConfig)});
+    await _remoteConfig.setDefaults({
+      "ads": jsonEncode(_defaultAdsConfig),
+      "delayInPreGame": 5,
+    });
 
     await _remoteConfig.setConfigSettings(
       RemoteConfigSettings(
@@ -97,144 +100,144 @@ class RemoteConfigService {
         "screenName": "SplashPage",
         "adUnitId": "ca-app-pub-3361561931511510/7198949619",
         "size": "LARGE_BANNER",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "BottomNav",
         "adUnitId": "ca-app-pub-3361561931511510/1584834318",
         "size": "SMART_BANNER",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "GameOverPage",
         "adUnitId": "ca-app-pub-3361561931511510/8864558533",
         "size": "MEDIUM_RECTANGLE",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "SettingsPage",
         "adUnitId": "ca-app-pub-3361561931511510/4221556196",
         "size": "MEDIUM_RECTANGLE",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "PreGameSettingsPage",
         "adUnitId": "ca-app-pub-3361561931511510/9561496873",
         "size": "MEDIUM_RECTANGLE",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "VideoPlayerPage",
         "adUnitId": "ca-app-pub-3361561931511510/7871837226",
         "size": "LARGE_BANNER",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "CreateWizardPageUpload",
         "adUnitId": "ca-app-pub-3361561931511510/1595392858",
         "size": "LARGE_BANNER",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "CreateWizardPageMode",
         "adUnitId": "ca-app-pub-3361561931511510/1595392858",
         "size": "LARGE_BANNER",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "CreateWizardPageManual",
         "adUnitId": "ca-app-pub-3361561931511510/1595392858",
         "size": "LARGE_BANNER",
-        "isShow": true
-      }
+        "isShow": true,
+      },
     ],
     "native": [
       {
         "screenName": "BottomNav",
         "adUnitId": "ca-app-pub-3361561931511510/7007377921",
         "size": "NATIVE_BANNER",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "SplashPageFull",
         "adUnitId": "ca-app-pub-3361561931511510/7156741107",
         "size": "FULL_SCREEN",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "GameOverPage",
         "adUnitId": "ca-app-pub-3361561931511510/2311608532",
         "size": "NATIVE_MEDIUM_RECTANGLE",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "SettingsPage",
         "adUnitId": "ca-app-pub-3361561931511510/1597771598",
-        "size": "NATIVE_LARGE",
-        "isShow": true
+        "size": "NATIVE_MEDIUM_RECTANGLE",
+        "isShow": true,
       },
       {
         "screenName": "PreGameSettingsPage",
         "adUnitId": "ca-app-pub-3361561931511510/4229827889",
         "size": "NATIVE_MEDIUM_RECTANGLE",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "VideoPlayerPage",
         "adUnitId": "ca-app-pub-3361561931511510/3603126019",
         "size": "NATIVE_LARGE",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "CreateWizardPageUpload",
         "adUnitId": "ca-app-pub-3361561931511510/9344399674",
         "size": "NATIVE_LARGE",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "CreateWizardPageMode",
         "adUnitId": "ca-app-pub-3361561931511510/9344399674",
         "size": "NATIVE_LARGE",
-        "isShow": true
+        "isShow": true,
       },
       {
         "screenName": "CreateWizardPageManual",
         "adUnitId": "ca-app-pub-3361561931511510/9344399674",
         "size": "NATIVE_LARGE",
-        "isShow": true
-      }
+        "isShow": true,
+      },
     ],
     "inter": {
       "adUnitIds": [
         "ca-app-pub-3361561931511510/6035231127",
         "ca-app-pub-3361561931511510/7551476862",
-        "ca-app-pub-3361561931511510/7647695698"
+        "ca-app-pub-3361561931511510/7647695698",
       ],
       "showRateTime": 15,
       "interMaxPerSession": 100,
       "interMinSecondsBetween": 15,
       "interMaxPerDay": 300,
-      "interMinActionBetween": 3
+      "interMinActionBetween": 1,
     },
     "reward": {
       "adUnitIds": [
         "ca-app-pub-3361561931511510/4381214589",
         "ca-app-pub-3361561931511510/5332507633",
-        "ca-app-pub-3361561931511510/4458425577"
+        "ca-app-pub-3361561931511510/4458425577",
       ],
       "rewardMaxPerSession": 10,
-      "rewardMaxPerDay": 30
+      "rewardMaxPerDay": 30,
     },
     "rewardInter": {
       "adUnitIds": [
         "ca-app-pub-3361561931511510/3409067782",
         "ca-app-pub-3361561931511510/6178685441",
-        "ca-app-pub-3361561931511510/9633541262"
+        "ca-app-pub-3361561931511510/9633541262",
       ],
       "rewardInterMaxPerSession": 10,
-      "rewardInterMaxPerDay": 30
+      "rewardInterMaxPerDay": 30,
     },
-    "shouldShowRewardInter": true
+    "shouldShowRewardInter": true,
   };
 
   int get maxInterShowInSession => adsModel.inter?.interMaxPerSession ?? 0;
@@ -258,6 +261,8 @@ class RemoteConfigService {
   /// Check if should show rewarded interstitial instead of rewarded ad
   /// Returns true if showRewardInter is true in Remote Config, false otherwise
   bool get shouldShowRewardInter => adsModel.shouldShowRewardInter ?? false;
+
+  int? get delayInPreGame => _remoteConfig.getInt("delayInPreGame");
 
   Widget? configAdsByScreen(
     String screenName, {

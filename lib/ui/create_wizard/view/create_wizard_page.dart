@@ -23,6 +23,39 @@ class CreateWizardPage extends StatefulWidget {
 
 class _CreateWizardPageState extends State<CreateWizardPage> {
   final ImagePicker _picker = ImagePicker();
+  final Map<String, TextEditingController> _imageNameControllers = {};
+
+  TextEditingController _getImageNameController(UploadedImage img) {
+    return _imageNameControllers.putIfAbsent(
+      img.id,
+      () => TextEditingController(text: img.name),
+    );
+  }
+
+  void _syncAndCleanupImageNameControllers(List<UploadedImage> images) {
+    final currentIds = images.map((e) => e.id).toSet();
+
+    // Dispose controllers for images that were removed.
+    final removedIds = _imageNameControllers.keys
+        .where((id) => !currentIds.contains(id))
+        .toList();
+    for (final id in removedIds) {
+      _imageNameControllers.remove(id)?.dispose();
+    }
+  }
+
+  void _removeImageNameController(String imageId) {
+    _imageNameControllers.remove(imageId)?.dispose();
+  }
+
+  @override
+  void dispose() {
+    for (final c in _imageNameControllers.values) {
+      c.dispose();
+    }
+    _imageNameControllers.clear();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +89,9 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
   }
 
   Widget _buildUploadStep(BuildContext context, CreateWizardState state) {
+    // Keep TextEditingControllers stable to avoid cursor/IME glitches.
+    _syncAndCleanupImageNameControllers(state.images);
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
@@ -171,9 +207,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                                 ),
                                 TextField(
                                   key: ValueKey('name_${img.id}'),
-                                  controller: TextEditingController(
-                                    text: img.name,
-                                  ),
+                                  controller: _getImageNameController(img),
                                   onChanged: (value) {
                                     context.read<CreateWizardBloc>().add(
                                       ImageNameUpdated(
@@ -219,6 +253,7 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                           const SizedBox(width: 8),
                           GestureDetector(
                             onTap: () {
+                              _removeImageNameController(img.id);
                               context.read<CreateWizardBloc>().add(
                                 ImageRemoved(img.id),
                               );

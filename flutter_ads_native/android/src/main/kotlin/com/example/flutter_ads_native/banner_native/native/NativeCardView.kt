@@ -13,6 +13,9 @@ import com.example.flutter_ads_native.AdsEventStreamHandler
 import com.example.flutter_ads_native.R
 import com.example.flutter_ads_native.tracking.AdTypes
 import com.example.flutter_ads_native.tracking.AdsAnalytics
+import com.example.flutter_ads_native.tracking.AdTypes
+import com.example.flutter_ads_native.tracking.AdsAnalytics
+import com.example.flutter_ads_native.facebook_event.FacebookROASTracker
 import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
 import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
 import com.facebook.appevents.AppEventsLogger
@@ -56,14 +59,11 @@ class NativeCardView(
             frmAdsContent.visibility = View.VISIBLE
             bindNativeAd(nativeAd)
             TikTokAdMobLogger.bindNativeRevenue(context = context, nativeAd, adUnitId, tracker)
-            FacebookROASTracker.bindNativeRevenue(context = context, nativeAd, adUnitId, facebookEventLogger)
+            FacebookROASTracker.bindNativeRevenue(
+                context = context, nativeAd, adUnitId, facebookEventLogger
+            )
             nativeAds = nativeAd
             AD_UNIT_ID = adUnitId
-            AdsAnalytics.logAdLoadSuccess(context, AdTypes.NATIVE, adUnitId)
-            eventHandler.sendEvent(
-                "native_loaded",
-                mapOf("id" to viewId, "adUnitId" to adUnitId)
-            )
         }.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(error: LoadAdError) {
                 // Notify Flutter that ad failed to load
@@ -94,16 +94,10 @@ class NativeCardView(
                         mapOf("id" to viewId, "adUnitId" to AD_UNIT_ID)
                     )
                     TikTokAdMobLogger.logNativeImpression(
-                        context = context,
-                        tracker,
-                        AD_UNIT_ID!!,
-                        nativeAds!!
+                        context = context, tracker, AD_UNIT_ID!!, nativeAds!!
                     )
                     FacebookROASTracker.logNativeImpression(
-                        context = context,
-                        facebookEventLogger,
-                        AD_UNIT_ID!!,
-                        nativeAds!!
+                        context = context, facebookEventLogger, AD_UNIT_ID!!, nativeAds!!
                     )
                 }
             }
@@ -111,16 +105,10 @@ class NativeCardView(
             override fun onAdClicked() {
                 if (nativeAds != null && AD_UNIT_ID != null) {
                     TikTokAdMobLogger.logNativeClick(
-                        context = context,
-                        tracker,
-                        AD_UNIT_ID!!,
-                        nativeAds!!
+                        context = context, tracker, AD_UNIT_ID!!, nativeAds!!
                     )
                     FacebookROASTracker.logNativeClick(
-                        context = context,
-                        facebookEventLogger,
-                        AD_UNIT_ID!!,
-                        nativeAds!!
+                        context = context, facebookEventLogger, AD_UNIT_ID!!, nativeAds!!
                     )
                 }
             }

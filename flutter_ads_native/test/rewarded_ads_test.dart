@@ -47,6 +47,14 @@ class MockRewardedAdsPlatform
     }
     return Future.value(true);
   }
+
+  @override
+  Future<bool> showRewardedWithContext({
+    String? screenClass,
+    String? callerFunction,
+  }) {
+    return showRewarded();
+  }
 }
 
 void main() {

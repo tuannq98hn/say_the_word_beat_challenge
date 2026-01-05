@@ -19,7 +19,10 @@ class InterstitialAdsController {
   /// Shows an interstitial ad.
   /// Returns true if ad was shown, false otherwise.
   /// Ad event handling is done via NativeAds callbacks set up in main.dart
-  Future<bool> showInterstitialAd() async {
+  Future<bool> showInterstitialAd({
+    String? screenClass,
+    String? callerFunction,
+  }) async {
     try {
       // Check conditions in Kotlin
       // 1. đã đạt đến số lượng max trong session chưa?
@@ -94,7 +97,10 @@ class InterstitialAdsController {
         return false;
       }
       // Show the ad
-      final shown = await InterstitialAds.showInterstitial();
+      final shown = await InterstitialAds.showInterstitial(
+        screenClass: screenClass,
+        callerFunction: callerFunction,
+      );
       if (!shown) {
         AppLogger.w('Failed to show interstitial ad');
         return false;

@@ -6,6 +6,9 @@ import com.example.flutter_ads_native.facebook_event.FacebookROASTracker
 import com.example.flutter_ads_native.inter_reward.AdLoadCallback
 import com.example.flutter_ads_native.inter_reward.RewardedAdCallback
 import com.example.flutter_ads_native.inter_reward.RewardedAdProvider
+import com.example.flutter_ads_native.tracking.AdTypes
+import com.example.flutter_ads_native.tracking.AdsAnalytics
+import com.example.flutter_ads_native.tracking.AdsShowContext
 import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
 import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
 import com.facebook.appevents.AppEventsLogger
@@ -66,6 +69,7 @@ class AdMobRewardedProvider : RewardedAdProvider {
 
     override fun load(context: Context, adUnitId: String, callback: AdLoadCallback?) {
         lastAdUnitId = adUnitId
+        AdsAnalytics.logAdLoadStart(context, AdTypes.REWARDED, adUnitId)
 
         android.util.Log.d("AdMobRewarded", "Loading rewarded ad with unit ID: $adUnitId")
 
@@ -76,7 +80,8 @@ class AdMobRewardedProvider : RewardedAdProvider {
                 override fun onAdLoaded(ad: RewardedAd) {
                     android.util.Log.d("AdMobRewarded", "Rewarded ad loaded successfully")
                     rewardedAd = ad
-                    callback?.onAdLoaded()
+                    AdsAnalytics.logAdLoadSuccess(context, AdTypes.REWARDED, adUnitId)
+                    callback?.onAdLoaded(adUnitId)
                     val facebookEventLogger = AppEventsLogger.newLogger(context)
                     TikTokAdMobLogger.bindRewardedRevenue(context, ad, adUnitId, tracker)
                     FacebookROASTracker.bindRewardedRevenue(
@@ -96,8 +101,14 @@ class AdMobRewardedProvider : RewardedAdProvider {
                         "AdMobRewarded", "Error domain: ${error.domain}, cause: ${error.cause}"
                     )
                     rewardedAd = null
-                    val errorMessage = "Error ${error.code}: ${error.message}"
-                    callback?.onAdFailedToLoad(errorMessage)
+                    AdsAnalytics.logAdLoadFail(
+                        context = context,
+                        adType = AdTypes.REWARDED,
+                        adUnitId = adUnitId,
+                        errorCode = error.code,
+                        errorMessage = error.message
+                    )
+                    callback?.onAdFailedToLoad(adUnitId, error.code, error.message)
                 }
             })
     }
@@ -105,7 +116,7 @@ class AdMobRewardedProvider : RewardedAdProvider {
     override fun show(activity: Activity, callback: RewardedAdCallback?) {
         val ad = rewardedAd
         if (ad == null) {
-            callback?.onAdFailedToShow("Rewarded ad not ready")
+            callback?.onAdFailedToShow(lastAdUnitId, null, "Rewarded ad not ready")
             // Optionally trigger a new load using rotation
             loadNext(activity.applicationContext, null)
             return
@@ -124,7 +135,17 @@ class AdMobRewardedProvider : RewardedAdProvider {
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
-                callback?.onAdFailedToShow(error.message)
+                val ctx = AdsShowContext.getForAdType(AdTypes.REWARDED)
+                AdsAnalytics.logAdShowFail(
+                    context = activity,
+                    adType = AdTypes.REWARDED,
+                    adUnitId = lastAdUnitId,
+                    screenClass = ctx?.screenClass,
+                    callerFunction = ctx?.callerFunction,
+                    errorCode = error.code,
+                    errorMessage = error.message
+                )
+                callback?.onAdFailedToShow(lastAdUnitId, error.code, error.message)
                 rewardedAd = null
                 // Try to preload next ad using rotation
                 loadNext(activity.applicationContext, null)
@@ -132,6 +153,14 @@ class AdMobRewardedProvider : RewardedAdProvider {
 
             override fun onAdImpression() {
                 if (lastAdUnitId != null) {
+                    val ctx = AdsShowContext.getForAdType(AdTypes.REWARDED)
+                    AdsAnalytics.logAdImpression(
+                        context = activity,
+                        adType = AdTypes.REWARDED,
+                        adUnitId = lastAdUnitId,
+                        screenClass = ctx?.screenClass,
+                        callerFunction = ctx?.callerFunction
+                    )
                     TikTokAdMobLogger.logImpression(
                         activity, tracker, lastAdUnitId!!, "REWARDED", ad.responseInfo
                     )
@@ -163,5 +192,7 @@ class AdMobRewardedProvider : RewardedAdProvider {
     override fun isReady(): Boolean {
         return rewardedAd != null
     }
+
+    fun getLastAdUnitId(): String? = lastAdUnitId
 }
 

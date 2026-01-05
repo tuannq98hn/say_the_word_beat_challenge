@@ -11,6 +11,8 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import com.example.flutter_ads_native.AdsEventStreamHandler
 import com.example.flutter_ads_native.R
+import com.example.flutter_ads_native.tracking.AdTypes
+import com.example.flutter_ads_native.tracking.AdsAnalytics
 import com.example.flutter_ads_native.facebook_event.FacebookROASTracker
 import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
 import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
@@ -47,6 +49,7 @@ class NativeCardView(
     private fun loadNativeAd(context: Context, params: Map<String, Any>?) {
         val adUnitId = params?.get("adUnitId")?.toString()
             ?: "ca-app-pub-3940256099942544/2247696110" // test id
+        AdsAnalytics.logAdLoadStart(context, AdTypes.NATIVE, adUnitId)
         adLoader = AdLoader.Builder(context, adUnitId).forNativeAd { nativeAd ->
             val frmAdsLoading = root.findViewById<FrameLayout>(R.id.frmAdsNativeLoading)
             val frmAdsContent = root.findViewById<FrameLayout>(R.id.frmAdsContent)
@@ -59,17 +62,40 @@ class NativeCardView(
             )
             nativeAds = nativeAd
             AD_UNIT_ID = adUnitId
+            AdsAnalytics.logAdLoadSuccess(context, AdTypes.NATIVE, adUnitId)
+            eventHandler.sendEvent(
+                "native_loaded",
+                mapOf("id" to viewId, "adUnitId" to adUnitId)
+            )
         }.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(error: LoadAdError) {
                 // Notify Flutter that ad failed to load
                 eventHandler.sendEvent(
-                    "ads_custom_view_failed", mapOf("id" to viewId)
+                    "ads_custom_view_failed",
+                    mapOf(
+                        "id" to viewId,
+                        "adUnitId" to adUnitId,
+                        "errorCode" to error.code,
+                        "errorMessage" to error.message
+                    )
+                )
+                AdsAnalytics.logAdLoadFail(
+                    context = context,
+                    adType = AdTypes.NATIVE,
+                    adUnitId = adUnitId,
+                    errorCode = error.code,
+                    errorMessage = error.message
                 )
             }
 
             override fun onAdImpression() {
                 // Check null nativeAds and AD_UNIT_ID before logging impression
                 if (nativeAds != null && AD_UNIT_ID != null) {
+                    AdsAnalytics.logAdImpression(context, AdTypes.NATIVE, AD_UNIT_ID, null, null)
+                    eventHandler.sendEvent(
+                        "native_impression",
+                        mapOf("id" to viewId, "adUnitId" to AD_UNIT_ID)
+                    )
                     TikTokAdMobLogger.logNativeImpression(
                         context = context, tracker, AD_UNIT_ID!!, nativeAds!!
                     )

@@ -39,4 +39,19 @@ class MethodChannelRewardedInterstitialAds
     );
     return result ?? false;
   }
+
+  @override
+  Future<bool> showRewardedInterstitialWithContext({
+    String? screenClass,
+    String? callerFunction,
+  }) async {
+    final result = await methodChannel.invokeMethod<bool>(
+      'ads_show_rewarded_interstitial',
+      {
+        if (screenClass != null) 'screenClass': screenClass,
+        if (callerFunction != null) 'callerFunction': callerFunction,
+      },
+    );
+    return result ?? false;
+  }
 }

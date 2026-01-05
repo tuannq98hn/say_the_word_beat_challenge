@@ -8,18 +8,18 @@ package com.example.flutter_ads_native.inter_reward
 interface InterstitialAdCallback {
     fun onAdShown()
     fun onAdClosed()
-    fun onAdFailedToShow(errorMessage: String?)
+    fun onAdFailedToShow(adUnitId: String?, errorCode: Int?, errorMessage: String?)
 }
 
 interface RewardedAdCallback {
     fun onAdShown()
     fun onAdClosed()
     fun onUserEarnedReward(rewardType: String, rewardAmount: Int)
-    fun onAdFailedToShow(errorMessage: String?)
+    fun onAdFailedToShow(adUnitId: String?, errorCode: Int?, errorMessage: String?)
 }
 
 interface AdLoadCallback {
-    fun onAdLoaded()
-    fun onAdFailedToLoad(errorMessage: String?)
+    fun onAdLoaded(adUnitId: String)
+    fun onAdFailedToLoad(adUnitId: String, errorCode: Int?, errorMessage: String?)
 }
 

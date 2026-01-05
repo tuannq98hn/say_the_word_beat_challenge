@@ -274,7 +274,10 @@ class _CustomTabPageState extends State<CustomTabPage> {
       InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
       // todo show native full screen ==> check policy
     };
-    if (!await InterstitialAdsController.instance.showInterstitialAd()) {
+    if (!await InterstitialAdsController.instance.showInterstitialAd(
+      screenClass: 'CustomTabPage',
+      callerFunction: 'CustomTabPage._handleShowInter',
+    )) {
       InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
       InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
       InterstitialAds.onInterstitialShown = origin_onInterstitialShown;

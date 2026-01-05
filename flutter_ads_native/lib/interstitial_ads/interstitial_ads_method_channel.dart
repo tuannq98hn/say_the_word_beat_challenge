@@ -38,4 +38,19 @@ class MethodChannelInterstitialAds extends InterstitialAdsPlatform {
     );
     return result ?? false;
   }
+
+  @override
+  Future<bool> showInterstitialWithContext({
+    String? screenClass,
+    String? callerFunction,
+  }) async {
+    final result = await methodChannel.invokeMethod<bool>(
+      'ads_show_interstitial',
+      {
+        if (screenClass != null) 'screenClass': screenClass,
+        if (callerFunction != null) 'callerFunction': callerFunction,
+      },
+    );
+    return result ?? false;
+  }
 }

@@ -36,4 +36,19 @@ class MethodChannelRewardedAds extends RewardedAdsPlatform {
     final result = await methodChannel.invokeMethod<bool>('ads_show_rewarded');
     return result ?? false;
   }
+
+  @override
+  Future<bool> showRewardedWithContext({
+    String? screenClass,
+    String? callerFunction,
+  }) async {
+    final result = await methodChannel.invokeMethod<bool>(
+      'ads_show_rewarded',
+      {
+        if (screenClass != null) 'screenClass': screenClass,
+        if (callerFunction != null) 'callerFunction': callerFunction,
+      },
+    );
+    return result ?? false;
+  }
 }

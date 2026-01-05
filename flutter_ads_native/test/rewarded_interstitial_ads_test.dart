@@ -47,6 +47,14 @@ class MockRewardedInterstitialAdsPlatform
     }
     return Future.value(true);
   }
+
+  @override
+  Future<bool> showRewardedInterstitialWithContext({
+    String? screenClass,
+    String? callerFunction,
+  }) {
+    return showRewardedInterstitial();
+  }
 }
 
 void main() {

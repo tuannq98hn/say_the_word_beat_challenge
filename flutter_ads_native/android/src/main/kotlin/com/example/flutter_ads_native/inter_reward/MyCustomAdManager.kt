@@ -114,5 +114,29 @@ object MyCustomAdManager {
     fun isRewardedInterstitialReady(): Boolean {
         return rewardedInterstitialProvider.isReady()
     }
+
+    fun getLastInterstitialAdUnitId(): String? {
+        return if (interstitialProvider is AdMobInterstitialProvider) {
+            (interstitialProvider as AdMobInterstitialProvider).getLastAdUnitId()
+        } else {
+            null
+        }
+    }
+
+    fun getLastRewardedAdUnitId(): String? {
+        return if (rewardedProvider is AdMobRewardedProvider) {
+            (rewardedProvider as AdMobRewardedProvider).getLastAdUnitId()
+        } else {
+            null
+        }
+    }
+
+    fun getLastRewardedInterstitialAdUnitId(): String? {
+        return if (rewardedInterstitialProvider is AdMobRewardedInterstitialProvider) {
+            (rewardedInterstitialProvider as AdMobRewardedInterstitialProvider).getLastAdUnitId()
+        } else {
+            null
+        }
+    }
 }
 

@@ -38,4 +38,14 @@ abstract class InterstitialAdsPlatform extends PlatformInterface {
   Future<bool> showInterstitial() {
     return _instance.showInterstitial();
   }
+
+  Future<bool> showInterstitialWithContext({
+    String? screenClass,
+    String? callerFunction,
+  }) {
+    return _instance.showInterstitialWithContext(
+      screenClass: screenClass,
+      callerFunction: callerFunction,
+    );
+  }
 }

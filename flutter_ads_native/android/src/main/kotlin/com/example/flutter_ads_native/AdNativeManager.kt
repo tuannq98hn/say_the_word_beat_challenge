@@ -146,10 +146,12 @@ class AdBannerPlugin(methodChannelName: String, eventChannelName: String) :
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         super.onAttachedToEngine(flutterPluginBinding)
         methodChannel?.let { channel ->
-            flutterPluginBinding.platformViewRegistry.registerViewFactory(
-                "ads_banner_view",
-                BannerViewFactory(channel)
-            )
+            eventHandler?.let { handler ->
+                flutterPluginBinding.platformViewRegistry.registerViewFactory(
+                    "ads_banner_view",
+                    BannerViewFactory(channel, handler)
+                )
+            }
         }
     }
 

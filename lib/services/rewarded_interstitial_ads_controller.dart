@@ -24,7 +24,10 @@ class RewardedInterstitialAdsController {
   /// Kiểm tra điều kiện trước khi show:
   /// 1. Đã show hết số lần cho phép trong session hiện tại của app hay chưa
   /// 2. Đã show hết số lần cho phép trong ngày hay chưa
-  Future<bool> showRewardedInterstitialAd() async {
+  Future<bool> showRewardedInterstitialAd({
+    String? screenClass,
+    String? callerFunction,
+  }) async {
     try {
       // Lấy thông tin từ local với format: timestamp-count
       final _localShowRewardInterPerday = await PrefUtils().getDataString(
@@ -99,7 +102,10 @@ class RewardedInterstitialAdsController {
       }
 
       // Show the ad
-      final shown = await RewardedInterstitialAds.showRewardedInterstitial();
+      final shown = await RewardedInterstitialAds.showRewardedInterstitial(
+        screenClass: screenClass,
+        callerFunction: callerFunction,
+      );
       if (!shown) {
         AppLogger.w('Failed to show rewarded interstitial ad');
         return false;

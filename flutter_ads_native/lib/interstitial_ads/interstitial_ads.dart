@@ -100,9 +100,19 @@ class InterstitialAds {
     }
   }
 
-  static Future<bool> showInterstitial() async {
+  static Future<bool> showInterstitial({
+    String? screenClass,
+    String? callerFunction,
+  }) async {
     try {
-      await InterstitialAdsPlatform.instance.showInterstitial();
+      if (screenClass != null || callerFunction != null) {
+        await InterstitialAdsPlatform.instance.showInterstitialWithContext(
+          screenClass: screenClass,
+          callerFunction: callerFunction,
+        );
+      } else {
+        await InterstitialAdsPlatform.instance.showInterstitial();
+      }
       return true;
     } on PlatformException catch (e) {
       if (e.code == 'AD_NOT_READY') {

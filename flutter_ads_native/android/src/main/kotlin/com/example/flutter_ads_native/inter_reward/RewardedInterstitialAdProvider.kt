@@ -20,5 +20,5 @@ interface RewardedInterstitialAdCallback {
     fun onAdShown()
     fun onAdClosed()
     fun onUserEarnedReward(rewardType: String, rewardAmount: Int)
-    fun onAdFailedToShow(errorMessage: String?)
+    fun onAdFailedToShow(adUnitId: String?, errorCode: Int?, errorMessage: String?)
 }

@@ -47,6 +47,15 @@ class MockInterstitialAdsPlatform
     }
     return Future.value(true);
   }
+
+  @override
+  Future<bool> showInterstitialWithContext({
+    String? screenClass,
+    String? callerFunction,
+  }) {
+    // Context is passed to native; for unit tests we just ensure call works.
+    return showInterstitial();
+  }
 }
 
 void main() {

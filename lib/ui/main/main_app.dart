@@ -7,6 +7,7 @@ import 'package:say_word_challenge/ui/app/bloc/app_state.dart';
 
 import '../../common/theme/app_theme.dart';
 import '../../routes/app_pages.dart';
+import '../../tracking/widgets/app_tracking_shell.dart';
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -37,7 +38,9 @@ class MainApp extends StatelessWidget {
               ],
               child: BlocBuilder<AppBloc, AppState>(
                 builder: (ctx, state) =>
-                    Container(color: Colors.black, child: child),
+                    AppTrackingShell(
+                      child: Container(color: Colors.black, child: child),
+                    ),
               ),
             );
           },

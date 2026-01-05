@@ -9,6 +9,14 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  # This repo vendors a local plugin (`flutter_ads_native`) which also contains an `example/`
+  # app with its own package config. When running `flutter analyze` from the app root,
+  # the analyzer may incorrectly try to analyze the plugin example sources using the app's
+  # pubspec, causing false errors (missing integration_test / example package imports).
+  exclude:
+    - flutter_ads_native/example/**
+
 linter:
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`

@@ -21,7 +21,10 @@ class RewardedAdsController {
   /// Kiểm tra điều kiện trước khi show:
   /// 1. Đã show hết số lần cho phép trong session hiện tại của app hay chưa
   /// 2. Đã show hết số lần cho phép trong ngày hay chưa
-  Future<bool> showRewardedAd() async {
+  Future<bool> showRewardedAd({
+    String? screenClass,
+    String? callerFunction,
+  }) async {
     try {
       // Lấy thông tin từ local với format: timestamp-count
       final _localShowRewardPerday =
@@ -87,7 +90,10 @@ class RewardedAdsController {
       }
 
       // Show the ad
-      final shown = await RewardedAds.showRewarded();
+      final shown = await RewardedAds.showRewarded(
+        screenClass: screenClass,
+        callerFunction: callerFunction,
+      );
       if (!shown) {
         AppLogger.w('Failed to show rewarded ad');
         return false;

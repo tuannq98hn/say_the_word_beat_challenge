@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:say_word_challenge/ui/common/widgets/keep_alive_page.dart';
+import 'package:say_word_challenge/tracking/app_analytics.dart';
 
 import '../../common/enums/app_tab.dart';
 import '../../data/model/challenge.dart';
@@ -49,6 +50,12 @@ class _MainTabPageState extends State<MainTabPage> {
           BottomNav(
             currentTab: _activeTab,
             onTabChange: (tab) {
+              // Track bottom nav usage (screen/tab popularity)
+              AppAnalytics.logButtonClick(
+                screenClass: 'MainTabPage',
+                buttonName: 'bottom_nav_${tab.name}',
+                action: 'switch_tab',
+              );
               setState(() {
                 _activeTab = tab;
               });

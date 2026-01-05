@@ -1220,7 +1220,10 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
       InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
       // todo show native full screen ==> check policy
     };
-    if (!await InterstitialAdsController.instance.showInterstitialAd()) {
+    if (!await InterstitialAdsController.instance.showInterstitialAd(
+      screenClass: 'CreateWizardPage',
+      callerFunction: 'CreateWizardPage._handleShowInter',
+    )) {
       InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
       InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
       InterstitialAds.onInterstitialShown = origin_onInterstitialShown;

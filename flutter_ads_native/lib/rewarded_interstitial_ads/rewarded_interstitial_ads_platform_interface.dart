@@ -39,4 +39,14 @@ abstract class RewardedInterstitialAdsPlatform extends PlatformInterface {
   Future<bool> showRewardedInterstitial() {
     return _instance.showRewardedInterstitial();
   }
+
+  Future<bool> showRewardedInterstitialWithContext({
+    String? screenClass,
+    String? callerFunction,
+  }) {
+    return _instance.showRewardedInterstitialWithContext(
+      screenClass: screenClass,
+      callerFunction: callerFunction,
+    );
+  }
 }

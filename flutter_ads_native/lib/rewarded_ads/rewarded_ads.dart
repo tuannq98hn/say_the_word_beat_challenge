@@ -139,9 +139,19 @@ class RewardedAds {
   /// Throws exception if there's an error.
   ///
   /// Note: After showing, the ad will be automatically reloaded in the background.
-  static Future<bool> showRewarded() async {
+  static Future<bool> showRewarded({
+    String? screenClass,
+    String? callerFunction,
+  }) async {
     try {
-      await RewardedAdsPlatform.instance.showRewarded();
+      if (screenClass != null || callerFunction != null) {
+        await RewardedAdsPlatform.instance.showRewardedWithContext(
+          screenClass: screenClass,
+          callerFunction: callerFunction,
+        );
+      } else {
+        await RewardedAdsPlatform.instance.showRewarded();
+      }
       return true;
     } on PlatformException catch (e) {
       if (e.code == 'AD_NOT_READY') {

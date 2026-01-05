@@ -187,7 +187,11 @@ class _GameOverPageState extends State<GameOverPage> {
       RewardedInterstitialAds.onRewardedInterstitialShown = origin_onInterstitialShown;
       // todo show native full screen ==> check policy
     };
-    if (!await RewardedInterstitialAdsController.instance.showRewardedInterstitialAd()) {
+    if (!await RewardedInterstitialAdsController.instance
+        .showRewardedInterstitialAd(
+      screenClass: 'GameOverPage',
+      callerFunction: 'GameOverPage._handleShowInter',
+    )) {
       RewardedInterstitialAds.onRewardedInterstitialClosed = origin_onInterstitialClosed;
       RewardedInterstitialAds.onRewardedInterstitialFailed = origin_onInterstitialFailed;
       RewardedInterstitialAds.onRewardedInterstitialShown = origin_onInterstitialShown;

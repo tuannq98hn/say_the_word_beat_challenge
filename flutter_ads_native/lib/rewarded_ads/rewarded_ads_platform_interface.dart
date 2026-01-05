@@ -38,4 +38,14 @@ abstract class RewardedAdsPlatform extends PlatformInterface {
   Future<bool> showRewarded() {
     return _instance.showRewarded();
   }
+
+  Future<bool> showRewardedWithContext({
+    String? screenClass,
+    String? callerFunction,
+  }) {
+    return _instance.showRewardedWithContext(
+      screenClass: screenClass,
+      callerFunction: callerFunction,
+    );
+  }
 }

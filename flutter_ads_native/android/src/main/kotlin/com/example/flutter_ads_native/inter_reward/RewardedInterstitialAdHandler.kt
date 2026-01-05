@@ -3,6 +3,9 @@ package com.example.flutter_ads_native.inter_reward
 import android.app.Activity
 import android.content.Context
 import com.example.flutter_ads_native.AdsEventStreamHandler
+import com.example.flutter_ads_native.tracking.AdTypes
+import com.example.flutter_ads_native.tracking.AdsAnalytics
+import com.example.flutter_ads_native.tracking.AdsShowContext
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 
@@ -31,14 +34,19 @@ class RewardedInterstitialAdHandler(
                 MyCustomAdManager.preloadRewardedInterstitial(
                     context,
                     object : AdLoadCallback {
-                        override fun onAdLoaded() {
+                        override fun onAdLoaded(adUnitId: String) {
                             eventHandler.sendEvent(AdsEventStreamHandler.EVENT_REWARDED_INTERSTITIAL_LOADED)
                         }
 
-                        override fun onAdFailedToLoad(errorMessage: String?) {
+                        override fun onAdFailedToLoad(adUnitId: String, errorCode: Int?, errorMessage: String?) {
                             eventHandler.sendEvent(
                                 AdsEventStreamHandler.EVENT_REWARDED_INTERSTITIAL_FAILED,
-                                mapOf("error" to (errorMessage ?: "Failed to load"))
+                                mapOf(
+                                    "error" to (errorMessage ?: "Failed to load"),
+                                    "adUnitId" to adUnitId,
+                                    "errorCode" to errorCode,
+                                    "errorMessage" to errorMessage
+                                )
                             )
                         }
                     }
@@ -49,14 +57,19 @@ class RewardedInterstitialAdHandler(
                 MyCustomAdManager.preloadRewardedInterstitial(
                     context,
                     object : AdLoadCallback {
-                        override fun onAdLoaded() {
+                        override fun onAdLoaded(adUnitId: String) {
                             eventHandler.sendEvent(AdsEventStreamHandler.EVENT_REWARDED_INTERSTITIAL_LOADED)
                         }
 
-                        override fun onAdFailedToLoad(errorMessage: String?) {
+                        override fun onAdFailedToLoad(adUnitId: String, errorCode: Int?, errorMessage: String?) {
                             eventHandler.sendEvent(
                                 AdsEventStreamHandler.EVENT_REWARDED_INTERSTITIAL_FAILED,
-                                mapOf("error" to (errorMessage ?: "Failed to load"))
+                                mapOf(
+                                    "error" to (errorMessage ?: "Failed to load"),
+                                    "adUnitId" to adUnitId,
+                                    "errorCode" to errorCode,
+                                    "errorMessage" to errorMessage
+                                )
                             )
                             // Try to load next ad unit ID in rotation
                             MyCustomAdManager.preloadRewardedInterstitial(context, null)
@@ -69,8 +82,27 @@ class RewardedInterstitialAdHandler(
                 result.success(MyCustomAdManager.isRewardedInterstitialReady())
             }
             "ads_show_rewarded_interstitial" -> {
+                val screenClass = call.argument<String>("screenClass")
+                val callerFunction = call.argument<String>("callerFunction")
+                AdsShowContext.setForAdType(AdTypes.REWARDED_INTERSTITIAL, screenClass, callerFunction)
+                AdsAnalytics.logAdShowCall(
+                    context = context,
+                    adType = AdTypes.REWARDED_INTERSTITIAL,
+                    adUnitId = MyCustomAdManager.getLastRewardedInterstitialAdUnitId(),
+                    screenClass = screenClass,
+                    callerFunction = callerFunction
+                )
                 val isReady = MyCustomAdManager.isRewardedInterstitialReady()
                 if (!isReady) {
+                    AdsAnalytics.logAdShowFail(
+                        context = context,
+                        adType = AdTypes.REWARDED_INTERSTITIAL,
+                        adUnitId = MyCustomAdManager.getLastRewardedInterstitialAdUnitId(),
+                        screenClass = screenClass,
+                        callerFunction = callerFunction,
+                        errorCode = null,
+                        errorMessage = "AD_NOT_READY"
+                    )
                     result.error("AD_NOT_READY", "Rewarded interstitial ad is not ready", null)
                     return
                 }
@@ -96,10 +128,15 @@ class RewardedInterstitialAdHandler(
                             )
                         }
 
-                        override fun onAdFailedToShow(errorMessage: String?) {
+                        override fun onAdFailedToShow(adUnitId: String?, errorCode: Int?, errorMessage: String?) {
                             eventHandler.sendEvent(
                                 AdsEventStreamHandler.EVENT_REWARDED_INTERSTITIAL_FAILED,
-                                mapOf("error" to (errorMessage ?: "Unknown error"))
+                                mapOf(
+                                    "error" to (errorMessage ?: "Unknown error"),
+                                    "adUnitId" to adUnitId,
+                                    "errorCode" to errorCode,
+                                    "errorMessage" to errorMessage
+                                )
                             )
                         }
                     }

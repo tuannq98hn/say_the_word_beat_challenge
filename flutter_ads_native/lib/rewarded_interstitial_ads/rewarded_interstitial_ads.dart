@@ -134,9 +134,20 @@ class RewardedInterstitialAds {
   /// Throws exception if there's an error.
   ///
   /// Note: After showing, the ad will be automatically reloaded in the background.
-  static Future<bool> showRewardedInterstitial() async {
+  static Future<bool> showRewardedInterstitial({
+    String? screenClass,
+    String? callerFunction,
+  }) async {
     try {
-      await RewardedInterstitialAdsPlatform.instance.showRewardedInterstitial();
+      if (screenClass != null || callerFunction != null) {
+        await RewardedInterstitialAdsPlatform.instance
+            .showRewardedInterstitialWithContext(
+          screenClass: screenClass,
+          callerFunction: callerFunction,
+        );
+      } else {
+        await RewardedInterstitialAdsPlatform.instance.showRewardedInterstitial();
+      }
       return true;
     } on PlatformException catch (e) {
       if (e.code == 'AD_NOT_READY') {

@@ -6,9 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:say_word_challenge/services/remote_config_service.dart';
-import 'package:say_word_challenge/ui/app/bloc/app_bloc.dart';
 
 import 'di/injection_container.dart';
 import 'ui/main/main_app.dart';

@@ -483,7 +483,10 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
       // todo show native full screen ==> check policy
     };
-    if (!await InterstitialAdsController.instance.showInterstitialAd()) {
+    if (!await InterstitialAdsController.instance.showInterstitialAd(
+      screenClass: 'VideoPlayerPage',
+      callerFunction: 'VideoPlayerPage._handleShowInter',
+    )) {
       InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
       InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
       InterstitialAds.onInterstitialShown = origin_onInterstitialShown;

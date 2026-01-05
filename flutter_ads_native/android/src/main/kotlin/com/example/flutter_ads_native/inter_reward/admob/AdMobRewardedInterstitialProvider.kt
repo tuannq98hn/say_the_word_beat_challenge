@@ -13,6 +13,9 @@ import com.example.flutter_ads_native.inter_reward.AdLoadCallback
 import com.example.flutter_ads_native.inter_reward.AdsConfig
 import com.example.flutter_ads_native.inter_reward.RewardedInterstitialAdCallback
 import com.example.flutter_ads_native.inter_reward.RewardedInterstitialAdProvider
+import com.example.flutter_ads_native.tracking.AdTypes
+import com.example.flutter_ads_native.tracking.AdsAnalytics
+import com.example.flutter_ads_native.tracking.AdsShowContext
 import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
 import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
 import com.facebook.appevents.AppEventsLogger
@@ -63,6 +66,7 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
 
     override fun load(context: Context, adUnitId: String, callback: AdLoadCallback?) {
         lastAdUnitId = adUnitId
+        AdsAnalytics.logAdLoadStart(context, AdTypes.REWARDED_INTERSTITIAL, adUnitId)
 
         android.util.Log.d("AdMobRewardedInterstitial", "Loading rewarded interstitial ad with unit ID: $adUnitId")
         
@@ -76,7 +80,8 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
                 override fun onAdLoaded(ad: RewardedInterstitialAd) {
                     android.util.Log.d("AdMobRewardedInterstitial", "Rewarded interstitial ad loaded successfully")
                     rewardedInterstitialAd = ad
-                    callback?.onAdLoaded()
+                    AdsAnalytics.logAdLoadSuccess(context, AdTypes.REWARDED_INTERSTITIAL, adUnitId)
+                    callback?.onAdLoaded(adUnitId)
                     val facebookEventLogger = AppEventsLogger.newLogger(context)
                     TikTokAdMobLogger.bindRewardedInterstitialRevenue(context,ad, adUnitId, tracker)
                     FacebookROASTracker.bindRewardedInterstitialRevenue(context,ad, adUnitId, facebookEventLogger)
@@ -85,8 +90,14 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
                 override fun onAdFailedToLoad(error: LoadAdError) {
                     android.util.Log.e("AdMobRewardedInterstitial", "Rewarded interstitial ad failed to load: ${error.code} - ${error.message}")
                     rewardedInterstitialAd = null
-                    val errorMessage = "Error ${error.code}: ${error.message}"
-                    callback?.onAdFailedToLoad(errorMessage)
+                    AdsAnalytics.logAdLoadFail(
+                        context = context,
+                        adType = AdTypes.REWARDED_INTERSTITIAL,
+                        adUnitId = adUnitId,
+                        errorCode = error.code,
+                        errorMessage = error.message
+                    )
+                    callback?.onAdFailedToLoad(adUnitId, error.code, error.message)
                 }
             }
         )
@@ -95,7 +106,7 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
     override fun show(activity: Activity, callback: RewardedInterstitialAdCallback?) {
         val ad = rewardedInterstitialAd
         if (ad == null) {
-            callback?.onAdFailedToShow("Rewarded interstitial ad not ready")
+            callback?.onAdFailedToShow(lastAdUnitId, null, "Rewarded interstitial ad not ready")
             // Optionally trigger a new load using rotation
             loadNext(activity.applicationContext, null)
             return
@@ -114,7 +125,17 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
             }
 
             override fun onAdFailedToShowFullScreenContent(error: AdError) {
-                callback?.onAdFailedToShow(error.message)
+                val ctx = AdsShowContext.getForAdType(AdTypes.REWARDED_INTERSTITIAL)
+                AdsAnalytics.logAdShowFail(
+                    context = activity,
+                    adType = AdTypes.REWARDED_INTERSTITIAL,
+                    adUnitId = lastAdUnitId,
+                    screenClass = ctx?.screenClass,
+                    callerFunction = ctx?.callerFunction,
+                    errorCode = error.code,
+                    errorMessage = error.message
+                )
+                callback?.onAdFailedToShow(lastAdUnitId, error.code, error.message)
                 rewardedInterstitialAd = null
                 // Try to preload next ad using rotation
                 loadNext(activity.applicationContext, null)
@@ -122,6 +143,14 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
 
             override fun onAdImpression() {
                 if(lastAdUnitId != null) {
+                    val ctx = AdsShowContext.getForAdType(AdTypes.REWARDED_INTERSTITIAL)
+                    AdsAnalytics.logAdImpression(
+                        context = activity,
+                        adType = AdTypes.REWARDED_INTERSTITIAL,
+                        adUnitId = lastAdUnitId,
+                        screenClass = ctx?.screenClass,
+                        callerFunction = ctx?.callerFunction
+                    )
                     val facebookEventLogger = AppEventsLogger.newLogger(activity)
                     TikTokAdMobLogger.logImpression(
                         activity,
@@ -168,4 +197,6 @@ class AdMobRewardedInterstitialProvider : RewardedInterstitialAdProvider {
     override fun isReady(): Boolean {
         return rewardedInterstitialAd != null
     }
+
+    fun getLastAdUnitId(): String? = lastAdUnitId
 }

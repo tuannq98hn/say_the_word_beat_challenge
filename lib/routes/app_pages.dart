@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_ads_native/interstitial_ads/interstitial_ads.dart';
 import 'package:go_router/go_router.dart';
 import 'package:say_word_challenge/services/interstitial_ads_controller.dart';
+import 'package:say_word_challenge/tracking/app_analytics.dart';
 
 import '../data/model/challenge.dart';
 import '../data/model/tiktok_video.dart';
@@ -13,6 +14,7 @@ import '../ui/pre_game_settings/view/pre_game_settings_page.dart';
 import '../ui/splash/view/splash_page.dart';
 import '../ui/style_selection/view/style_selection_page.dart';
 import '../ui/video/video_player_page.dart';
+import '../tracking/widgets/tracked_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -21,12 +23,22 @@ class AppPages {
     routes: [
       GoRoute(
         path: AppRoutes.splash,
-        builder: (context, state) => SplashPage(),
+        builder: (context, state) => TrackedScreen(
+          screenClass: 'SplashPage',
+          child: SplashPage(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.main,
-        builder: (context, state) => MainTabPage(
+        builder: (context, state) => TrackedScreen(
+          screenClass: 'MainTabPage',
+          child: MainTabPage(
           onChallengeSelected: (challenge) async {
+            AppAnalytics.logButtonClick(
+              screenClass: 'MainTabPage',
+              buttonName: 'select_challenge',
+              action: 'open_pre_game_settings',
+            );
             _handleShowInter(
               onDone: () {
                 context.push(AppRoutes.preGameSettings, extra: challenge);
@@ -34,12 +46,18 @@ class AppPages {
             );
           },
           onVideoSelected: (video) {
+            AppAnalytics.logButtonClick(
+              screenClass: 'MainTabPage',
+              buttonName: 'select_video',
+              action: 'open_video_player',
+            );
             _handleShowInter(
               onDone: () {
                 context.push(AppRoutes.videoPlayer, extra: video);
               },
             );
           },
+          ),
         ),
       ),
       GoRoute(
@@ -57,7 +75,10 @@ class AppPages {
           if (challenge == null) {
             return const SizedBox();
           }
-          return PreGameSettingsPage(challenge: challenge);
+          return TrackedScreen(
+            screenClass: 'PreGameSettingsPage',
+            child: PreGameSettingsPage(challenge: challenge),
+          );
         },
       ),
       GoRoute(
@@ -72,23 +93,34 @@ class AppPages {
           if (challenge == null) {
             return const SizedBox();
           }
-          return GamePage(
-            challenge: challenge,
-            onBack: () {
-              context.go(AppRoutes.main);
-            },
-            onGameOver: () {
-              context.go(AppRoutes.gameOver);
-            },
+          return TrackedScreen(
+            screenClass: 'GamePage',
+            child: GamePage(
+              challenge: challenge,
+              onBack: () {
+                context.go(AppRoutes.main);
+              },
+              onGameOver: () {
+                context.go(AppRoutes.gameOver);
+              },
+            ),
           );
         },
       ),
       GoRoute(
         path: AppRoutes.gameOver,
-        builder: (context, state) => GameOverPage(
-          onPlayAgain: () {
-            context.go(AppRoutes.main);
-          },
+        builder: (context, state) => TrackedScreen(
+          screenClass: 'GameOverPage',
+          child: GameOverPage(
+            onPlayAgain: () {
+              AppAnalytics.logButtonClick(
+                screenClass: 'GameOverPage',
+                buttonName: 'play_again',
+                action: 'go_main',
+              );
+              context.go(AppRoutes.main);
+            },
+          ),
         ),
       ),
       GoRoute(
@@ -98,11 +130,14 @@ class AppPages {
           if (video == null) {
             return const SizedBox();
           }
-          return VideoPlayerPage(
-            video: video,
-            onBack: () {
-              context.pop();
-            },
+          return TrackedScreen(
+            screenClass: 'VideoPlayerPage',
+            child: VideoPlayerPage(
+              video: video,
+              onBack: () {
+                context.pop();
+              },
+            ),
           );
         },
       ),
@@ -127,7 +162,10 @@ class AppPages {
       InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
       // todo show native full screen ==> check policy
     };
-    if (!await InterstitialAdsController.instance.showInterstitialAd()) {
+    if (!await InterstitialAdsController.instance.showInterstitialAd(
+      screenClass: 'MainTabPage',
+      callerFunction: 'AppPages._handleShowInter',
+    )) {
       InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
       InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
       InterstitialAds.onInterstitialShown = origin_onInterstitialShown;

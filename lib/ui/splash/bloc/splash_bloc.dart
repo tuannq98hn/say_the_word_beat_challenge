@@ -5,6 +5,7 @@ import 'package:flutter_ads_native/rewarded_ads/rewarded_ads.dart';
 import 'package:flutter_ads_native/rewarded_interstitial_ads/rewarded_interstitial_ads.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:say_word_challenge/common/utils/app_broadcast.dart';
+import 'package:say_word_challenge/services/interstitial_ads_controller.dart';
 import 'package:say_word_challenge/services/remote_config_service.dart';
 
 import '../../../base/base_bloc.dart';
@@ -37,7 +38,50 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
     await RewardedInterstitialAds.init(
       rewardedInterstitialAdUnitIds: rewardedInterstitialAdUnitIds,
     );
+    await Future.delayed(Duration(milliseconds: 1500));
+    await _handleShowInter();
     emit(state.copyWith(isLoading: false, isCompleted: true));
+  }
+
+  Future<void> _handleShowInter() async {
+    final completer = Completer<void>(); // 1. Tạo Completer
+
+    final origin_onInterstitialClosed = InterstitialAds.onInterstitialClosed;
+    final origin_onInterstitialFailed = InterstitialAds.onInterstitialFailed;
+    final origin_onInterstitialShown = InterstitialAds.onInterstitialShown;
+    final origin_onInterstitialLoaded = InterstitialAds.onInterstitialLoaded;
+    bool isShown = false;
+    void finish() {
+      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
+      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
+      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+      InterstitialAds.onInterstitialLoaded = origin_onInterstitialLoaded;
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+    }
+
+    InterstitialAds.onInterstitialClosed = () {
+      finish();
+    };
+
+    InterstitialAds.onInterstitialFailed = (_) {
+      finish();
+    };
+
+    InterstitialAds.onInterstitialShown = () {};
+    InterstitialAds.onInterstitialLoaded = () async {
+      // show inter nếu action isShown = false
+      if (!isShown) {
+        isShown = await InterstitialAdsController.instance.showInterstitialAd();
+        if (!isShown) {
+          finish();
+        }
+      }
+    };
+
+    isShown = await InterstitialAdsController.instance.showInterstitialAd();
+    return completer.future;
   }
 
   void _handleListenAppEvent(Emitter<SplashState> emit) {

@@ -345,7 +345,9 @@ class _PreGameSettingsPageState extends State<PreGameSettingsPage> {
           countDownTimer = null;
         }
         setState(() {
-          delayCountDown = delayCountDown! - 1;
+          if (delayCountDown != null) {
+            delayCountDown = delayCountDown! - 1;
+          }
           if (delayCountDown == 0) {
             delayCountDown = null;
           }

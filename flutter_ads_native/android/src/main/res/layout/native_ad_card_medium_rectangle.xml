@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.gms.ads.nativead.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
     <FrameLayout
         android:id="@+id/frmNativeRoot"
         android:layout_width="match_parent"
@@ -36,20 +38,29 @@
                 android:padding="12dp">
 
                 <!-- Top Section: Large Banner Image (60% height) -->
-                <FrameLayout
+                <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="130dp"
                     android:layout_marginBottom="5dp"
-                    android:background="@drawable/image_container_gray">
+                    android:elevation="0dp"
+                    app:cardBackgroundColor="#111827"
+                    app:cardCornerRadius="8dp">
 
                     <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="match_parent">
                         <!-- MediaView for video/image content -->
                         <com.google.android.gms.ads.nativead.MediaView
                             android:id="@+id/adMediaView"
                             android:layout_width="wrap_content"
                             android:layout_height="130dp" />
+                        <!-- Fallback ImageView if MediaView not available -->
+                        <ImageView
+                            android:id="@+id/adImage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="130dp"
+                            android:contentDescription="Ad Image"
+                            android:visibility="visible" />
 
                         <ProgressBar
                             android:id="@+id/loadingMedia"
@@ -57,15 +68,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true" />
                     </RelativeLayout>
-
-                    <!-- Fallback ImageView if MediaView not available -->
-                    <ImageView
-                        android:id="@+id/adImage"
-                        android:layout_width="wrap_content"
-                        android:layout_height="130dp"
-                        android:contentDescription="Ad Image"
-                        android:visibility="visible" />
-                </FrameLayout>
+                </androidx.cardview.widget.CardView>
 
                 <!-- Bottom Section: Content Info (40% height) -->
                 <LinearLayout
@@ -73,13 +76,13 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <!-- Left: Icon/Logo Container -->
-                    <FrameLayout
+                    <androidx.cardview.widget.CardView
                         android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:layout_marginEnd="8dp"
-                        android:background="@drawable/image_container_gray"
-                        android:padding="2dp">
+                        app:cardBackgroundColor="#111827"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp">
 
                         <ImageView
                             android:id="@+id/adIcon"
@@ -87,7 +90,8 @@
                             android:layout_height="match_parent"
                             android:contentDescription="Ad Icon"
                             android:scaleType="centerCrop" />
-                    </FrameLayout>
+
+                    </androidx.cardview.widget.CardView>
 
                     <!-- Text Content -->
                     <LinearLayout
@@ -112,9 +116,9 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:ellipsize="end"
+                                android:fontFamily="@font/inter_variable_font"
                                 android:maxLines="1"
                                 android:minWidth="0dp"
-                                android:fontFamily="@font/inter_variable_font"
                                 android:text="Giáng Sinh Diệu Kỳ"
                                 android:textColor="#FFFFFF"
                                 android:textSize="14sp"
@@ -174,10 +178,10 @@
                             android:id="@+id/adDescription"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter_variable_font"
                             android:lineSpacingExtra="2dp"
                             android:lineSpacingMultiplier="1.1"
                             android:maxLines="2"
-                            android:fontFamily="@font/inter_variable_font"
                             android:text="Khám phá kho tàng đồ chơi và quà tặng độc đáo cho bé yêu mùa lễ hội này."
                             android:textColor="#D1D5DB"
                             android:textSize="12sp" />
@@ -205,8 +209,8 @@
                             android:id="@+id/install_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Start now"
                             android:fontFamily="@font/inter_variable_font"
+                            android:text="Start now"
                             android:textColor="#000000"
                             android:textSize="14sp"
                             android:textStyle="bold" />

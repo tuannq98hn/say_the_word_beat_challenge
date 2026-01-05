@@ -465,7 +465,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
     );
   }
 
-  static Future<void> _handleShowInter({
+  Future<void> _handleShowInter({
     required void Function() onDone,
   }) async {
     final origin_onInterstitialClosed = InterstitialAds.onInterstitialClosed;

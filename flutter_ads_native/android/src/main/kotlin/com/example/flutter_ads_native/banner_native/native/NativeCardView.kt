@@ -11,8 +11,10 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import com.example.flutter_ads_native.AdsEventStreamHandler
 import com.example.flutter_ads_native.R
+import com.example.flutter_ads_native.facebook_event.FacebookROASTracker
 import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
 import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker
+import com.facebook.appevents.AppEventsLogger
 import com.google.android.gms.ads.AdListener
 import com.google.android.gms.ads.AdLoader
 import com.google.android.gms.ads.AdRequest
@@ -23,8 +25,6 @@ import com.google.android.gms.ads.nativead.NativeAd
 import com.google.android.gms.ads.nativead.NativeAdView
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
-import com.example.flutter_ads_native.facebook_event.FacebookROASTracker
-import com.facebook.appevents.AppEventsLogger
 
 class NativeCardView(
     context: Context,
@@ -54,15 +54,16 @@ class NativeCardView(
             frmAdsContent.visibility = View.VISIBLE
             bindNativeAd(nativeAd)
             TikTokAdMobLogger.bindNativeRevenue(context = context, nativeAd, adUnitId, tracker)
-            FacebookROASTracker.bindNativeRevenue(context = context, nativeAd, adUnitId, facebookEventLogger)
+            FacebookROASTracker.bindNativeRevenue(
+                context = context, nativeAd, adUnitId, facebookEventLogger
+            )
             nativeAds = nativeAd
             AD_UNIT_ID = adUnitId
         }.withAdListener(object : AdListener() {
             override fun onAdFailedToLoad(error: LoadAdError) {
                 // Notify Flutter that ad failed to load
                 eventHandler.sendEvent(
-                    "ads_custom_view_failed",
-                    mapOf("id" to viewId)
+                    "ads_custom_view_failed", mapOf("id" to viewId)
                 )
             }
 
@@ -70,16 +71,10 @@ class NativeCardView(
                 // Check null nativeAds and AD_UNIT_ID before logging impression
                 if (nativeAds != null && AD_UNIT_ID != null) {
                     TikTokAdMobLogger.logNativeImpression(
-                        context = context,
-                        tracker,
-                        AD_UNIT_ID!!,
-                        nativeAds!!
+                        context = context, tracker, AD_UNIT_ID!!, nativeAds!!
                     )
                     FacebookROASTracker.logNativeImpression(
-                        context = context,
-                        facebookEventLogger,
-                        AD_UNIT_ID!!,
-                        nativeAds!!
+                        context = context, facebookEventLogger, AD_UNIT_ID!!, nativeAds!!
                     )
                 }
             }
@@ -87,16 +82,10 @@ class NativeCardView(
             override fun onAdClicked() {
                 if (nativeAds != null && AD_UNIT_ID != null) {
                     TikTokAdMobLogger.logNativeClick(
-                        context = context,
-                        tracker,
-                        AD_UNIT_ID!!,
-                        nativeAds!!
+                        context = context, tracker, AD_UNIT_ID!!, nativeAds!!
                     )
                     FacebookROASTracker.logNativeClick(
-                        context = context,
-                        facebookEventLogger,
-                        AD_UNIT_ID!!,
-                        nativeAds!!
+                        context = context, facebookEventLogger, AD_UNIT_ID!!, nativeAds!!
                     )
                 }
             }
@@ -162,9 +151,8 @@ class NativeCardView(
                 description.visibility = View.GONE
             }
             // Bind icon/logo if available
+            val iconDrawable = nativeAd.icon?.drawable
             if (icon != null) {
-                val iconDrawable =
-                    nativeAd.icon?.drawable ?: nativeAd.images.firstOrNull()?.drawable
                 if (iconDrawable != null) {
                     icon.setImageDrawable(iconDrawable)
                     icon.visibility = View.VISIBLE
@@ -177,33 +165,48 @@ class NativeCardView(
                     iconContainer?.visibility = View.GONE
                 }
             }
-            if (mediaView != null && nativeAd.mediaContent?.hasVideoContent() == true) {
-                adView.mediaView = mediaView
-                mediaView.setMediaContent(nativeAd.mediaContent!!)
-                adView.imageView = null
-                nativeAd.mediaContent!!.videoController.videoLifecycleCallbacks =
-                    object : VideoController.VideoLifecycleCallbacks() {
-                        override fun onVideoPlay() {
-                            super.onVideoPlay()
-                            loadingMedia?.visibility = View.GONE
-                        }
+            adView.mediaView = null
+            adView.imageView = null
+            if (mediaView != null && nativeAd.mediaContent != null) {
+                image?.visibility = View.GONE
+                mediaView.visibility = View.VISIBLE
 
-                        override fun onVideoStart() {
-                            super.onVideoStart()
-                            loadingMedia?.visibility = View.GONE
+                adView.mediaView = mediaView
+                mediaView.mediaContent = nativeAd.mediaContent!!
+                if (nativeAd.mediaContent?.hasVideoContent() == true) {
+                    nativeAd.mediaContent!!.videoController.videoLifecycleCallbacks =
+                        object : VideoController.VideoLifecycleCallbacks() {
+                            override fun onVideoPlay() {
+                                super.onVideoPlay()
+                                loadingMedia?.visibility = View.GONE
+                            }
+
+                            override fun onVideoStart() {
+                                super.onVideoStart()
+                                loadingMedia?.visibility = View.GONE
+                            }
                         }
-                    }
-            } else {
-                adView.mediaView = null
+                } else {
+                    loadingMedia?.visibility = View.GONE
+                }
+            } else if (image != null && nativeAd.images.isNotEmpty()) {
+                adView.imageView = image
+                image.setImageDrawable(nativeAd.images[0].drawable)
+
+                image.visibility = View.VISIBLE
+                mediaView?.visibility = View.GONE
                 loadingMedia?.visibility = View.GONE
-//                adView.imageView = image
-//                loadingMedia?.visibility = View.GONE
-//                image?.visibility = View.VISIBLE
-//                val images = nativeAd.images
-//                if (images.isNotEmpty()) {
-//                    val drawable = images[0].drawable
-//                    image?.setImageDrawable(drawable)
-//                }
+            } else if (image != null && iconDrawable != null) {
+                image.setImageDrawable(iconDrawable)
+                image.setPadding(0, 0, 0, 0)
+
+                image.visibility = View.VISIBLE
+                mediaView?.visibility = View.GONE
+                loadingMedia?.visibility = View.GONE
+            } else {
+                image?.visibility = View.GONE
+                mediaView?.visibility = View.GONE
+                loadingMedia?.visibility = View.GONE
             }
 
             // CALL TO ACTION BUTTON

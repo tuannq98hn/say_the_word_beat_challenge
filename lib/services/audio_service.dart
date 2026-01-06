@@ -50,6 +50,7 @@ class AudioService {
       try {
         await _audioPlayer.play(AssetSource('mp3/music2.mp3'));
         await _audioPlayer.setReleaseMode(ReleaseMode.release);
+        await _audioPlayer.setVolume(1);
         _isMusicPlaying = true;
       } catch (e) {
         // Error playing music - silently fail

@@ -8,7 +8,7 @@ class GameSettings {
   final bool enableRecording;
   final bool enableCamera;
 
-  GameSettings({
+  const GameSettings({
     this.showWordText = false,
     this.difficulty = Difficulty.medium,
     this.musicStyle = MusicStyle.funk,

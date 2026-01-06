@@ -8,9 +8,11 @@ import '../data/model/challenge.dart';
 import '../data/model/tiktok_video.dart';
 import '../ui/game/view/game_page.dart';
 import '../ui/game_over/view/game_over_page.dart';
+import '../ui/guide/view/guide_page.dart';
 import '../ui/main/main_tab_page.dart';
 import '../ui/pre_game_settings/view/pre_game_settings_page.dart';
 import '../ui/splash/view/splash_page.dart';
+import '../ui/style_selection/view/style_selection_page.dart';
 import '../ui/video/video_player_page.dart';
 import '../tracking/widgets/tracked_screen.dart';
 import 'app_routes.dart';
@@ -57,6 +59,14 @@ class AppPages {
           },
           ),
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.guide,
+        builder: (context, state) => const GuidePage(),
+      ),
+      GoRoute(
+        path: AppRoutes.styleSelection,
+        builder: (context, state) => const StyleSelectionPage(),
       ),
       GoRoute(
         path: AppRoutes.preGameSettings,

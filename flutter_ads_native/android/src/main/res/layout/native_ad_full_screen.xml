@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.gms.ads.nativead.NativeAdView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -30,6 +31,7 @@
             android:fitsSystemWindows="true"
             android:visibility="gone"
             tools:visibility="visible">
+
             <com.google.android.gms.ads.nativead.AdChoicesView
                 android:id="@+id/adChoicesView"
                 android:layout_width="24dp"
@@ -66,12 +68,6 @@
                             android:layout_centerInParent="true"
                             android:minHeight="120dp" />
 
-                        <ProgressBar
-                            android:id="@+id/loadingMedia"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_centerInParent="true" />
-
                         <ImageView
                             android:id="@+id/adImage"
                             android:layout_width="match_parent"
@@ -80,6 +76,12 @@
                             android:contentDescription="Ad Image"
                             android:scaleType="centerCrop"
                             android:visibility="visible" />
+
+                        <ProgressBar
+                            android:id="@+id/loadingMedia"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true" />
                     </RelativeLayout>
                 </FrameLayout>
 
@@ -90,12 +92,13 @@
                     android:orientation="horizontal">
 
                     <!-- Left: Icon/Logo Container -->
-                    <FrameLayout
+                    <androidx.cardview.widget.CardView
                         android:layout_width="80dp"
                         android:layout_height="80dp"
                         android:layout_marginEnd="8dp"
-                        android:background="@drawable/image_container_gray"
-                        android:padding="2dp">
+                        app:cardBackgroundColor="#111827"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp">
 
                         <ImageView
                             android:id="@+id/adIcon"
@@ -103,7 +106,8 @@
                             android:layout_height="match_parent"
                             android:contentDescription="Ad Icon"
                             android:scaleType="centerCrop" />
-                    </FrameLayout>
+
+                    </androidx.cardview.widget.CardView>
 
                     <!-- Text Content -->
                     <LinearLayout
@@ -123,12 +127,12 @@
                             android:orientation="horizontal">
 
                             <TextView
-                                android:fontFamily="@font/inter_variable_font"
                                 android:id="@+id/adTitle"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:ellipsize="end"
+                                android:fontFamily="@font/inter_variable_font"
                                 android:maxLines="1"
                                 android:minWidth="0dp"
                                 android:text="Giáng Sinh Diệu Kỳ"
@@ -187,10 +191,10 @@
 
                         <!-- Description -->
                         <TextView
-                            android:fontFamily="@font/inter_variable_font"
                             android:id="@+id/adDescription"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter_variable_font"
                             android:lineSpacingExtra="2dp"
                             android:lineSpacingMultiplier="1.1"
                             android:maxLines="2"
@@ -217,10 +221,10 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:fontFamily="@font/inter_variable_font"
                             android:id="@+id/install_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter_variable_font"
                             android:text="Start now"
                             android:textColor="#000000"
                             android:textSize="14sp"
@@ -229,6 +233,7 @@
                 </FrameLayout>
             </LinearLayout>
         </FrameLayout>
+
         <RelativeLayout
             android:id="@+id/btnClose"
             android:layout_width="36dp"
@@ -245,16 +250,17 @@
                 android:layout_centerInParent="true"
                 android:src="@drawable/admob_close_button_white_circle_black_cross" />
         </RelativeLayout>
+
         <TextView
             android:id="@+id/adLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top|start"
             android:background="@drawable/ad_label_yellow"
+            android:elevation="16dp"
             android:paddingStart="6dp"
             android:paddingTop="2dp"
             android:paddingEnd="6dp"
-            android:elevation="16dp"
             android:paddingBottom="2dp"
             android:text="Ad"
             android:textColor="#000000"

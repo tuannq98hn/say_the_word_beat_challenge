@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:say_word_challenge/data/model/ads_model.dart';
 import 'package:say_word_challenge/routes/app_routes.dart';
 import 'package:say_word_challenge/services/remote_config_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../bloc/splash_bloc.dart';
 import '../bloc/splash_event.dart';
@@ -104,7 +105,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       child: BlocListener<SplashBloc, SplashState>(
         listener: (context, state) {
           if (state.isCompleted) {
-            context.go(AppRoutes.main);
+            _navigateAfterSplash(context);
           }
         },
         child: Scaffold(
@@ -219,7 +220,8 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                     BlocBuilder<SplashBloc, SplashState>(
                       builder: (ctx, state) {
                         final blank = SizedBox.shrink();
-                        if (state.isLoading || state.isCloseNative) return blank;
+                        if (state.isLoading || state.isCloseNative)
+                          return blank;
                         final adData = RemoteConfigService.instance
                             .configAdsDataByScreen("SplashPageFull");
                         if (state.isOpenAppSuccess &&
@@ -257,6 +259,17 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     if (w >= 900) return 88;
     if (w >= 600) return 78;
     return 64;
+  }
+
+  Future<void> _navigateAfterSplash(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenGuide = prefs.getBool('has_seen_guide') ?? false;
+    if (!context.mounted) return;
+    if (hasSeenGuide) {
+      context.go(AppRoutes.main);
+    } else {
+      context.go(AppRoutes.guide);
+    }
   }
 }
 

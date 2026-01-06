@@ -1,35 +1,38 @@
+
 export interface ChallengeItem {
   word: string;
   emoji: string;
-  image?: string; // Optional URL for custom images (Base64 or URL)
+  image?: string;
 }
 
 export interface Round {
   id: number;
-  items: ChallengeItem[]; // Exactly 8 items per round
+  items: ChallengeItem[];
 }
 
 export interface Challenge {
   id: string;
   topic: string;
-  icon?: string; // Icon/Emoji representing the topic
+  icon?: string;
   rounds: Round[];
   isCustom?: boolean;
 }
 
 export enum GameState {
   SPLASH = 'SPLASH',
-  MAIN = 'MAIN', // Replaces MENU, acts as container for Tabs
+  GUIDE = 'GUIDE',
+  STYLE_SELECTION = 'STYLE_SELECTION',
+  MAIN = 'MAIN',
   GENERATING = 'GENERATING',
   PLAYING = 'PLAYING',
   GAME_OVER = 'GAME_OVER',
-  VIDEO_PLAYER = 'VIDEO_PLAYER' // New state for full screen video
+  VIDEO_PLAYER = 'VIDEO_PLAYER'
 }
 
 export enum Difficulty {
-  EASY = 'EASY',     // 120 BPM
-  MEDIUM = 'MEDIUM', // 138 BPM
-  HARD = 'HARD'      // 150 BPM
+  EASY = 'EASY',
+  MEDIUM = 'MEDIUM',
+  HARD = 'HARD'
 }
 
 export enum MusicStyle {
@@ -44,21 +47,23 @@ export interface GameSettings {
   musicStyle: MusicStyle;
 }
 
-export interface BeatConfig {
-  bpm: number;
-  isPlaying: boolean;
-  currentBeat: number;
-}
-
 export enum AppTab {
   TRENDING = 'TRENDING',
   FEATURED = 'FEATURED',
-  VIDEO = 'VIDEO', // New Tab
+  VIDEO = 'VIDEO',
   CUSTOM = 'CUSTOM',
   SETTINGS = 'SETTINGS'
 }
 
-// Interfaces for Custom Challenge Creation
+export interface TikTokVideo {
+  id: string;
+  author: string;
+  description: string;
+  tags: string[];
+  thumbnailUrl: string;
+}
+
+// Added UploadedImage interface to match usage in CreateWizard
 export interface UploadedImage {
   id: string;
   file: File;
@@ -66,17 +71,13 @@ export interface UploadedImage {
   name: string;
 }
 
+// Added CustomCreationData interface to match usage in CreateWizard
 export interface CustomCreationData {
+  processedImages: {
+    id: string;
+    name: string;
+    base64: string;
+  }[];
+  levels: string[][];
   topicName: string;
-  images: UploadedImage[];
-  levels: string[][]; // 5 levels, each has 8 image IDs
-}
-
-// Interface for TikTok Video
-export interface TikTokVideo {
-  id: string; // The numeric/string ID of the video from TikTok
-  author: string;
-  description: string;
-  tags: string[];
-  thumbnailUrl: string; // URL for the preview image
 }

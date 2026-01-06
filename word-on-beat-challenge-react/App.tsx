@@ -1,8 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { TopicList } from './components/TopicList';
 import { Game } from './components/Game';
 import { GameOver } from './components/GameOver';
 import { Splash } from './components/Splash';
+import { Guide } from './components/Guide';
+import { StyleSelection } from './components/StyleSelection';
 import { BottomNav } from './components/BottomNav';
 import { SettingsTab } from './components/SettingsTab';
 import { CustomTab } from './components/CustomTab';
@@ -17,31 +20,31 @@ function App() {
   const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
   const [activeTab, setActiveTab] = useState<AppTab>(AppTab.TRENDING);
   
-  // Video Player State
   const [currentVideo, setCurrentVideo] = useState<TikTokVideo | null>(null);
-  
-  // Custom Challenges Data
   const [customChallenges, setCustomChallenges] = useState<Challenge[]>([]);
 
-  // Settings State
   const [settings, setSettings] = useState<GameSettings>({
     showWordText: true,
     difficulty: Difficulty.MEDIUM,
     musicStyle: MusicStyle.FUNK
   });
 
-  // Load Custom Challenges on Mount
   useEffect(() => {
     const loaded = loadCustomChallenges();
     setCustomChallenges(loaded);
   }, []);
 
-  // Splash Screen Logic
   useEffect(() => {
     if (gameState === GameState.SPLASH) {
         const timer = setTimeout(() => {
-            setGameState(GameState.MAIN);
-        }, 2000); // 2 seconds
+            // Check if first time user (simplified for this demo with localStorage)
+            const hasSeenGuide = localStorage.getItem('has_seen_guide');
+            if (hasSeenGuide) {
+                setGameState(GameState.MAIN);
+            } else {
+                setGameState(GameState.GUIDE);
+            }
+        }, 2000);
         return () => clearTimeout(timer);
     }
   }, [gameState]);
@@ -50,10 +53,20 @@ function App() {
     setSettings(prev => ({ ...prev, ...newSettings }));
   };
 
+  const handleGuideComplete = () => {
+    localStorage.setItem('has_seen_guide', 'true');
+    setGameState(GameState.STYLE_SELECTION);
+  };
+
+  const handleStyleSelect = (newSettings: Partial<GameSettings>) => {
+    updateSettings(newSettings);
+    setGameState(GameState.MAIN);
+  };
+
   const handleAddCustomChallenge = (c: Challenge) => {
       const updated = [c, ...customChallenges];
       setCustomChallenges(updated);
-      saveCustomChallenges(updated); // Save to local storage
+      saveCustomChallenges(updated);
   };
 
   const handleVideoClick = (video: TikTokVideo) => {
@@ -65,8 +78,15 @@ function App() {
     <div className="h-[100dvh] w-full bg-black text-white font-sans antialiased selection:bg-pink-500 selection:text-white overflow-hidden touch-none relative flex flex-col">
       
       {gameState === GameState.SPLASH && <Splash />}
+      
+      {gameState === GameState.GUIDE && (
+        <Guide onComplete={handleGuideComplete} />
+      )}
 
-      {/* MAIN TABBED INTERFACE */}
+      {gameState === GameState.STYLE_SELECTION && (
+        <StyleSelection onSelect={handleStyleSelect} />
+      )}
+
       {gameState === GameState.MAIN && (
           <>
             <div className="flex-1 overflow-hidden relative">
@@ -110,8 +130,6 @@ function App() {
             <BottomNav currentTab={activeTab} onTabChange={setActiveTab} />
           </>
       )}
-
-      {/* FULL SCREEN STATES (No Bottom Nav) */}
 
       {gameState === GameState.PLAYING && currentChallenge && (
         <Game 

@@ -131,6 +131,7 @@ flutter:
     - assets/translations/
     - assets/svg/
     - assets/lotties/
+    - assets/gif/
     - assets/mp3/
     - assets/data/data.json
     - assets/data/auherthe/

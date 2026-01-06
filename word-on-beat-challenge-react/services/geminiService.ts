@@ -1,8 +1,10 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { Challenge } from "../types";
 import { TRENDING_DATA, TRENDING_METADATA } from "../data/trending";
 import { FEATURED_DATA, FEATURED_METADATA } from "../data/featured";
 
+// Initialize AI with the correct pattern
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // Export Metadata for UI
@@ -29,8 +31,9 @@ export const generateWordChallenge = async (topicId: string, promptTopic: string
   `;
 
   try {
+    // Using recommended model and generateContent pattern
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         responseMimeType: "application/json",
@@ -38,7 +41,7 @@ export const generateWordChallenge = async (topicId: string, promptTopic: string
           type: Type.OBJECT,
           properties: {
             topic: { type: Type.STRING },
-            icon: { type: Type.STRING }, // Request icon
+            icon: { type: Type.STRING },
             rounds: {
               type: Type.ARRAY,
               items: {
@@ -52,19 +55,24 @@ export const generateWordChallenge = async (topicId: string, promptTopic: string
                       properties: {
                         word: { type: Type.STRING },
                         emoji: { type: Type.STRING }
-                      }
+                      },
+                      required: ['word', 'emoji']
                     }
                   }
-                }
+                },
+                required: ['id', 'items']
               }
             }
-          }
+          },
+          required: ['topic', 'rounds']
         }
       }
     });
 
-    if (response.text) {
-      const data = JSON.parse(response.text);
+    // Access text property directly as per guidelines
+    const text = response.text;
+    if (text) {
+      const data = JSON.parse(text);
       return {
         id: Date.now().toString(),
         topic: data.topic,

@@ -1,8 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_ads_native/interstitial_ads/interstitial_ads.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:say_word_challenge/services/interstitial_ads_controller.dart';
+import 'package:say_word_challenge/services/remote_config_service.dart';
 
 import '../../../common/enums/difficulty.dart';
 import '../../../common/enums/music_style.dart';
@@ -37,7 +40,8 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
       style: MusicStyle.synth,
       difficulty: Difficulty.hard,
       name: 'Neon Hype',
-      description: 'Fast 150 BPM. For pros who can say words at lightning speed.',
+      description:
+          'Fast 150 BPM. For pros who can say words at lightning speed.',
       icon: '🌃',
       borderColor: Color(0x80EC4899),
       backgroundColor: Color(0x1AEC4899),
@@ -56,7 +60,8 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => StyleSelectionBloc()..add(const StyleSelectionInitialized()),
+      create: (_) =>
+          StyleSelectionBloc()..add(const StyleSelectionInitialized()),
       child: BlocListener<StyleSelectionBloc, StyleSelectionState>(
         listenWhen: (p, c) => p.isCompleted != c.isCompleted,
         listener: (context, state) {
@@ -89,7 +94,9 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
                         builder: (context, constraints) {
                           return SingleChildScrollView(
                             child: ConstrainedBox(
-                              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                              constraints: BoxConstraints(
+                                minHeight: constraints.maxHeight,
+                              ),
                               child: Align(
                                 alignment: Alignment.center,
                                 child: Column(
@@ -119,16 +126,34 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
                                     ),
                                     const SizedBox(height: 28),
                                     ConstrainedBox(
-                                      constraints: const BoxConstraints(maxWidth: 390),
+                                      constraints: const BoxConstraints(
+                                        maxWidth: 390,
+                                      ),
                                       child: Column(
                                         children: [
                                           for (final option in _styles) ...[
-                                            _buildStyleButton(context, state, option),
+                                            _buildStyleButton(
+                                              context,
+                                              state,
+                                              option,
+                                            ),
                                             const SizedBox(height: 16),
                                           ],
                                         ],
                                       ),
                                     ),
+                                    if (RemoteConfigService.instance
+                                            .configAdsDataByScreen(
+                                              "StyleSelectionPage",
+                                            ) !=
+                                        null) ...[
+                                      const SizedBox(height: 10),
+                                      RemoteConfigService.instance
+                                          .configAdsByScreen(
+                                            "StyleSelectionPage",
+                                          )!,
+                                    ],
+
                                     const SizedBox(height: 18),
                                     Text(
                                       'You can change this anytime in Settings',
@@ -148,7 +173,9 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
                                         child: SizedBox(
                                           width: 18,
                                           height: 18,
-                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
                                         ),
                                       ),
                                   ],
@@ -193,9 +220,16 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
       onTap: state.isLoading
           ? null
           : () {
-              context.read<StyleSelectionBloc>().add(
-                    StyleSelected(style: option.style, difficulty: option.difficulty),
+              _handleShowInter(
+                onDone: () {
+                  context.read<StyleSelectionBloc>().add(
+                    StyleSelected(
+                      style: option.style,
+                      difficulty: option.difficulty,
+                    ),
                   );
+                },
+              );
             },
       child: AnimatedScale(
         scale: _pressedStyle == option.style ? 0.95 : 1.0,
@@ -212,10 +246,7 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
           ),
           child: Row(
             children: [
-              Text(
-                option.icon,
-                style: const TextStyle(fontSize: 34),
-              ),
+              Text(option.icon, style: const TextStyle(fontSize: 34)),
               const SizedBox(width: 18),
               Expanded(
                 child: Column(
@@ -243,7 +274,10 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
                     ),
                     const SizedBox(height: 10),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withAlpha(20),
                         borderRadius: BorderRadius.circular(999),
@@ -268,6 +302,33 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
       ),
     );
   }
+
+  Future<void> _handleShowInter({required void Function() onDone}) async {
+    final origin_onInterstitialClosed = InterstitialAds.onInterstitialClosed;
+    final origin_onInterstitialFailed = InterstitialAds.onInterstitialFailed;
+    final origin_onInterstitialShown = InterstitialAds.onInterstitialShown;
+    InterstitialAds.onInterstitialClosed = () {
+      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
+      onDone();
+    };
+    InterstitialAds.onInterstitialFailed = (_) {
+      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
+      onDone();
+    };
+    InterstitialAds.onInterstitialShown = () {
+      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+      // todo show native full screen ==> check policy
+    };
+    if (!await InterstitialAdsController.instance.showInterstitialAd(
+      screenClass: 'StyleSelectionPage',
+      callerFunction: 'StyleSelectionPage._handleShowInter',
+    )) {
+      InterstitialAds.onInterstitialClosed = origin_onInterstitialClosed;
+      InterstitialAds.onInterstitialFailed = origin_onInterstitialFailed;
+      InterstitialAds.onInterstitialShown = origin_onInterstitialShown;
+      onDone();
+    }
+  }
 }
 
 class _StyleOption {
@@ -289,4 +350,3 @@ class _StyleOption {
     required this.backgroundColor,
   });
 }
-

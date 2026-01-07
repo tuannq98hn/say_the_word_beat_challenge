@@ -19,3 +19,7 @@ class GuideSkipPressed extends GuideEvent {
   const GuideSkipPressed();
 }
 
+class GuideCountdownTick extends GuideEvent {
+  const GuideCountdownTick();
+}
+

@@ -26,6 +26,7 @@ enum AdNativeSize {
   FULL_SCREEN,
   FULL_SCREEN_GUIDE,
   NATIVE_MEDIUM_RECTANGLE,
+  NATIVE_MEDIUM_RECTANGLE_GUIDE,
   NATIVE_FULL_BANNER,
   NATIVE_LARGE;
 
@@ -33,6 +34,7 @@ enum AdNativeSize {
     AdNativeSize.FULL_SCREEN => double.infinity,
     AdNativeSize.FULL_SCREEN_GUIDE => double.infinity,
     AdNativeSize.NATIVE_MEDIUM_RECTANGLE => 270,
+    AdNativeSize.NATIVE_MEDIUM_RECTANGLE_GUIDE => 270,
     AdNativeSize.NATIVE_FULL_BANNER => 80,
     AdNativeSize.NATIVE_LARGE => 135,
   };

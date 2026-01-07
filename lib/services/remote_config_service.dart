@@ -39,8 +39,8 @@ class RemoteConfigService {
     } catch (err) {
       adsString = jsonEncode(_defaultAdsConfig);
     }
-    // return AdsModel.fromJson(_defaultAdsConfig);
-    return AdsModel.fromJson(jsonDecode(adsString));
+    return AdsModel.fromJson(_defaultAdsConfig);
+    // return AdsModel.fromJson(jsonDecode(adsString));
   }
 
   /// Get list of interstitial ad unit IDs from remote config
@@ -203,6 +203,18 @@ class RemoteConfigService {
       {
         "screenName": "CreateWizardPageManual",
         "adUnitId": "ca-app-pub-3361561931511510/9344399674",
+        "size": "NATIVE_LARGE",
+        "isShow": true,
+      },
+      {
+        "screenName": "GuidePageFull",
+        "adUnitId": "ca-app-pub-3361561931511510/2311608532",
+        "size": "NATIVE_LARGE",
+        "isShow": true,
+      },
+      {
+        "screenName": "GuidePage",
+        "adUnitId": "ca-app-pub-3361561931511510/7156741107",
         "size": "NATIVE_LARGE",
         "isShow": true,
       },

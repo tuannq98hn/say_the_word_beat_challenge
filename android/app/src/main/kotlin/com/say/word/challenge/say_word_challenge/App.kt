@@ -20,7 +20,9 @@ class App : NativeAdsApplication(), Application.ActivityLifecycleCallbacks,
     private var currentActivity: Activity? = null
     private var isAppInBackground = true
     private var hasShownAdOnStartup = false
-
+    companion object{
+        var canShowOpenAd =  true
+    }
     override fun onCreate() {
         super<NativeAdsApplication>.onCreate()
         openAdManager = AppOpenAdManager(this)
@@ -50,7 +52,7 @@ class App : NativeAdsApplication(), Application.ActivityLifecycleCallbacks,
 
     override fun onStart(owner: LifecycleOwner) {
         // Show OpenAd khi app quay lại từ background (không phải lần đầu khởi động)
-        if (isAppInBackground) {
+        if (isAppInBackground && canShowOpenAd) {
             Handler(Looper.getMainLooper()).postDelayed({
                 currentActivity?.let {
                     openAdManager.showIfAvailable(it)

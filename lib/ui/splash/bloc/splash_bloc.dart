@@ -73,14 +73,20 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
     InterstitialAds.onInterstitialLoaded = () async {
       // show inter nếu action isShown = false
       if (!isShown) {
-        isShown = await InterstitialAdsController.instance.showInterstitialAd();
+        isShown = await InterstitialAdsController.instance.showInterstitialAd(
+          callerFunction: "SplashBloc._handleShowInter",
+          screenClass: "SplashBloc",
+        );
         if (!isShown) {
           finish();
         }
       }
     };
 
-    isShown = await InterstitialAdsController.instance.showInterstitialAd();
+    isShown = await InterstitialAdsController.instance.showInterstitialAd(
+      callerFunction: "SplashBloc._handleShowInter",
+      screenClass: "SplashBloc",
+    );
     return completer.future;
   }
 

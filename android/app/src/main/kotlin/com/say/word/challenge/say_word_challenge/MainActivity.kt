@@ -11,6 +11,7 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
+import io.flutter.plugin.common.MethodChannel
 
 //import com.say.word.challenge.say_word_challenge.BuildConfig
 
@@ -23,12 +24,20 @@ class MainActivity : FlutterActivity() {
 
         // App Open Ad EventChannel for streaming events (riêng biệt)
         val appOpenAdEventChannelName = "com.say.word.challenge.say_word_challenge/app_events"
+        val methodChannelName = "com.say.word.challenge.say_word_challenge/app_method"
         val appOpenAdEventHandler = AppEventStreamHandler()
         EventChannel(
             flutterEngine.dartExecutor.binaryMessenger,
             appOpenAdEventChannelName
         ).setStreamHandler(appOpenAdEventHandler)
         (application as? App)?.openAdManager?.setEventHandler(appOpenAdEventHandler)
+        val channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, methodChannelName)
+        channel.setMethodCallHandler { method, result ->
+            if (method.method == "canShowOpenAd") {
+                App.canShowOpenAd = method.arguments as Boolean
+                result.success(true)
+            }
+        }
     }
 
     override fun onResume() {

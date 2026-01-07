@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_ads_native/ad_data.dart';
 import 'package:flutter_ads_native/index.dart';
 import 'package:say_word_challenge/data/model/ads_model.dart';
@@ -29,7 +30,12 @@ class RemoteConfigService {
         minimumFetchInterval: Duration.zero, // 30 phút mới cho fetch lại
       ),
     );
+    _remoteConfig.onConfigUpdated.listen((data) {
+      // handle update config show open ad
+      _updateShowOpenAd();
+    });
     await _remoteConfig.fetchAndActivate();
+    _updateShowOpenAd();
   }
 
   AdsModel get adsModel {
@@ -218,6 +224,12 @@ class RemoteConfigService {
         "size": "NATIVE_LARGE",
         "isShow": true,
       },
+      {
+        "screenName": "StyleSelectionPage",
+        "adUnitId": "ca-app-pub-3361561931511510/3603126019",
+        "size": "NATIVE_MEDIUM_RECTANGLE_GUIDE",
+        "isShow": true,
+      },
     ],
     "inter": {
       "adUnitIds": [
@@ -329,5 +341,14 @@ class RemoteConfigService {
 
   bool getFeatureIsFree(String featureKey) {
     return _remoteConfig.getBool('${featureKey}_is_free');
+  }
+
+  void _updateShowOpenAd() {
+    final showOpenAd = _remoteConfig.getBool('show_open_ad');
+    // canShowOpenAd
+    final MethodChannel methodChannel = MethodChannel(
+      "com.say.word.challenge.say_word_challenge/app_method",
+    );
+    methodChannel.invokeMethod("canShowOpenAd", showOpenAd == true);
   }
 }

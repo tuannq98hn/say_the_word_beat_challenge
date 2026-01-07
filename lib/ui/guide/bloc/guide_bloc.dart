@@ -94,14 +94,20 @@ class GuideBloc extends Bloc<GuideEvent, GuideState> {
     InterstitialAds.onInterstitialLoaded = () async {
       // show inter nếu action isShown = false
       if (!isShown) {
-        isShown = await InterstitialAdsController.instance.showInterstitialAd();
+        isShown = await InterstitialAdsController.instance.showInterstitialAd(
+          callerFunction: "GuideBloc._handleShowInter",
+          screenClass: "GuideBloc",
+        );
         if (!isShown) {
           finish();
         }
       }
     };
 
-    isShown = await InterstitialAdsController.instance.showInterstitialAd();
+    isShown = await InterstitialAdsController.instance.showInterstitialAd(
+      callerFunction: "GuideBloc._handleShowInter",
+      screenClass: "GuideBloc",
+    );
     return completer.future;
   }
 

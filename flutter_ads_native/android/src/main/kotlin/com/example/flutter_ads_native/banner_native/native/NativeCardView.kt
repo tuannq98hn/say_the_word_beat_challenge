@@ -13,8 +13,6 @@ import com.example.flutter_ads_native.AdsEventStreamHandler
 import com.example.flutter_ads_native.R
 import com.example.flutter_ads_native.tracking.AdTypes
 import com.example.flutter_ads_native.tracking.AdsAnalytics
-import com.example.flutter_ads_native.tracking.AdTypes
-import com.example.flutter_ads_native.tracking.AdsAnalytics
 import com.example.flutter_ads_native.facebook_event.FacebookROASTracker
 import com.example.flutter_ads_native.tiktok_event.TikTokAdMobLogger
 import com.example.flutter_ads_native.tiktok_event.TikTokAdTracker

@@ -1,10 +1,13 @@
+import 'package:flutter/src/widgets/page_view.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'guide_event.dart';
 import 'guide_state.dart';
 
 class GuideBloc extends Bloc<GuideEvent, GuideState> {
-  static const int totalSteps = 4;
+  static const int totalSteps = 6;
+
+  PageController pageController = PageController();
 
   GuideBloc() : super(const GuideState()) {
     on<GuideInitialized>(_onInitialized);
@@ -21,11 +24,12 @@ class GuideBloc extends Bloc<GuideEvent, GuideState> {
       emit(state.copyWith(isCompleted: true));
       return;
     }
-    emit(state.copyWith(currentStep: state.currentStep + 1));
+    final currentPage = state.currentStep + 1;
+    // pageController.jumpToPage(currentPage);
+    emit(state.copyWith(currentStep: currentPage));
   }
 
   void _onSkipPressed(GuideSkipPressed event, Emitter<GuideState> emit) {
     emit(state.copyWith(isCompleted: true));
   }
 }
-

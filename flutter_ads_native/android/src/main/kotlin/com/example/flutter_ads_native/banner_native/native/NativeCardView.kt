@@ -287,6 +287,7 @@ class NativeCardView(
         val adSize = params?.get("size") as? String ?: "BANNER"
         return when (adSize.uppercase()) {
             "FULL_SCREEN" -> R.layout.native_ad_full_screen
+            "FULL_SCREEN_GUIDE" -> R.layout.native_ad_full_screen_guide
             "NATIVE_MEDIUM_RECTANGLE" -> R.layout.native_ad_card_medium_rectangle
             "NATIVE_FULL_BANNER" -> R.layout.native_ad_card_full_banner
             "NATIVE_LARGE" -> R.layout.native_ad_card_large

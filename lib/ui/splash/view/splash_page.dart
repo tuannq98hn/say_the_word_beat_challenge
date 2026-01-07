@@ -265,11 +265,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     final prefs = await SharedPreferences.getInstance();
     final hasSeenGuide = prefs.getBool('has_seen_guide') ?? false;
     if (!context.mounted) return;
-    if (hasSeenGuide) {
-      context.go(AppRoutes.main);
-    } else {
-      context.go(AppRoutes.guide);
-    }
+    context.go(AppRoutes.guide);
+    // if (hasSeenGuide) {
+    //   context.go(AppRoutes.main);
+    // } else {
+    //   context.go(AppRoutes.guide);
+    // }
   }
 }
 

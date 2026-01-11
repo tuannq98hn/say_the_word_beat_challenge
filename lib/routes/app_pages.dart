@@ -6,6 +6,7 @@ import 'package:say_word_challenge/tracking/app_analytics.dart';
 
 import '../data/model/challenge.dart';
 import '../data/model/tiktok_video.dart';
+import '../tracking/widgets/tracked_screen.dart';
 import '../ui/game/view/game_page.dart';
 import '../ui/game_over/view/game_over_page.dart';
 import '../ui/guide/view/guide_page.dart';
@@ -14,7 +15,6 @@ import '../ui/pre_game_settings/view/pre_game_settings_page.dart';
 import '../ui/splash/view/splash_page.dart';
 import '../ui/style_selection/view/style_selection_page.dart';
 import '../ui/video/video_player_page.dart';
-import '../tracking/widgets/tracked_screen.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -23,40 +23,42 @@ class AppPages {
     routes: [
       GoRoute(
         path: AppRoutes.splash,
-        builder: (context, state) => TrackedScreen(
-          screenClass: 'SplashPage',
-          child: SplashPage(),
-        ),
+        builder: (context, state) =>
+            TrackedScreen(screenClass: 'SplashPage', child: SplashPage()),
       ),
       GoRoute(
         path: AppRoutes.main,
         builder: (context, state) => TrackedScreen(
           screenClass: 'MainTabPage',
           child: MainTabPage(
-          onChallengeSelected: (challenge) async {
-            AppAnalytics.logButtonClick(
-              screenClass: 'MainTabPage',
-              buttonName: 'select_challenge',
-              action: 'open_pre_game_settings',
-            );
-            _handleShowInter(
-              onDone: () {
-                context.push(AppRoutes.preGameSettings, extra: challenge);
-              },
-            );
-          },
-          onVideoSelected: (video) {
-            AppAnalytics.logButtonClick(
-              screenClass: 'MainTabPage',
-              buttonName: 'select_video',
-              action: 'open_video_player',
-            );
-            _handleShowInter(
-              onDone: () {
-                context.push(AppRoutes.videoPlayer, extra: video);
-              },
-            );
-          },
+            onChallengeSelected: (challenge) async {
+              AppAnalytics.logButtonClick(
+                screenClass: 'MainTabPage',
+                buttonName: 'select_challenge',
+                action: 'open_pre_game_settings',
+              );
+              _handleShowInter(
+                onDone: () {
+                  if (context.mounted == true) {
+                    context.push(AppRoutes.preGameSettings, extra: challenge);
+                  }
+                },
+              );
+            },
+            onVideoSelected: (video) {
+              AppAnalytics.logButtonClick(
+                screenClass: 'MainTabPage',
+                buttonName: 'select_video',
+                action: 'open_video_player',
+              );
+              _handleShowInter(
+                onDone: () {
+                  if (context.mounted == true) {
+                    context.push(AppRoutes.videoPlayer, extra: video);
+                  }
+                },
+              );
+            },
           ),
         ),
       ),

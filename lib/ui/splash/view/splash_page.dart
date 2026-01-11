@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:say_word_challenge/data/model/ads_model.dart';
 import 'package:say_word_challenge/routes/app_routes.dart';
 import 'package:say_word_challenge/services/remote_config_service.dart';
+import 'package:say_word_challenge/tracking/widgets/app_tracking_shell.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../bloc/splash_bloc.dart';
@@ -37,12 +38,13 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-
+    RemoteConfigService.instance.init();
     // Pulse for center blob + loading text
     _pulseCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1800),
-    )..repeat(reverse: true);
+    )
+      ..repeat(reverse: true);
 
     _pulseScale = Tween<double>(
       begin: 0.92,
@@ -75,7 +77,8 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     _introCtrl = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
-    )..forward();
+    )
+      ..forward();
 
     _introOpacity = Tween<double>(
       begin: 0.0,
@@ -101,10 +104,14 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     final size = MediaQuery.sizeOf(context);
 
     return BlocProvider(
-      create: (context) => SplashBloc()..add(const SplashInitialized()),
+      create: (context) =>
+      SplashBloc()
+        ..add(const SplashInitialized()),
       child: BlocListener<SplashBloc, SplashState>(
         listener: (context, state) {
-          if (state.isCompleted) {
+          if (state.isCompleted && !AppTrackingShell
+              .of(context)
+              .isOffline) {
             _navigateAfterSplash(context);
           }
         },
@@ -199,17 +206,21 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                                 builder: (_, __) {
                                   return Opacity(
                                     opacity: _loadingOpacity.value,
-                                    child: const Text(
-                                      'LOADING ASSETS....',
+                                    child: Text(
+                                      AppTrackingShell
+                                          .of(context)
+                                          .isOffline
+                                          ? "YOU ARE OFFLINE\nCHECK THE CONNECTION\nAND\n OPEN AGAIN"
+                                          : "LOADING ASSETS....",
+                                      textAlign: TextAlign.center,
                                       style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                        letterSpacing: 6.0,
-                                        color: Colors.white,
-                                      ),
+                                      fontFamily: 'Inter',
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      letterSpacing: 6.0,
+                                      color: Colors.white,
                                     ),
-                                  );
+                                  ),);
                                 },
                               ),
                             ],

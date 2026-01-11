@@ -28,7 +28,8 @@ class GuidePage extends StatefulWidget {
 class _GuidePageState extends State<GuidePage> with TickerProviderStateMixin {
   late final AnimationController _bounceCtrl;
   bool _isPrimaryPressed = false;
-  late AnimationController _countdownAnimationController;
+
+  // late AnimationController _countdownAnimationController;
 
   @override
   void initState() {
@@ -37,16 +38,16 @@ class _GuidePageState extends State<GuidePage> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 1600),
     )..repeat(reverse: true);
-    _countdownAnimationController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 600),
-    );
+    // _countdownAnimationController = AnimationController(
+    //   vsync: this,
+    //   duration: Duration(milliseconds: 600),
+    // );
   }
 
   @override
   void dispose() {
     _bounceCtrl.dispose();
-    _countdownAnimationController.dispose();
+    // _countdownAnimationController.dispose();
     super.dispose();
   }
 
@@ -79,10 +80,6 @@ class _GuidePageState extends State<GuidePage> with TickerProviderStateMixin {
         listener: (context, state) {
           if (state.isCompleted) {
             _completeGuide(context);
-          }
-          if (state.countdownValue > 0 && state.isCountDowning) {
-            _countdownAnimationController.reset();
-            _countdownAnimationController.forward();
           }
         },
         child: Scaffold(
@@ -361,46 +358,61 @@ class _GuidePageState extends State<GuidePage> with TickerProviderStateMixin {
                       ? children
                       : children.reversed.toList(),
                   if (state.isCountDowning)
-                    Align(
-                      alignment: Alignment.center,
-                      child: AnimatedBuilder(
-                        animation: _countdownAnimationController,
-                        builder: (context, child) {
-                          return Transform.scale(
-                            scale: Tween<double>(begin: 3.0, end: 1.0)
-                                .animate(
-                                  CurvedAnimation(
-                                    parent: _countdownAnimationController,
-                                    curve: Curves.easeOutCubic,
-                                  ),
-                                )
-                                .value,
-                            child: Opacity(
-                              opacity: 1,
-                              child: Text(
-                                '${state.countdownValue}',
-                                key: ValueKey(
-                                  'countdown_${state.countdownValue}',
-                                ),
-                                style: TextStyle(
-                                  fontSize: 150,
-                                  fontWeight: FontWeight.w900,
-                                  fontFamily: 'Anton',
-                                  color: Colors.white,
-                                  fontStyle: FontStyle.italic,
-                                  shadows: [
-                                    Shadow(
-                                      color: Colors.yellow.withOpacity(0.5),
-                                      blurRadius: 50,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
+                    GestureDetector(
+                      onTap: () {},
+                      behavior: HitTestBehavior.translucent,
+                      child: Container(
+                        alignment: Alignment.center,
+                        color: Colors.black.withValues(alpha: 0.7),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(),
+                            Text("Loading guide"),
+                          ],
+                        ),
                       ),
                     ),
+                  // Align(
+                  //   alignment: Alignment.center,
+                  //   child: AnimatedBuilder(
+                  //     animation: _countdownAnimationController,
+                  //     builder: (context, child) {
+                  //       return Transform.scale(
+                  //         scale: Tween<double>(begin: 3.0, end: 1.0)
+                  //             .animate(
+                  //               CurvedAnimation(
+                  //                 parent: _countdownAnimationController,
+                  //                 curve: Curves.easeOutCubic,
+                  //               ),
+                  //             )
+                  //             .value,
+                  //         child: Opacity(
+                  //           opacity: 1,
+                  //           child: Text(
+                  //             '${state.countdownValue}',
+                  //             key: ValueKey(
+                  //               'countdown_${state.countdownValue}',
+                  //             ),
+                  //             style: TextStyle(
+                  //               fontSize: 150,
+                  //               fontWeight: FontWeight.w900,
+                  //               fontFamily: 'Anton',
+                  //               color: Colors.white,
+                  //               fontStyle: FontStyle.italic,
+                  //               shadows: [
+                  //                 Shadow(
+                  //                   color: Colors.yellow.withOpacity(0.5),
+                  //                   blurRadius: 50,
+                  //                 ),
+                  //               ],
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       );
+                  //     },
+                  //   ),
+                  // ),
                 ],
               );
             },

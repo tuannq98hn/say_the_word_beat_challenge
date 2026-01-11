@@ -1,14 +1,17 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:flutter_screen_recording/flutter_screen_recording.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RecordingService {
   static final RecordingService _instance = RecordingService._internal();
+
   factory RecordingService() => _instance;
+
   RecordingService._internal();
-  
+
   bool _isRecording = false;
   String? _videoName;
 
@@ -28,7 +31,7 @@ class RecordingService {
           return false;
         }
       }
-
+      await Future.delayed(Duration(milliseconds: 300));
       if (await Permission.videos.isDenied) {
         final result = await Permission.videos.request();
         if (!result.isGranted) {
@@ -52,13 +55,15 @@ class RecordingService {
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       _videoName = 'game_recording_$timestamp';
 
-      final started = await FlutterScreenRecording.startRecordScreenAndAudio(_videoName!);
-      
+      final started = await FlutterScreenRecording.startRecordScreenAndAudio(
+        _videoName!,
+      );
+
       if (started) {
         _isRecording = true;
         return true;
       }
-      
+
       return false;
     } catch (e) {
       return false;
@@ -70,7 +75,7 @@ class RecordingService {
 
     try {
       final path = await FlutterScreenRecording.stopRecordScreen;
-      
+
       _isRecording = false;
       _videoName = null;
 

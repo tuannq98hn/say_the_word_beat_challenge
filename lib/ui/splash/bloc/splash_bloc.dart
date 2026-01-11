@@ -25,6 +25,7 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
     SplashInitialized event,
     Emitter<SplashState> emit,
   ) async {
+
     _handleListenAppEvent(emit);
     // Init Remote Config (setDefaults + fetchAndActivate)
     final interstitialAdUnitIds = RemoteConfigService.instance

@@ -31,7 +31,6 @@ void main() async {
   };
 
   runZonedGuarded(() async {
-    await RemoteConfigService.instance.init();
     // await NotificationHelper.initialize();
     await EasyLocalization.ensureInitialized();
     await configureDependencies();

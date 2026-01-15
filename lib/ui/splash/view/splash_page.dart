@@ -38,7 +38,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    RemoteConfigService.instance.init();
+    // RemoteConfigService.instance.init();
     // Pulse for center blob + loading text
     _pulseCtrl = AnimationController(
       vsync: this,

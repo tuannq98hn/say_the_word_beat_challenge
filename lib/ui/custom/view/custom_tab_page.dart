@@ -76,21 +76,23 @@ class _CustomTabPageState extends State<CustomTabPage> {
                             onTap: () {
                               _handleShowInter(
                                 onDone: () {
-                                  Navigator.of(context)
-                                      .push(
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const CreateWizardPage(),
-                                          fullscreenDialog: true,
-                                        ),
-                                      )
-                                      .then((_) {
-                                        if (mounted) {
-                                          context.read<CustomBloc>().add(
-                                            const CustomInitialized(),
-                                          );
-                                        }
-                                      });
+                                  if (mounted) {
+                                    Navigator.of(context)
+                                        .push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                const CreateWizardPage(),
+                                            fullscreenDialog: true,
+                                          ),
+                                        )
+                                        .then((_) {
+                                          if (mounted) {
+                                            context.read<CustomBloc>().add(
+                                              const CustomInitialized(),
+                                            );
+                                          }
+                                        });
+                                  }
                                 },
                               );
                             },

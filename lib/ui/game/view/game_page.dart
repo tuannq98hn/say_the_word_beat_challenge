@@ -846,7 +846,11 @@ class _GamePageState extends State<GamePage>
         onTap: () {
           audioService.stop();
           context.read<GameBloc>().add(const GameStopped());
-          _handleShowInter(onDone: widget.onBack);
+          _handleShowInter(onDone: (){
+            if(mounted){
+              widget.onBack();
+            }
+          });
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),

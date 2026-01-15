@@ -8,6 +8,7 @@ class AnalyticsEventNames {
 
   // Session summary
   static const sessionAdsSummary = 'swc_session_ads_summary';
+  static const initRemoteConfigFailed = 'init_remote_config_failed';
 }
 
 

@@ -185,7 +185,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       GestureDetector(
-                        onTap: () => _handleShowInter(onDone: widget.onBack),
+                        onTap: () => _handleShowInter(onDone: (){
+                          if(mounted){
+                            widget.onBack();
+                          }
+                        }),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
@@ -408,7 +412,11 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () =>
-                              _handleShowInter(onDone: _openTikTokInBrowser),
+                              _handleShowInter(onDone: (){
+                                if(mounted){
+                                  _openTikTokInBrowser();
+                                }
+                              }),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.pink.shade600,
                             padding: const EdgeInsets.symmetric(vertical: 16),

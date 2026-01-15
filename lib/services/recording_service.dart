@@ -23,21 +23,16 @@ class RecordingService {
   }
 
   Future<bool> requestPermissions() async {
-    if (Platform.isAndroid) {
-      final micStatus = await Permission.microphone.status;
-      if (!micStatus.isGranted) {
-        final result = await Permission.microphone.request();
-        if (!result.isGranted) {
-          return false;
-        }
-      }
-      await Future.delayed(Duration(milliseconds: 300));
-      if (await Permission.videos.isDenied) {
-        final result = await Permission.videos.request();
-        if (!result.isGranted) {
-          return false;
-        }
-      }
+    if (!Platform.isAndroid) return true;
+
+    final statuses = await [Permission.microphone, Permission.videos].request();
+
+    if (statuses[Permission.microphone] != PermissionStatus.granted) {
+      return false;
+    }
+
+    if (statuses[Permission.videos] != PermissionStatus.granted) {
+      return false;
     }
 
     return true;

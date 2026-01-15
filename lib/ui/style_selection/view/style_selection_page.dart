@@ -222,12 +222,14 @@ class _StyleSelectionPageState extends State<StyleSelectionPage> {
           : () {
               _handleShowInter(
                 onDone: () {
-                  context.read<StyleSelectionBloc>().add(
+                  if(mounted) {
+                    context.read<StyleSelectionBloc>().add(
                     StyleSelected(
                       style: option.style,
                       difficulty: option.difficulty,
                     ),
                   );
+                  }
                 },
               );
             },

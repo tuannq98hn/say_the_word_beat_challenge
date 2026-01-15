@@ -40,7 +40,7 @@ class AppPages {
               _handleShowInter(
                 onDone: () {
                   if (context.mounted == true) {
-                    context.push(AppRoutes.preGameSettings, extra: challenge);
+                    AppPages.router.push(AppRoutes.preGameSettings, extra: challenge);
                   }
                 },
               );
@@ -54,7 +54,7 @@ class AppPages {
               _handleShowInter(
                 onDone: () {
                   if (context.mounted == true) {
-                    context.push(AppRoutes.videoPlayer, extra: video);
+                    AppPages.router.push(AppRoutes.videoPlayer, extra: video);
                   }
                 },
               );

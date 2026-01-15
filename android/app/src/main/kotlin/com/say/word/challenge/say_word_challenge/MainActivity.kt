@@ -1,6 +1,8 @@
 package com.say.word.challenge.say_word_challenge
 
+import android.content.IntentSender
 import androidx.annotation.NonNull
+import androidx.lifecycle.Lifecycle
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
@@ -8,6 +10,7 @@ import com.google.android.play.core.install.InstallStateUpdatedListener
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.InstallStatus
 import com.google.android.play.core.install.model.UpdateAvailability
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
@@ -19,6 +22,7 @@ class MainActivity : FlutterActivity() {
     private val MY_REQUEST_CODE: Int = 123
     private lateinit var installStateUpdatedListener: InstallStateUpdatedListener
     private lateinit var appUpdateManager: AppUpdateManager
+    private var isUpdateFlowStarted = false
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
 
@@ -46,67 +50,71 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun initCheckUpdate() {
-        installStateUpdatedListener = InstallStateUpdatedListener {
-//            if (BuildConfig.DEBUG) {
-//                Log.e(
-//                    "LoadActivity", "InstallStateUpdatedListener: state: " + it.installStatus()
-//                )
-//            }
-            if (it.installStatus() == InstallStatus.DOWNLOADED) {
-                appUpdateManager.completeUpdate()
-            } else if (it.installStatus() == InstallStatus.INSTALLED) {
-//                viewModel.setUpdateNotAvailableStatus(true)
-                appUpdateManager.unregisterListener(installStateUpdatedListener)
+        installStateUpdatedListener = InstallStateUpdatedListener {state->
+                when (state.installStatus()) {
+                InstallStatus.DOWNLOADED -> {
+                    appUpdateManager.completeUpdate()
+                }
+
+                InstallStatus.INSTALLED,
+                InstallStatus.CANCELED,
+                InstallStatus.FAILED -> {
+                    appUpdateManager.unregisterListener(installStateUpdatedListener)
+                    isUpdateFlowStarted = false
+                }
+
+                else -> {}
             }
+            appUpdateManager = AppUpdateManagerFactory.create(this)
+            appUpdateManager.registerListener(installStateUpdatedListener)
+            checkUpdate()
         }
-        appUpdateManager = AppUpdateManagerFactory.create(this)
-        appUpdateManager.registerListener(installStateUpdatedListener)
-        checkUpdate()
     }
 
     private fun checkUpdate() {
         val appUpdateInfoTask = appUpdateManager.appUpdateInfo
         appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_NOT_AVAILABLE) {
-//                viewModel.setUpdateNotAvailableStatus(true)
+            // 🔒 Activity phải RESUMED
+            if (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
                 return@addOnSuccessListener
             }
+
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_NOT_AVAILABLE) {
+                return@addOnSuccessListener
+            }
+            if (isUpdateFlowStarted) return@addOnSuccessListener
+
             if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE) {
 
-                when {
-                    // 🔸 Ưu tiên cập nhật ngay (immediate)
-                    appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE) -> {
-//                        viewModel.setUpdateNotAvailableStatus(false)
+                      val updateType = when {
+                    appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE) ->
+                        AppUpdateType.IMMEDIATE
+
+                    appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE) ->
+                        AppUpdateType.FLEXIBLE
+
+                    else -> null
+                }
+
+                if (updateType != null) {
+                    try {
+                        isUpdateFlowStarted = true
                         appUpdateManager.startUpdateFlowForResult(
                             appUpdateInfo,
                             this,
-                            AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE)
-                                .setAllowAssetPackDeletion(true).build(),
+                            AppUpdateOptions.newBuilder(updateType)
+                                .setAllowAssetPackDeletion(true)
+                                .build(),
                             MY_REQUEST_CODE
                         )
-                        return@addOnSuccessListener
-                    }
-
-                    appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE) -> {
-//                        viewModel.setUpdateNotAvailableStatus(false)
-                        appUpdateManager.startUpdateFlowForResult(
-                            appUpdateInfo,
-                            this,
-                            AppUpdateOptions.newBuilder(AppUpdateType.FLEXIBLE)
-                                .setAllowAssetPackDeletion(true).build(),
-                            MY_REQUEST_CODE
-                        )
-                        return@addOnSuccessListener
-                    }
-
-                    else -> {
-//                        viewModel.setUpdateNotAvailableStatus(true)
-                        return@addOnSuccessListener
+                    } catch (e: IntentSender.SendIntentException) {
+                        isUpdateFlowStarted = false
+                        FirebaseCrashlytics.getInstance().recordException(e)
                     }
                 }
             }
         }.addOnFailureListener {
-//            viewModel.setUpdateNotAvailableStatus(true)
+            isUpdateFlowStarted = false
         }
     }
 }

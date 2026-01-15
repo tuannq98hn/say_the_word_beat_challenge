@@ -7,6 +7,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:say_word_challenge/services/remote_config_service.dart';
+import 'package:say_word_challenge/tracking/app_analytics.dart';
 
 import 'di/injection_container.dart';
 import 'ui/main/main_app.dart';
@@ -15,14 +16,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
-
   // By default Crashlytics collection can be disabled in debug builds.
   // Keep it enabled in release, and you can flip to `true` in debug when testing.
-  await FirebaseCrashlytics.instance
-      .setCrashlyticsCollectionEnabled(!kDebugMode);
+  await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
+    !kDebugMode,
+  );
 
-  FlutterError.onError =
-      FirebaseCrashlytics.instance.recordFlutterFatalError;
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
   // Catch errors that happen outside the Flutter framework.
   PlatformDispatcher.instance.onError = (error, stack) {
@@ -30,26 +30,50 @@ void main() async {
     return true;
   };
 
-  runZonedGuarded(() async {
-    // await NotificationHelper.initialize();
-    await EasyLocalization.ensureInitialized();
-    await configureDependencies();
+  runZonedGuarded(
+    () async {
+      // await NotificationHelper.initialize();
+      await EasyLocalization.ensureInitialized();
+      await configureDependencies();
 
-    runApp(
-      EasyLocalization(
-        supportedLocales: const [Locale('en'), Locale('vi')],
-        path: 'assets/translations',
-        fallbackLocale: const Locale('en'),
-        child: const MyApp(),
-      ),
-    );
-  }, (error, stack) {
-    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-  });
+      runApp(
+        EasyLocalization(
+          supportedLocales: const [Locale('en'), Locale('vi')],
+          path: 'assets/translations',
+          fallbackLocale: const Locale('en'),
+          child: const MyApp(),
+        ),
+      );
+    },
+    (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    },
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    try {
+      RemoteConfigService.instance.init();
+    } catch (e, s) {
+      FirebaseCrashlytics.instance.recordError(
+        e,
+        s,
+        fatal: true,
+        reason: 'RemoteConfig fetch failed',
+      );
+      AppAnalytics.logInitRemoteConfig();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

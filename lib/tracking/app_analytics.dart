@@ -26,6 +26,11 @@ class AppAnalytics {
     );
   }
 
+  static Future<void> logInitRemoteConfig() async {
+    await _fa.logEvent(
+      name: AnalyticsEventNames.initRemoteConfigFailed,
+    );
+  }
   static Future<void> logButtonClick({
     required String screenClass,
     required String buttonName,

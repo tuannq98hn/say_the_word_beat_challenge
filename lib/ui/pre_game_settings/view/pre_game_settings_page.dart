@@ -208,7 +208,9 @@ class _PreGameSettingsPageState extends State<PreGameSettingsPage> {
                     child: OutlinedButton(
                       onPressed: () => _handleShowInter(
                         onDone: () {
-                          context.pop();
+                          if (mounted) {
+                            context.pop();
+                          }
                         },
                       ),
                       style: OutlinedButton.styleFrom(
@@ -240,7 +242,7 @@ class _PreGameSettingsPageState extends State<PreGameSettingsPage> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        disabledBackgroundColor: Colors.grey[300],
+                        disabledBackgroundColor: const Color.fromARGB(255, 94, 80, 80),
                       ),
                       child: Text(
                         (delayCountDown != null ? "Loading game" : "Start")

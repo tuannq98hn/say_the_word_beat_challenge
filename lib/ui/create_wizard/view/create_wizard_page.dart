@@ -1099,9 +1099,11 @@ class _CreateWizardPageState extends State<CreateWizardPage> {
                                     ? () {
                                         _handleShowInter(
                                           onDone: () {
-                                            context
+                                            if(mounted) {
+                                              context
                                                 .read<CreateWizardBloc>()
                                                 .add(const FinishCreation());
+                                            }
                                           },
                                         );
                                       }

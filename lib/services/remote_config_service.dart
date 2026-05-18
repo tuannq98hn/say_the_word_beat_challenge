@@ -98,6 +98,9 @@ class RemoteConfigService {
     return defaultIds.map((id) => id.toString()).toList();
   }
 
+  bool get showGuidePage =>
+      _remoteConfig.getBool('show_guide') ?? false;
+
   Map<String, RemoteConfigValue> get all => _remoteConfig.getAll();
 
   dynamic get _defaultAdsConfig => {

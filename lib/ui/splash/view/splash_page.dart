@@ -112,7 +112,7 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
           if (state.isCompleted && !AppTrackingShell
               .of(context)
               .isOffline) {
-            _navigateAfterSplash(context);
+            _navigateAfterSplash(context, state.isShowGuide);
           }
         },
         child: Scaffold(
@@ -272,16 +272,16 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     return 64;
   }
 
-  Future<void> _navigateAfterSplash(BuildContext context) async {
+  Future<void> _navigateAfterSplash(BuildContext context, bool isShowGuide) async {
     final prefs = await SharedPreferences.getInstance();
     final hasSeenGuide = prefs.getBool('has_seen_guide') ?? false;
     if (!context.mounted) return;
-    context.go(AppRoutes.guide);
-    // if (hasSeenGuide) {
-    //   context.go(AppRoutes.main);
-    // } else {
-    //   context.go(AppRoutes.guide);
-    // }
+    // context.go(AppRoutes.guide);
+    if (hasSeenGuide || !isShowGuide) {
+      context.go(AppRoutes.main);
+    } else {
+      context.go(AppRoutes.guide);
+    }
   }
 }
 

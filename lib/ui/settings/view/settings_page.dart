@@ -156,105 +156,105 @@ class _SettingsPageState extends State<SettingsPage> {
                             )!,
                           ],
                           const SizedBox(height: 16),
-                          const Text(
-                            'DIFFICULTY (SPEED)',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.grey,
-                              letterSpacing: 4,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade900,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.grey.shade800,
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: _buildDifficultyButton(
-                                    context,
-                                    state,
-                                    Difficulty.easy,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildDifficultyButton(
-                                    context,
-                                    state,
-                                    Difficulty.medium,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildDifficultyButton(
-                                    context,
-                                    state,
-                                    Difficulty.hard,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-                          const Text(
-                            'MUSIC STYLE',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.grey,
-                              letterSpacing: 4,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade900,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.grey.shade800,
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: _buildMusicStyleButton(
-                                    context,
-                                    state,
-                                    MusicStyle.funk,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildMusicStyleButton(
-                                    context,
-                                    state,
-                                    MusicStyle.synth,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _buildMusicStyleButton(
-                                    context,
-                                    state,
-                                    MusicStyle.chill,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          // const Text(
+                          //   'DIFFICULTY (SPEED)',
+                          //   style: TextStyle(
+                          //     fontSize: 12,
+                          //     fontWeight: FontWeight.w900,
+                          //     color: Colors.grey,
+                          //     letterSpacing: 4,
+                          //     fontFamily: 'Inter',
+                          //   ),
+                          // ),
+                          // const SizedBox(height: 12),
+                          // Container(
+                          //   padding: const EdgeInsets.all(12),
+                          //   decoration: BoxDecoration(
+                          //     color: Colors.grey.shade900,
+                          //     borderRadius: BorderRadius.circular(16),
+                          //     border: Border.all(
+                          //       color: Colors.grey.shade800,
+                          //       width: 1,
+                          //     ),
+                          //   ),
+                          //   child: Row(
+                          //     children: [
+                          //       Expanded(
+                          //         child: _buildDifficultyButton(
+                          //           context,
+                          //           state,
+                          //           Difficulty.easy,
+                          //         ),
+                          //       ),
+                          //       const SizedBox(width: 12),
+                          //       Expanded(
+                          //         child: _buildDifficultyButton(
+                          //           context,
+                          //           state,
+                          //           Difficulty.medium,
+                          //         ),
+                          //       ),
+                          //       const SizedBox(width: 12),
+                          //       Expanded(
+                          //         child: _buildDifficultyButton(
+                          //           context,
+                          //           state,
+                          //           Difficulty.hard,
+                          //         ),
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // const SizedBox(height: 32),
+                          // const Text(
+                          //   'MUSIC STYLE',
+                          //   style: TextStyle(
+                          //     fontSize: 12,
+                          //     fontWeight: FontWeight.w900,
+                          //     color: Colors.grey,
+                          //     letterSpacing: 4,
+                          //     fontFamily: 'Inter',
+                          //   ),
+                          // ),
+                          // const SizedBox(height: 12),
+                          // Container(
+                          //   padding: const EdgeInsets.all(12),
+                          //   decoration: BoxDecoration(
+                          //     color: Colors.grey.shade900,
+                          //     borderRadius: BorderRadius.circular(16),
+                          //     border: Border.all(
+                          //       color: Colors.grey.shade800,
+                          //       width: 1,
+                          //     ),
+                          //   ),
+                          //   child: Row(
+                          //     children: [
+                          //       Expanded(
+                          //         child: _buildMusicStyleButton(
+                          //           context,
+                          //           state,
+                          //           MusicStyle.funk,
+                          //         ),
+                          //       ),
+                          //       const SizedBox(width: 12),
+                          //       Expanded(
+                          //         child: _buildMusicStyleButton(
+                          //           context,
+                          //           state,
+                          //           MusicStyle.synth,
+                          //         ),
+                          //       ),
+                          //       const SizedBox(width: 12),
+                          //       Expanded(
+                          //         child: _buildMusicStyleButton(
+                          //           context,
+                          //           state,
+                          //           MusicStyle.chill,
+                          //         ),
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
                           SizedBox(height: 12),
                           Center(
                             child: Text(

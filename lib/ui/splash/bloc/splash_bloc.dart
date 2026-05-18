@@ -34,6 +34,7 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
         .getRewardedAdUnitIds();
     final rewardedInterstitialAdUnitIds = RemoteConfigService.instance
         .getRewardedInterstitialAdUnitIds();
+    final isShowGuide = RemoteConfigService.instance.showGuidePage;
     await InterstitialAds.init(interstitialAdUnitIds: interstitialAdUnitIds);
     await RewardedAds.init(rewardedAdUnitIds: rewardedAdUnitIds);
     await RewardedInterstitialAds.init(
@@ -41,7 +42,7 @@ class SplashBloc extends BaseBloc<SplashEvent, SplashState> {
     );
     await Future.delayed(Duration(milliseconds: 1500));
     await _handleShowInter();
-    emit(state.copyWith(isLoading: false, isCompleted: true));
+    emit(state.copyWith(isLoading: false, isCompleted: true, isShowGuide: isShowGuide));
   }
 
   Future<void> _handleShowInter() async {

@@ -5,6 +5,7 @@ class SplashState extends BaseBlocState {
   final bool
   isOpenAppSuccess; // check trường hợp openad load failed hoặc closed
   final bool isCloseNative; // native fullscreen closed
+  final bool isShowGuide;
 
   const SplashState({
     super.isLoading = false,
@@ -12,6 +13,7 @@ class SplashState extends BaseBlocState {
     this.isCompleted = false,
     this.isOpenAppSuccess = false,
     this.isCloseNative = false,
+    this.isShowGuide = false,
   });
 
   @override
@@ -22,6 +24,7 @@ class SplashState extends BaseBlocState {
     bool? isCompleted,
     bool? isOpenAppSuccess,
     bool? isCloseNative,
+    bool? isShowGuide,
   }) {
     return SplashState(
       isLoading: isLoading ?? this.isLoading,
@@ -29,9 +32,10 @@ class SplashState extends BaseBlocState {
       isCompleted: isCompleted ?? this.isCompleted,
       isOpenAppSuccess: isOpenAppSuccess ?? this.isOpenAppSuccess,
       isCloseNative: isCloseNative ?? this.isCloseNative,
+      isShowGuide: isShowGuide ?? this.isShowGuide,
     );
   }
 
   @override
-  List<Object?> get props => [isLoading, error, isCompleted, isOpenAppSuccess, isCloseNative];
+  List<Object?> get props => [isLoading, error, isCompleted, isOpenAppSuccess, isCloseNative, isShowGuide];
 }

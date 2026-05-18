@@ -90,18 +90,18 @@ class BottomNav extends StatelessWidget {
                         ),
                       ],
                     ),
-                    if (RemoteConfigService.instance.configAdsDataByScreen(
-                          "BottomNav",
-                        ) !=
-                        null) ...[
-                      const SizedBox(height: 8),
-                      RemoteConfigService.instance.configAdsByScreen(
-                        "BottomNav",
-                      )!,
-                      SizedBox(
-                        height: MediaQuery.of(context).padding.bottom + 8,
-                      ),
-                    ],
+                    // if (RemoteConfigService.instance.configAdsDataByScreen(
+                    //       "BottomNav",
+                    //     ) !=
+                    //     null) ...[
+                    //   const SizedBox(height: 8),
+                    //   RemoteConfigService.instance.configAdsByScreen(
+                    //     "BottomNav",
+                    //   )!,
+                    //   SizedBox(
+                    //     height: MediaQuery.of(context).padding.bottom + 8,
+                    //   ),
+                    // ],
                   ],
                 ),
               ),

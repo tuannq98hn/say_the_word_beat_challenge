@@ -408,45 +408,45 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           "VideoPlayerPage",
                         )!,
                       const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () =>
-                              _handleShowInter(onDone: (){
-                                if(mounted){
-                                  _openTikTokInBrowser();
-                                }
-                              }),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.pink.shade600,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            elevation: 8,
-                          ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.open_in_new,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                'WATCH ON TIKTOK',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 2,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      // SizedBox(
+                      //   width: double.infinity,
+                      //   child: ElevatedButton(
+                      //     onPressed: () =>
+                      //         _handleShowInter(onDone: (){
+                      //           if(mounted){
+                      //             _openTikTokInBrowser();
+                      //           }
+                      //         }),
+                      //     style: ElevatedButton.styleFrom(
+                      //       backgroundColor: Colors.pink.shade600,
+                      //       padding: const EdgeInsets.symmetric(vertical: 16),
+                      //       shape: RoundedRectangleBorder(
+                      //         borderRadius: BorderRadius.circular(24),
+                      //       ),
+                      //       elevation: 8,
+                      //     ),
+                      //     child: const Row(
+                      //       mainAxisAlignment: MainAxisAlignment.center,
+                      //       children: [
+                      //         Icon(
+                      //           Icons.open_in_new,
+                      //           color: Colors.white,
+                      //           size: 24,
+                      //         ),
+                      //         SizedBox(width: 8),
+                      //         Text(
+                      //           'WATCH ON TIKTOK',
+                      //           style: TextStyle(
+                      //             color: Colors.white,
+                      //             fontSize: 16,
+                      //             fontWeight: FontWeight.bold,
+                      //             letterSpacing: 2,
+                      //           ),
+                      //         ),
+                      //       ],
+                      //     ),
+                      //   ),
+                      // ),
                       const SizedBox(height: 12),
                       Center(
                         child: Text(
